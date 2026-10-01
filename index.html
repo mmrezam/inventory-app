@@ -3,6 +3,69 @@
 <head>
     <title>انبار من</title>
     <style>
+   /* اصلاح موقعیت دکمه: انتقال به بالا سمت چپ برای سازگاری با متون فارسی */
+.theme-btn {
+  position: fixed;
+  top: 15px;
+  left: 20px;
+  right: auto;
+  font-size: 22px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  z-index: 1000;
+
+  /* فرمول سنتر کردن دقیق محتوا در مرکز دایره */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+/* استایل بدنه در حالت شب */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+/* اصلاح دکمه تم در حالت شب */
+body.dark-mode .theme-btn {
+  background-color: #2c2c2c;
+  border-color: #555;
+  color: #fff;
+}
+
+/* حل قطعی مشکل محو شدن تیترهای جدول */
+body.dark-mode th {
+  background-color: #1f2937 !important; /* سرمه‌ای تیره و شیک */
+  color: #ffffff !important;           /* متن کاملاً سفید و درخشان */
+  border: 1px solid #374151;
+}
+
+/* ردیف‌ها و سلول‌های داده */
+body.dark-mode td {
+  background-color: #1a1a1a;
+  color: #d1d5db;
+  border: 1px solid #374151;
+}
+
+/* اینپوت‌های فرم در حالت شب */
+body.dark-mode input {
+  background-color: #242424;
+  color: #ffffff;
+  border: 1px solid #444;
+}
+
+/* کادر تایید حذف در حالت شب */
+body.dark-mode #confirmBox {
+  background-color: #242424;
+  color: #ffffff;
+  border: 1px solid #444;
+}   
         body { font-family: sans-serif; margin: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
@@ -17,6 +80,7 @@
     </style>
 </head>
 <body>
+    <button id="themeToggle" class="theme-btn">🌙</button>
     <h1>سیستم انبار هوشمند</h1>
 
     <div class="form-container">
@@ -130,6 +194,19 @@
         });
 
         updateTable();
+        const themeToggle = document.getElementById('themeToggle');
+
+themeToggle.addEventListener('click', () => {
+  // روشن یا خاموش کردن کلاس دارک‌مود روی کل صفحه
+  document.body.classList.toggle('dark-mode');
+
+  // تغییر آیکون بین ماه و خورشید
+  if (document.body.classList.contains('dark-mode')) {
+    themeToggle.textContent = '☀️';
+  } else {
+    themeToggle.textContent = '🌙';
+  }
+});
     </script>
 </body>
 </html>
