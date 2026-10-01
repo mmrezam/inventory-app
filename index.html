@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <title>انبار من</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        .form-container { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+        input { padding: 8px; margin-left: 10px; }
+        button { padding: 8px 15px; background: #28a745; color: white; border: none; cursor: pointer; }
+        .total-box { font-size: 18px; font-weight: bold; color: #0056b3; margin-top: 20px; }
+        
+        /* استایل جدید برای زیباسازی پیام موفقیت */
+        #success-message { color: #155724; font-weight: bold; margin-top: 15px; height: 20px; }
+    </style>
+</head>
+<body>
+    <h1>سیستم مدیریت انبار</h1>
+
+    <div class="form-container">
+        <form id="add-product-form">
+            <input type="text" id="new-name" placeholder="نام محصول" required>
+            <input type="number" id="new-price" placeholder="قیمت" required>
+            <input type="number" id="new-stock" placeholder="موجودی" required>
+            <button type="submit">اضافه کن</button>
+        </form>
+        
+        <!-- جعبه خالی که پیام موفقیت اینجا ظاهر میشه -->
+        <div id="success-message"></div>
+    </div>
+
+    <div class="total-box" id="total-value">ارزش کل انبار: ۰ تومان</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>نام محصول</th>
+                <th>قیمت</th>
+                <th>موجودی</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody id="product-list"></tbody>
+    </table>
+    <!-- جعبه تایید حذف که در حالت عادی مخفی است (display: none) -->
+    <div id="custom-confirm-box" style="display: none; background: #fff3cd; padding: 15px; margin-top: 15px; border: 1px solid #ffeeba; text-align: center;">
+        <p style="color: #856404; font-weight: bold;">آیا از حذف این محصول مطمئن هستید؟</p>
+        <button id="btn-yes" style="background: red; color: white;">بله، حذف کن</button>
+        <button id="btn-no" style="background: gray; color: white;">خیر، پشیمون شدم</button>
+    </div>
+
+    <script>
+        const tableBody = document.getElementById('product-list');
+        const form = document.getElementById('add-product-form');
+        const totalValueDisplay = document.getElementById('total-value');
+        
+        // معرفی جعبه پیام به جاوا اسکریپت
+        const successMessage = document.getElementById('success-message'); 
+        const confirmBox = document.getElementById('custom-confirm-box'); // پیدا کردن جعبه جدیدمون
+        let rowToDelete = null; // یک ظرف خالی برای اینکه شماره ردیفِ کلیک‌شده رو موقتاً توش نگه داریم
+
+        let productsArray = JSON.parse(localStorage.getItem('inventoryData')) || [];
+
+        function updateTable() {
+            tableBody.innerHTML = ''; 
+            let total = 0;
+
+            productsArray.forEach((product, index) => {
+                total = total + Number(product.price) * Number(product.stock);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.price}</td>
+                    <td>${product.stock}</td>
+                    <td>
+                        <button onclick="deleteProduct(${index})" style="background: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">حذف</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            let discountedTotal = total * 0.9;
+            totalValueDisplay.textContent = `ارزش کل: ${total} | با ۱۰٪ تخفیف: ${discountedTotal} تومان`;
+        }
+
+       // ۱. وقتی دکمه قرمزِ توی جدول کلیک میشه، دیگه مستقیم پاک نمی‌کنیم
+        function deleteProduct(index) {
+            rowToDelete = index; // شماره ردیفی که کلیک شده رو میندازیم تو ظرف خالیمون
+            confirmBox.style.display = 'block'; // جعبه اخطار رو از حالت مخفی درمیاریم و نمایش میدیم
+        }
+
+        // ۲. منطقِ دکمه "بله، حذف کن"
+        document.getElementById('btn-yes').addEventListener('click', function() {
+            productsArray.splice(rowToDelete, 1); // حالا همون شماره رو از حافظه می‌خونیم و قیچی می‌کنیم
+            localStorage.setItem('inventoryData', JSON.stringify(productsArray)); // دفترچه رو آپدیت می‌کنیم
+            updateTable(); // جدول رو از نو رسم می‌کنیم
+            confirmBox.style.display = 'none'; // جعبه اخطار رو دوباره قایم می‌کنیم
+        });
+
+        // ۳. منطقِ دکمه "خیر، پشیمون شدم"
+        document.getElementById('btn-no').addEventListener('click', function() {
+            rowToDelete = null; // شماره رو از ظرفمون دور می‌ریزیم
+            confirmBox.style.display = 'none'; // فقط جعبه رو قایم می‌کنیم (بدون هیچ تغییری در جدول)
+        });
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const newProduct = {
+                name: document.getElementById('new-name').value,
+                price: document.getElementById('new-price').value,
+                stock: document.getElementById('new-stock').value
+            };
+            
+            productsArray.push(newProduct);
+            localStorage.setItem('inventoryData', JSON.stringify(productsArray));
+            updateTable();
+            form.reset();
+
+            // --- کدهای اضافه شده برای نمایش پیام تایید ---
+            // ۱. نوشتن متن داخل جعبه
+            successMessage.textContent = "عملیات با موفقیت انجام شد ✅"; 
+            
+            // ۲. تنظیم تایمر برای پاک کردن متن
+            setTimeout(() => {
+                successMessage.textContent = ""; // بعد از اتمام زمان، متن رو خالی کن
+            }, 3000); 
+            // --------------------------------------------
+        });
+
+        updateTable();
+    </script>
+</body>
+</html>
