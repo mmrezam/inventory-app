@@ -6,19 +6,29 @@
   <title>سیستم انبار هوشمند</title>
   
   <style>
-    /* =========================================
-       ۱. استایل‌های پایه و ساختار کلی
-       ========================================= */
+    /* ۱. استایل‌های پایه و تم روز */
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: sans-serif;
-      margin: 20px;
-      background-color: #ffffff;
-      color: #1e293b;
+      font-family: Tahoma, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8fafc;
+      color: #0f172a;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
     h1 {
-      margin-top: 60px;
+      margin-top: 50px;
+      margin-bottom: 25px;
+      font-size: 24px;
       display: flex;
       align-items: center;
       flex-wrap: wrap;
@@ -28,56 +38,50 @@
       font-size: 0.65em;
       color: #64748b;
       font-weight: normal;
-      margin-right: 8px;
+      margin-right: 10px;
     }
 
-    /* =========================================
-       ۲. دکمه‌های شناور بالا سمت چپ
-       ========================================= */
+    /* ۲. دکمه‌های شناور تم و منو */
     .theme-btn, .menu-btn {
       position: fixed;
       top: 15px;
-      width: 45px;
-      height: 45px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      border: 1px solid #ccc;
-      background-color: #f9f9f9;
+      border: 1px solid #cbd5e1;
+      background-color: #ffffff;
       cursor: pointer;
       z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0;
-      line-height: 1;
+      font-size: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
       transition: all 0.2s ease;
     }
 
     .theme-btn {
-      left: 20px;
-      font-size: 22px;
+      left: 15px;
     }
 
     .menu-btn {
-      left: 75px;
-      font-size: 20px;
-      color: #111111;
+      left: 68px;
+      color: #0f172a;
     }
 
-    /* =========================================
-       ۳. منوی کشویی سه‌خط و لایه پس‌زمینه
-       ========================================= */
+    /* ۳. منوی کشویی */
     .side-menu {
       position: fixed;
       top: 0;
-      right: -280px;
-      width: 260px;
+      right: -290px;
+      width: 270px;
       height: 100%;
       background-color: #ffffff;
-      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+      box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
       transition: right 0.3s ease;
       z-index: 2000;
       padding: 20px;
-      box-sizing: border-box;
     }
 
     .side-menu.open {
@@ -90,7 +94,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(15, 23, 42, 0.4);
       display: none;
       z-index: 1500;
     }
@@ -103,15 +107,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 12px;
+    }
+
+    .menu-header h3 {
+      margin: 0;
+      font-size: 18px;
     }
 
     .close-btn {
       background: none;
       border: none;
-      font-size: 26px;
+      font-size: 24px;
       cursor: pointer;
+      color: #64748b;
     }
 
     .menu-items {
@@ -121,21 +131,21 @@
     }
 
     .menu-item {
-      padding: 12px 15px;
+      padding: 12px 16px;
       margin-bottom: 8px;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s;
+      font-size: 15px;
+      transition: background 0.2s ease;
     }
 
     .menu-item:hover, .menu-item.active {
-      background-color: #f0f3f8;
+      background-color: #e0f2fe;
+      color: #0284c7;
       font-weight: bold;
     }
 
-    /* =========================================
-       ۴. مدیریت تب‌ها
-       ========================================= */
+    /* ۴. مدیریت نمایش تب‌ها */
     .tab-content {
       display: none;
     }
@@ -144,134 +154,143 @@
       display: block;
     }
 
-    /* =========================================
-       ۵. جدول‌ها، فرم‌ها و دکمه‌های مشترک
-       ========================================= */
+    /* ۵. فرم و جدول */
     .form-container {
-      background: #f9f9f9;
+      background: #ffffff;
       padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
-    input {
-      padding: 8px 12px;
+    input[type="text"], input[type="number"] {
+      padding: 10px 14px;
       margin-left: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      margin-bottom: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
     }
 
-    button.btn-primary {
-      padding: 8px 16px;
-      background: #28a745;
+    button {
+      font-family: inherit;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      padding: 10px 18px;
+      background: #10b981;
       color: white;
       border: none;
-      border-radius: 4px;
-      cursor: pointer;
     }
 
     .btn-edit {
       background: #0284c7;
       color: white;
       border: none;
-      padding: 5px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-left: 5px;
+      padding: 6px 12px;
+      margin-left: 6px;
+    }
+
+    .btn-delete {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 6px 12px;
     }
 
     .btn-cancel-edit {
-      padding: 8px 16px;
+      padding: 10px 18px;
       background: #64748b;
       color: white;
       border: none;
-      border-radius: 4px;
-      cursor: pointer;
       display: none;
-      margin-right: 5px;
+      margin-right: 6px;
     }
 
     #success-message {
-      color: #155724;
       font-weight: bold;
-      margin-top: 15px;
-      height: 20px;
+      margin-top: 12px;
+      min-height: 22px;
+      font-size: 14px;
     }
 
     .total-box {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
-      color: #0056b3;
-      margin-top: 20px;
+      color: #0369a1;
+      margin: 20px 0 10px 0;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 15px;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
       text-align: center;
+      font-size: 14px;
     }
 
     th {
-      background-color: #f4f4f4;
-    }
-
-    .btn-delete {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 5px 12px;
-      border-radius: 4px;
-      cursor: pointer;
+      background-color: #f1f5f9;
+      color: #334155;
     }
 
     #custom-confirm-box {
       display: none;
-      background: #fff3cd;
+      background: #fffbeb;
       padding: 15px;
       margin-top: 15px;
-      border: 1px solid #ffeeba;
+      border: 1px solid #fef3c7;
       border-radius: 8px;
       text-align: center;
     }
 
-    /* =========================================
-       ۶. استایل کارت‌های آمار و بخش‌های داده
-       ========================================= */
+    /* ۶. کارت‌های آمار و پشتیبان‌گیری */
     .stats-container {
       display: flex;
-      gap: 20px;
+      gap: 15px;
       flex-wrap: wrap;
       margin-top: 20px;
     }
 
     .stat-card {
       flex: 1;
-      min-width: 200px;
-      background-color: #f8fafc;
+      min-width: 220px;
+      background-color: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 12px;
       padding: 20px;
       text-align: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .stat-card h3 {
       margin: 0 0 10px 0;
-      font-size: 16px;
+      font-size: 15px;
       color: #64748b;
     }
 
     .stat-card p {
       margin: 0;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: bold;
-      color: #1e293b;
+      color: #0f172a;
     }
 
     .stat-card.alert {
@@ -284,23 +303,22 @@
     }
 
     .low-stock-box {
-      margin-top: 30px;
-      padding: 15px;
-      background-color: #f8fafc;
+      margin-top: 25px;
+      padding: 15px 20px;
+      background-color: #ffffff;
       border-radius: 8px;
       border: 1px solid #e2e8f0;
     }
 
-    /* کارت‌های بخش پشتیبان‌گیری */
     .backup-section {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 15px;
       margin-top: 20px;
     }
 
     .backup-card {
-      background: #f8fafc;
+      background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
       padding: 20px;
@@ -308,7 +326,7 @@
 
     .backup-card h3 {
       margin-top: 0;
-      color: #1e293b;
+      font-size: 17px;
     }
 
     .badge {
@@ -322,38 +340,37 @@
     .badge-edit { background: #e0f2fe; color: #0369a1; }
     .badge-delete { background: #fee2e2; color: #991b1b; }
 
-    /* =========================================
-       ۷. بازنویسی حالت دارک‌مود (Dark Mode)
-       ========================================= */
+    /* ۷. دارک‌مود */
     body.dark-mode {
-      background-color: #121212;
-      color: #e0e0e0;
+      background-color: #0f172a;
+      color: #f1f5f9;
     }
 
     body.dark-mode .theme-btn,
     body.dark-mode .menu-btn {
-      background-color: #2c2c2c;
-      border-color: #555;
-      color: #fff;
+      background-color: #1e293b;
+      border-color: #334155;
+      color: #ffffff;
     }
 
     body.dark-mode .side-menu {
-      background-color: #1e1e1e;
-      color: #fff;
-      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.6);
+      background-color: #1e293b;
+      color: #ffffff;
+      box-shadow: -4px 0 15px rgba(0, 0, 0, 0.5);
     }
 
     body.dark-mode .menu-header {
-      border-bottom-color: #333;
+      border-bottom-color: #334155;
     }
 
     body.dark-mode .close-btn {
-      color: #fff;
+      color: #94a3b8;
     }
 
     body.dark-mode .menu-item:hover, 
     body.dark-mode .menu-item.active {
-      background-color: #2d3748;
+      background-color: #334155;
+      color: #38bdf8;
     }
 
     body.dark-mode .header-subtitle {
@@ -361,47 +378,40 @@
     }
 
     body.dark-mode .form-container,
-    body.dark-mode .backup-card {
-      background: #1e1e1e;
-      border-color: #333;
+    body.dark-mode .backup-card,
+    body.dark-mode table,
+    body.dark-mode .stat-card,
+    body.dark-mode .low-stock-box {
+      background: #1e293b;
+      border-color: #334155;
     }
 
-    body.dark-mode .backup-card h3 {
-      color: #f1f5f9;
-    }
-
-    body.dark-mode input {
-      background-color: #242424;
+    body.dark-mode input[type="text"], 
+    body.dark-mode input[type="number"] {
+      background-color: #0f172a;
       color: #ffffff;
-      border: 1px solid #444;
+      border-color: #334155;
     }
 
     body.dark-mode th {
-      background-color: #1f2937 !important;
-      color: #ffffff !important;
-      border: 1px solid #374151;
+      background-color: #334155;
+      color: #ffffff;
+      border-color: #475569;
     }
 
     body.dark-mode td {
-      background-color: #1a1a1a;
-      color: #d1d5db;
-      border: 1px solid #374151;
+      border-color: #334155;
+      color: #cbd5e1;
     }
 
     body.dark-mode .total-box {
-      color: #60a5fa;
+      color: #38bdf8;
     }
 
     body.dark-mode #custom-confirm-box {
-      background-color: #242424;
-      color: #ffffff;
-      border: 1px solid #444;
-    }
-
-    body.dark-mode .stat-card,
-    body.dark-mode .low-stock-box {
       background-color: #1e293b;
-      border-color: #334155;
+      border-color: #eab308;
+      color: #ffffff;
     }
 
     body.dark-mode .stat-card h3 {
@@ -409,7 +419,7 @@
     }
 
     body.dark-mode .stat-card p {
-      color: #f8fafc;
+      color: #ffffff;
     }
 
     body.dark-mode .stat-card.alert {
@@ -424,15 +434,15 @@
 </head>
 <body>
 
-  <!-- دکمه‌های کنترل بالا سمت چپ -->
-  <button id="themeToggle" class="theme-btn">🌙</button>
-  <button id="menuToggle" class="menu-btn">☰</button>
+  <!-- دکمه‌های شناور -->
+  <button id="themeToggle" class="theme-btn" title="تغییر تم">🌙</button>
+  <button id="menuToggle" class="menu-btn" title="منوی بخش‌ها">☰</button>
 
-  <!-- پرده تاریک و منوی کشویی -->
+  <!-- منوی کشویی -->
   <div id="menuOverlay" class="menu-overlay"></div>
   <nav id="sideMenu" class="side-menu">
     <div class="menu-header">
-      <h3>منوی سیستم</h3>
+      <h3>منوی سامانه</h3>
       <button id="closeMenuBtn" class="close-btn">&times;</button>
     </div>
     <ul class="menu-items">
@@ -443,139 +453,130 @@
     </ul>
   </nav>
 
-  <!-- عنوان اصلی به همراه نام پویای تب -->
-  <h1>سیستم انبار هوشمند <span id="headerSubTitle" class="header-subtitle">(📦 مدیریت انبار)</span></h1>
+  <div class="container">
+    <h1>سیستم انبار هوشمند <span id="headerSubTitle" class="header-subtitle">(📦 مدیریت انبار)</span></h1>
 
-  <!-- ====================================================
-       تب شماره ۱: مدیریت انبار
-       ==================================================== -->
-  <div id="tab-inventory" class="tab-content active">
-    <div class="form-container">
-      <form id="add-product-form">
-        <input type="text" id="new-name" placeholder="نام محصول" required>
-        <input type="number" id="new-price" placeholder="قیمت (تومان)" required>
-        <input type="number" id="new-stock" placeholder="موجودی" required>
-        <button type="submit" id="submit-btn" class="btn-primary">اضافه کن</button>
-        <button type="button" id="cancel-edit-btn" class="btn-cancel-edit">انصراف از ویرایش</button>
-      </form>
-      <div id="success-message"></div>
-    </div>
-
-    <div class="total-box" id="total-value">ارزش کل انبار: ۰ تومان</div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>نام محصول</th>
-          <th>قیمت</th>
-          <th>موجودی</th>
-          <th>عملیات</th>
-        </tr>
-      </thead>
-      <tbody id="product-list"></tbody>
-    </table>
-
-    <div id="custom-confirm-box">
-      <p style="color: #b45309; font-weight: bold; margin-bottom: 10px;">آیا از حذف این محصول مطمئن هستید؟</p>
-      <button id="btn-yes" class="btn-delete" style="margin-left: 10px;">بله، حذف کن</button>
-      <button id="btn-no" style="padding: 5px 12px; background: gray; color: white; border: none; border-radius: 4px; cursor: pointer;">انصراف</button>
-    </div>
-  </div>
-
-  <!-- ====================================================
-       تب شماره ۲: داشبورد آمار و تحلیل
-       ==================================================== -->
-  <div id="tab-analytics" class="tab-content">
-    <h2>داشبورد تحلیل انبار</h2>
-    
-    <div class="stats-container">
-      <div class="stat-card">
-        <h3>تنوع اقلام</h3>
-        <p id="totalItemsCount">۰</p>
+    <!-- تب ۱: مدیریت انبار -->
+    <div id="tab-inventory" class="tab-content active">
+      <div class="form-container">
+        <form id="add-product-form">
+          <input type="text" id="new-name" placeholder="نام محصول" required>
+          <input type="number" id="new-price" placeholder="قیمت (تومان)" required>
+          <input type="number" id="new-stock" placeholder="موجودی" required>
+          <button type="submit" id="submit-btn" class="btn-primary">اضافه کن</button>
+          <button type="button" id="cancel-edit-btn" class="btn-cancel-edit">انصراف از ویرایش</button>
+        </form>
+        <div id="success-message"></div>
       </div>
 
-      <div class="stat-card">
-        <h3>ارزش کل موجودی</h3>
-        <p id="totalValueStat">۰ تومان</p>
-      </div>
+      <div class="total-box" id="total-value">ارزش کل انبار: ۰ تومان</div>
 
-      <div class="stat-card alert">
-        <h3>هشدار موجودی اندک</h3>
-        <p id="lowStockCount">۰ قلم</p>
+      <table>
+        <thead>
+          <tr>
+            <th>نام محصول</th>
+            <th>قیمت واحد</th>
+            <th>موجودی</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+        <tbody id="product-list"></tbody>
+      </table>
+
+      <div id="custom-confirm-box">
+        <p style="color: #b45309; font-weight: bold; margin-bottom: 12px;">آیا از حذف این کالا اطمینان دارید؟</p>
+        <button id="btn-yes" class="btn-delete" style="margin-left: 8px;">بله، حذف کن</button>
+        <button id="btn-no" style="padding: 6px 12px; background: #64748b; color: white; border: none;">انصراف</button>
       </div>
     </div>
 
-    <div class="low-stock-box">
-      <h4>لیست کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4>
-      <ul id="lowStockList"></ul>
-    </div>
-  </div>
+    <!-- تب ۲: آمار و تحلیل -->
+    <div id="tab-analytics" class="tab-content">
+      <h2>داشبورد تحلیل انبار</h2>
+      
+      <div class="stats-container">
+        <div class="stat-card">
+          <h3>تنوع اقلام</h3>
+          <p id="totalItemsCount">۰</p>
+        </div>
 
-  <!-- ====================================================
-       تب شماره ۳: تاریخچه رویدادها (لاگ سیستم)
-       ==================================================== -->
-  <div id="tab-history" class="tab-content">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h2>تاریخچه و گزارش رویدادها</h2>
-      <button id="clearLogsBtn" style="padding: 6px 12px; background: #64748b; color: white; border: none; border-radius: 4px; cursor: pointer;">پاک‌سازی لاگ‌ها</button>
-    </div>
+        <div class="stat-card">
+          <h3>ارزش کل موجودی</h3>
+          <p id="totalValueStat">۰ تومان</p>
+        </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ردیف</th>
-          <th>نوع رویداد</th>
-          <th>توضیحات رویداد</th>
-          <th>تاریخ و زمان ثبت</th>
-        </tr>
-      </thead>
-      <tbody id="logs-list"></tbody>
-    </table>
-  </div>
-
-  <!-- ====================================================
-       تب شماره ۴: پشتیبان‌گیری و داده‌ها
-       ==================================================== -->
-  <div id="tab-backup" class="tab-content">
-    <h2>پشتیبان‌گیری و مدیریت داده‌ها</h2>
-    
-    <div class="backup-section">
-      <!-- دانلود بک‌آپ -->
-      <div class="backup-card">
-        <h3>📥 دریافت فایل پشتیبان (Export)</h3>
-        <p>یک نسخه کامل از داده‌های انبار و تاریخچه را در قالب یک فایل استاندارد روی دستگاه خود دانلود کنید.</p>
-        <button id="downloadBackupBtn" class="btn-primary" style="background: #0284c7;">دانلود فایل JSON پشتیبان</button>
+        <div class="stat-card alert">
+          <h3>هشدار موجودی اندک</h3>
+          <p id="lowStockCount">۰ قلم</p>
+        </div>
       </div>
 
-      <!-- بازیابی بک‌آپ -->
-      <div class="backup-card">
-        <h3>📤 بازیابی اطلاعات از فایل (Import)</h3>
-        <p>اگر فایل پشتیبان قبلی دارید، آن را انتخاب کنید تا داده‌های انبار بازگردانی شوند:</p>
-        <input type="file" id="importFileInput" accept=".json" style="margin-right: 0; margin-bottom: 10px;">
-        <br>
-        <button id="restoreBackupBtn" class="btn-primary">بازگردانی اطلاعات</button>
+      <div class="low-stock-box">
+        <h4>لیست کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4>
+        <ul id="lowStockList" style="padding-right: 20px; line-height: 1.8;"></ul>
+      </div>
+    </div>
+
+    <!-- تب ۳: تاریخچه رویدادها -->
+    <div id="tab-history" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>تاریخچه رویدادهای سیستم</h2>
+        <button id="clearLogsBtn" style="padding: 6px 12px; background: #64748b; color: white; border: none;">پاک‌سازی تاریخچه</button>
       </div>
 
-      <!-- پاک‌سازی کامل -->
-      <div class="backup-card" style="border-color: #fecaca;">
-        <h3 style="color: #dc3545;">⚠️ بازنشانی کامل انبار (Factory Reset)</h3>
-        <p>با انجام این عملیات تمام کالاهای ثبت‌شده و تاریخچه رویدادها به طور دائم پاک خواهند شد.</p>
-        <button id="clearAllDataBtn" class="btn-delete" style="padding: 8px 16px;">حذف کامل داده‌های انبار</button>
+      <table>
+        <thead>
+          <tr>
+            <th>ردیف</th>
+            <th>نوع عملیات</th>
+            <th>شرح رویداد</th>
+            <th>زمان ثبت</th>
+          </tr>
+        </thead>
+        <tbody id="logs-list"></tbody>
+      </table>
+    </div>
+
+    <!-- تب ۴: پشتیبان‌‌گیری و خروجی داده‌ها -->
+    <div id="tab-backup" class="tab-content">
+      <h2>پشتیبان‌گیری و مدیریت داده‌ها</h2>
+      
+      <div class="backup-section">
+        <div class="backup-card" style="border-right: 4px solid #ef4444;">
+          <h3>📄 گزارش اداری و چاپی (PDF)</h3>
+          <p>مشاهده و ذخیره مستقیم صورت‌جلسه موجودی انبار، قیمت‌ها و ارزش مالی به صورت فایل چاپی PDF.</p>
+          <button id="downloadPdfBtn" class="btn-primary" style="background: #ef4444;">ایجاد و دانلود فایل PDF</button>
+        </div>
+
+        <div class="backup-card">
+          <h3>📥 دریافت فایل پشتیبان (Export JSON)</h3>
+          <p>دانلود فایل خام داده‌ها برای نگهداری امن روی کامپیوتر یا انتقال به مرورگر دیگر.</p>
+          <button id="downloadBackupBtn" class="btn-primary" style="background: #0284c7;">دانلود فایل JSON</button>
+        </div>
+
+        <div class="backup-card">
+          <h3>📤 بازیابی اطلاعات از فایل (Import JSON)</h3>
+          <p>اگر فایل پشتیبان دارید، آن را بارگذاری کنید تا داده‌های انبار جایگزین شوند:</p>
+          <input type="file" id="importFileInput" accept=".json" style="margin-bottom: 12px;"><br>
+          <button id="restoreBackupBtn" class="btn-primary">بازگردانی اطلاعات</button>
+        </div>
+
+        <div class="backup-card" style="border-color: #fecaca;">
+          <h3 style="color: #ef4444;">⚠️ بازنشانی کامل انبار (Factory Reset)</h3>
+          <p>با اجرای این گزینه، تمام محصولات و تاریخچه سیستم برای همیشه حذف خواهند شد.</p>
+          <button id="clearAllDataBtn" class="btn-delete" style="padding: 8px 16px;">حذف تمام اطلاعات انبار</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ====================================================
-       موتور منطقی برنامه (JavaScript)
-       ==================================================== -->
+  <!-- اسکریپت اصلی بدون تداخل با Live Server -->
   <script>
-    // --- ۱. بارگذاری داده‌های پایه از LocalStorage ---
     let productsArray = JSON.parse(localStorage.getItem('inventoryData')) || [];
     let logsArray = JSON.parse(localStorage.getItem('inventoryLogs')) || [];
     let rowToDelete = null;
     let editIndex = null;
 
-    // --- ۲. متغیرهای رابط کاربری (DOM Elements) ---
     const tableBody = document.getElementById('product-list');
     const logsTableBody = document.getElementById('logs-list');
     const form = document.getElementById('add-product-form');
@@ -593,7 +594,7 @@
     const menuItems = document.querySelectorAll('.menu-item');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    // --- ۳. تم دارک‌مود با ذخیره در حافظه ---
+    // تم دارک‌مود
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-mode');
@@ -611,7 +612,7 @@
       }
     });
 
-    // --- ۴. کنترل منوی کشویی ---
+    // منوی کشویی
     function openMenu() {
       sideMenu.classList.add('open');
       menuOverlay.classList.add('open');
@@ -626,7 +627,7 @@
     closeMenuBtn.addEventListener('click', closeMenu);
     menuOverlay.addEventListener('click', closeMenu);
 
-    // --- ۵. جابه‌جایی تب‌ها (SPA Routing) ---
+    // سوییچ تب‌ها
     menuItems.forEach(item => {
       item.addEventListener('click', () => {
         menuItems.forEach(i => i.classList.remove('active'));
@@ -648,25 +649,23 @@
       });
     });
 
-    // --- ۶. سیستم ثبت و مدیریت تاریخچه رویدادها (Audit Log) ---
+    // ثبت لاگ
     function recordLog(type, message) {
       const now = new Date();
       const timeString = now.toLocaleDateString('fa-IR') + ' - ' + now.toLocaleTimeString('fa-IR');
       
-      const logEntry = {
+      logsArray.unshift({
         id: Date.now(),
-        type: type, // 'add', 'edit', 'delete', 'system'
+        type: type,
         message: message,
         time: timeString
-      };
+      });
 
-      logsArray.unshift(logEntry); // رویداد جدید همیشه بالای لیست می‌نشیند
       localStorage.setItem('inventoryLogs', JSON.stringify(logsArray));
     }
 
     function updateLogsTable() {
       logsTableBody.innerHTML = '';
-
       if (logsArray.length === 0) {
         logsTableBody.innerHTML = '<tr><td colspan="4" style="color: #64748b;">هیچ رویدادی تاکنون ثبت نشده است.</td></tr>';
         return;
@@ -674,7 +673,6 @@
 
       logsArray.forEach((log, index) => {
         const row = document.createElement('tr');
-        
         let badgeHtml = '';
         if (log.type === 'add') badgeHtml = '<span class="badge badge-add">افزودن</span>';
         else if (log.type === 'edit') badgeHtml = '<span class="badge badge-edit">ویرایش</span>';
@@ -692,24 +690,29 @@
     }
 
     document.getElementById('clearLogsBtn').addEventListener('click', () => {
-      if (confirm('آیا مطمئن هستید که می‌خواهید تمام تاریخچه رویدادها را پاک کنید؟')) {
+      if (confirm('آیا از پاک کردن کل تاریخچه رویدادها اطمینان دارید؟')) {
         logsArray = [];
         localStorage.removeItem('inventoryLogs');
         updateLogsTable();
       }
     });
 
-    // --- ۷. توابع رندرینگ جدول انبار و داشبورد آمار ---
+    // رندر جدول انبار
     function updateTable() {
       tableBody.innerHTML = '';
       let total = 0;
 
+      if (productsArray.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" style="color: #64748b; padding: 20px;">انبار خالی است! کالای جدید اضافه کنید.</td></tr>';
+        totalValueDisplay.textContent = 'ارزش کل انبار: ۰ تومان';
+        return;
+      }
+
       productsArray.forEach((product, index) => {
         total += Number(product.price) * Number(product.stock);
-
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${product.name}</td>
+          <td style="font-weight: bold;">${product.name}</td>
           <td>${Number(product.price).toLocaleString('fa-IR')} تومان</td>
           <td>${Number(product.stock).toLocaleString('fa-IR')}</td>
           <td>
@@ -721,9 +724,10 @@
       });
 
       const discountedTotal = total * 0.9;
-      totalValueDisplay.textContent = `ارزش کل: ${total.toLocaleString('fa-IR')} | با ۱۰٪ تخفیف: ${discountedTotal.toLocaleString('fa-IR')} تومان`;
+      totalValueDisplay.textContent = `ارزش کل: ${total.toLocaleString('fa-IR')} تومان | با ۱۰٪ تخفیف: ${discountedTotal.toLocaleString('fa-IR')} تومان`;
     }
 
+    // رندر آمار
     function updateAnalytics() {
       const totalItemsCount = document.getElementById('totalItemsCount');
       const totalValueStat = document.getElementById('totalValueStat');
@@ -747,17 +751,17 @@
 
       lowStockList.innerHTML = '';
       if (lowStockItems.length === 0) {
-        lowStockList.innerHTML = '<li>تمامی اقلام موجودی کافی دارند.</li>';
+        lowStockList.innerHTML = '<li>تمامی اقلام دارای موجودی کافی هستند.</li>';
       } else {
         lowStockItems.forEach(item => {
           const li = document.createElement('li');
-          li.textContent = `${item.name} — موجودی: ${Number(item.stock).toLocaleString('fa-IR')} عدد`;
+          li.textContent = `${item.name} — موجودی فعلی: ${Number(item.stock).toLocaleString('fa-IR')} عدد`;
           lowStockList.appendChild(li);
         });
       }
     }
 
-    // --- ۸. مدیریت ویرایش و حذف کالاها ---
+    // ویرایش کالا
     function startEdit(index) {
       editIndex = index;
       const product = productsArray[index];
@@ -777,12 +781,13 @@
       editIndex = null;
       form.reset();
       submitBtn.textContent = 'اضافه کن';
-      submitBtn.style.background = '#28a745';
+      submitBtn.style.background = '#10b981';
       cancelEditBtn.style.display = 'none';
     }
 
     cancelEditBtn.addEventListener('click', cancelEdit);
 
+    // حذف کالا
     function deleteProduct(index) {
       rowToDelete = index;
       confirmBox.style.display = 'block';
@@ -790,12 +795,11 @@
 
     document.getElementById('btn-yes').addEventListener('click', () => {
       if (rowToDelete !== null) {
-        const deletedItemName = productsArray[rowToDelete].name;
+        const deletedName = productsArray[rowToDelete].name;
         productsArray.splice(rowToDelete, 1);
         localStorage.setItem('inventoryData', JSON.stringify(productsArray));
 
-        // ثبت در لاگ
-        recordLog('delete', `محصول "${deletedItemName}" از انبار حذف گردید.`);
+        recordLog('delete', `کالای "${deletedName}" از لیست انبار حذف گردید.`);
 
         updateTable();
         updateAnalytics();
@@ -810,7 +814,7 @@
       confirmBox.style.display = 'none';
     });
 
-    // --- ۹. ثبت یا ویرایش کالا ---
+    // ثبت یا به‌روزرسانی در فرم
     form.addEventListener('submit', (event) => {
       event.preventDefault();
 
@@ -823,8 +827,8 @@
       });
 
       if (isDuplicate) {
-        successMessage.textContent = 'خطا: محصول دیگری با این نام در انبار ثبت شده است!';
-        successMessage.style.color = '#dc3545';
+        successMessage.textContent = 'خطا: محصولی با همین نام در انبار موجود است!';
+        successMessage.style.color = '#ef4444';
         nameInput.focus();
         nameInput.select();
         setTimeout(() => { successMessage.textContent = ''; }, 3500);
@@ -839,12 +843,12 @@
 
       if (editIndex !== null) {
         productsArray[editIndex] = productData;
-        recordLog('edit', `اطلاعات محصول "${enteredName}" ویرایش گردید.`);
-        successMessage.textContent = 'تغییرات کالا با موفقیت ذخیره شد ✏️';
+        recordLog('edit', `مشخصات کالای "${enteredName}" به‌روزرسانی شد.`);
+        successMessage.textContent = 'تغییرات با موفقیت ذخیره شد ✏️';
       } else {
         productsArray.push(productData);
-        recordLog('add', `محصول جدید "${enteredName}" با موجودی ${productData.stock} عدد افزوده شد.`);
-        successMessage.textContent = 'عملیات با موفقیت انجام شد ✅';
+        recordLog('add', `کالای جدید "${enteredName}" با تعداد ${productData.stock} ثبت شد.`);
+        successMessage.textContent = 'کالا با موفقیت به انبار افزوده شد ✅';
       }
 
       localStorage.setItem('inventoryData', JSON.stringify(productsArray));
@@ -853,13 +857,93 @@
 
       cancelEdit();
 
-      successMessage.style.color = '#155724';
+      successMessage.style.color = '#10b981';
       setTimeout(() => { successMessage.textContent = ''; }, 3000);
     });
 
-    // --- ۱۰. موتور پشتیبان‌گیری و بازیابی داده‌ها ---
+    // صدور PDF استاندارد و بدون تداخل با Live Server
+    document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+      if (productsArray.length === 0) {
+        alert('انبار در حال حاضر خالی است!');
+        return;
+      }
 
-    // دانلود فایل JSON
+      let grandTotal = 0;
+      let rowsHtml = '';
+
+      productsArray.forEach((p, idx) => {
+        const rowVal = Number(p.price) * Number(p.stock);
+        grandTotal += rowVal;
+        const low = Number(p.stock) < 5;
+
+        rowsHtml += `
+          <tr style="${low ? 'background-color: #fff1f2;' : ''}">
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${(idx + 1).toLocaleString('fa-IR')}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right; font-weight: bold;">${p.name}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${Number(p.price).toLocaleString('fa-IR')} تومان</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${Number(p.stock).toLocaleString('fa-IR')}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${rowVal.toLocaleString('fa-IR')} تومان</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: ${low ? '#e11d48' : '#166534'};">
+              ${low ? 'موجودی اندک' : 'کافی'}
+            </td>
+          </tr>
+        `;
+      });
+
+      const now = new Date();
+      const printDate = now.toLocaleDateString('fa-IR') + ' - ساعت ' + now.toLocaleTimeString('fa-IR');
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('لطفاً اجازه باز شدن پنجره پاپ‌آپ را در مرورگر صادر کنید.');
+        return;
+      }
+
+      printWindow.document.title = 'گزارش موجودی انبار';
+      printWindow.document.body.style.fontFamily = 'Tahoma, sans-serif';
+      printWindow.document.body.style.direction = 'rtl';
+      printWindow.document.body.style.padding = '25px';
+      printWindow.document.body.style.color = '#0f172a';
+
+      printWindow.document.body.innerHTML = `
+        <div style="text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px;">
+          <h2 style="margin: 0 0 10px 0;">گزارش رسمی و جامع موجودی انبار</h2>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 15px;">
+          <span>تاریخ چاپ: ${printDate}</span>
+          <span>تعداد کل اقلام: ${productsArray.length.toLocaleString('fa-IR')} کالا</span>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background-color: #f1f5f9;">
+              <th style="border: 1px solid #cbd5e1; padding: 8px;">ردیف</th>
+              <th style="border: 1px solid #cbd5e1; padding: 8px;">نام کالا</th>
+              <th style="border: 1px solid #cbd5e1; padding: 8px;">قیمت واحد</th>
+              <th style="border: 1px solid #cbd5e1; padding: 8px;">موجودی</th>
+              <th style="border: 1px solid #cbd5e1; padding: 8px;">ارزش کل</th>
+              <th style="border: 1px solid #cbd5e1; padding: 8px;">وضعیت</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+        <div style="margin-top: 25px; border-top: 2px dashed #94a3b8; padding-top: 15px; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px;">
+          <div>ارزش کل انبار: ${grandTotal.toLocaleString('fa-IR')} تومان</div>
+          <div>ارزش با ۱۰٪ تخفیف: ${(grandTotal * 0.9).toLocaleString('fa-IR')} تومان</div>
+        </div>
+      `;
+
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 350);
+
+      recordLog('system', 'گزارش PDF از وضعیت انبار استخراج گردید.');
+      updateLogsTable();
+    });
+
+    // دانلود بک‌آپ JSON
     document.getElementById('downloadBackupBtn').addEventListener('click', () => {
       const backupData = {
         exportedAt: new Date().toISOString(),
@@ -868,38 +952,37 @@
       };
 
       const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(backupData, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute('href', dataStr);
-      downloadAnchor.setAttribute('download', `inventory-backup-${new Date().toLocaleDateString('fa-IR')}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+      const a = document.createElement('a');
+      a.setAttribute('href', dataStr);
+      a.setAttribute('download', `inventory-backup-${new Date().toLocaleDateString('fa-IR')}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
 
-      recordLog('system', 'فایل پشتیبان کامل از انبار دانلود گردید.');
+      recordLog('system', 'فایل پشتیبان JSON دریافت گردید.');
+      updateLogsTable();
     });
 
-    // بازگردانی اطلاعات از فایل انتخابی
+    // بازیابی بک‌آپ
     document.getElementById('restoreBackupBtn').addEventListener('click', () => {
       const fileInput = document.getElementById('importFileInput');
       if (!fileInput.files.length) {
-        alert('لطفاً ابتدا یک فایل JSON پشتیبان انتخاب کنید.');
+        alert('لطفاً یک فایل پشتیبان JSON انتخاب کنید.');
         return;
       }
 
-      const file = fileInput.files[0];
       const reader = new FileReader();
-
       reader.onload = function(e) {
         try {
-          const importedData = JSON.parse(e.target.result);
-          if (Array.isArray(importedData.products)) {
-            productsArray = importedData.products;
-            logsArray = Array.isArray(importedData.logs) ? importedData.logs : [];
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported.products)) {
+            productsArray = imported.products;
+            logsArray = Array.isArray(imported.logs) ? imported.logs : [];
 
             localStorage.setItem('inventoryData', JSON.stringify(productsArray));
             localStorage.setItem('inventoryLogs', JSON.stringify(logsArray));
 
-            recordLog('system', 'داده‌های انبار با موفقیت از فایل پشتیبان بازگردانی شد.');
+            recordLog('system', 'داده‌ها با موفقیت از فایل پشتیبان بازگردانی شدند.');
 
             updateTable();
             updateAnalytics();
@@ -908,19 +991,18 @@
             alert('اطلاعات با موفقیت بازگردانی شد ✅');
             fileInput.value = '';
           } else {
-            alert('قالب فایل انتخابی معتبر نیست.');
+            alert('قالب فایل پشتیبان معتبر نیست.');
           }
         } catch (err) {
-          alert('خطا در خواندن محتوای فایل!');
+          alert('خطا در پردازش فایل!');
         }
       };
-
-      reader.readAsText(file);
+      reader.readAsText(fileInput.files[0]);
     });
 
-    // ریست کامل انبار
+    // ریست کامل
     document.getElementById('clearAllDataBtn').addEventListener('click', () => {
-      if (confirm('آیا کاملاً مطمئن هستید؟ این عمل تمامی اطلاعات انبار را پاک می‌کند و قابل بازگشت نیست!')) {
+      if (confirm('هشدار: آیا مطمئن هستید؟ تمام کالاها و تاریخچه به طور برگشت‌ناپذیر پاک خواهند شد!')) {
         productsArray = [];
         logsArray = [];
         localStorage.removeItem('inventoryData');
@@ -930,13 +1012,14 @@
         updateAnalytics();
         updateLogsTable();
 
-        alert('انبار به طور کامل بازنشانی شد.');
+        alert('سامانه به تنظیمات کارخانه بازگشت.');
       }
     });
 
-    // --- بارگذاری اولیه ---
+    // لود اولیه
     updateTable();
     updateAnalytics();
+    updateLogsTable();
   </script>
 </body>
 </html>
