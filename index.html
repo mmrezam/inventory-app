@@ -158,6 +158,7 @@
   .badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #fff; }
   .badge.add { background: var(--ok); } .badge.edit { background: var(--accent); }
   .badge.delete { background: var(--danger); } .badge.system { background: var(--muted); }
+  .badge.sale { background: var(--orange); }
 
   /* پنجره‌های مدال ورود و سبد خرید */
   .modal-overlay {
@@ -519,7 +520,11 @@ const normalize = list => list.map((p, i) => ({
 
 let products = normalize(load('inventoryData', []));
 let logs = load('inventoryLogs', []);
-let cart = load('customerCart', []); // سبد خرید اختصاصی
+
+/* سبد خرید مجزا برای هر کاربر */
+let carts = load('customerCarts', {});
+let cart = carts[currentUser.id] || [];
+
 let editId = null, deleteId = null, stockFilter = 'all', catFilter = 'all', subFilter = 'all', shopFilter = 'all';
 const drafts = {};
 
@@ -529,11 +534,12 @@ const save = () => {
   localStorage.setItem('inventoryLogs', JSON.stringify(logs));
   localStorage.setItem('inventoryUsers', JSON.stringify(users));
   localStorage.setItem('currentAuthUser', JSON.stringify(currentUser));
-  localStorage.setItem('customerCart', JSON.stringify(cart));
+  carts[currentUser.id] = cart;
+  localStorage.setItem('customerCarts', JSON.stringify(carts));
 };
 
-function log(type, message) {
-  logs.unshift({ id: Date.now() + Math.random(), type, message, time: new Date().toLocaleString('fa-IR'), by: currentUser.name });
+function log(type, message, shop = '') {
+  logs.unshift({ id: Date.now() + Math.random(), type, message, time: new Date().toLocaleString('fa-IR'), by: currentUser.name, shop });
   save();
 }
 
@@ -546,7 +552,18 @@ function toast(text, color = 'var(--ok)') {
 }
 
 /* ============ مدیریت سبد خرید خریدار ============ */
+const cartQty = id => (cart.find(x => x.id === id) || {}).qty || 0;
+
+function cartCell(p) {
+  if (p.stock <= 0) return '<button class="ok" disabled style="opacity:.45;cursor:not-allowed">🛒 افزودن</button>';
+  const q = cartQty(p.id);
+  return q
+    ? `<div class="stock"><button type="button" class="qty" data-act="cart-dec" data-id="${p.id}">-</button><b style="min-width:26px;display:inline-block;text-align:center">${fa(q)}</b><button type="button" class="qty" data-act="cart-inc" data-id="${p.id}">+</button></div>`
+    : `<button class="ok" data-act="add-to-cart" data-id="${p.id}">🛒 افزودن</button>`;
+}
+
 function updateCartBadge() {
+  cart = cart.filter(i => find(i.id));
   const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
   $('#cartCount').textContent = fa(totalCount);
 }
@@ -575,10 +592,12 @@ function addToCart(productId) {
 
   save();
   updateCartBadge();
-  toast(`کالای "${product.name}" به سبد خرید اضافه شد 🛒`);
+  if (!existingItem) toast(`کالای "${product.name}" به سبد خرید اضافه شد 🛒`);
+  render();
 }
 
 function renderCartModal() {
+  cart = cart.filter(i => find(i.id));
   const listEl = $('#cartItemsList');
   if (!cart.length) {
     listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:25px 0;">سبد خرید شما در حال حاضر خالی است.</div>';
@@ -588,13 +607,13 @@ function renderCartModal() {
 
   let grandTotal = 0;
   listEl.innerHTML = cart.map(item => {
-    const itemSubtotal = item.price * item.qty;
+    const cur = find(item.id), price = cur ? cur.price : item.price, itemSubtotal = price * item.qty;
     grandTotal += itemSubtotal;
     return `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:10px">
         <div style="flex:1">
           <div style="font-weight:bold;font-size:13.5px">${esc(item.name)}</div>
-          <div style="font-size:11.5px;color:var(--muted)">${esc(item.shop)} | هر عدد: ${fa(item.price)} ت</div>
+          <div style="font-size:11.5px;color:var(--muted)">${esc(item.shop)} | هر عدد: ${fa(price)} ت</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
           <button type="button" class="qty" onclick="changeCartItemQty(${item.id}, -1)">-</button>
@@ -627,6 +646,7 @@ window.changeCartItemQty = function(id, delta) {
   save();
   updateCartBadge();
   renderCartModal();
+  render();
 };
 
 window.removeCartItem = function(id) {
@@ -634,6 +654,7 @@ window.removeCartItem = function(id) {
   save();
   updateCartBadge();
   renderCartModal();
+  render();
 };
 
 $('#openCartBtn').onclick = () => {
@@ -649,13 +670,14 @@ $('#clearCartBtn').onclick = () => {
   save();
   updateCartBadge();
   renderCartModal();
+  render();
 };
 
-// ثبت نهایی سفارش، کسر موجودی و ثبت لاگ
+// ثبت نهایی سفارش، کسر موجودی و ثبت لاگ فروش برای هر فروشگاه جداگانه
 $('#checkoutBtn').onclick = () => {
+  cart = cart.filter(i => find(i.id));
   if (!cart.length) return toast('سبد خرید شما خالی است!', 'var(--danger)');
 
-  // بازبینی مجدد موجودی‌ها پیش از کسر
   for (const item of cart) {
     const prod = find(item.id);
     if (!prod || prod.stock < item.qty) {
@@ -663,15 +685,14 @@ $('#checkoutBtn').onclick = () => {
     }
   }
 
-  // کسر موجودی
-  const boughtItemsSummary = [];
+  const byShop = {};
   cart.forEach(item => {
     const prod = find(item.id);
     prod.stock -= item.qty;
-    boughtItemsSummary.push(`${item.name} (${item.qty} عدد از ${item.shop})`);
+    (byShop[prod.shop] = byShop[prod.shop] || []).push(`${prod.name} × ${fa(item.qty)} (${fa(prod.price * item.qty)} تومان)`);
   });
+  Object.entries(byShop).forEach(([shop, items]) => log('sale', `خرید ${currentUser.name}: ${items.join('، ')}`, shop));
 
-  log('edit', `خرید آنلاین موفق توسط ${currentUser.name}: ${boughtItemsSummary.join('، ')}.`);
   cart = [];
   save();
   updateCartBadge();
@@ -772,11 +793,7 @@ function render() {
         <td>${esc(p.category)}</td>
         <td>${fa(p.price)} تومان</td>
         <td>${status(p)}</td>
-        <td>
-          <button class="ok" data-act="add-to-cart" data-id="${p.id}" ${p.stock <= 0 ? 'disabled style="opacity:0.45;cursor:not-allowed"' : ''}>
-            🛒 افزودن
-          </button>
-        </td>
+        <td>${cartCell(p)}</td>
       </tr>`).join('')
     : rows.map(p => {
       const d = draftOf(p), dirty = p.id in drafts;
@@ -820,8 +837,8 @@ function render() {
     ? lowItems.map(p => `<li>${esc(p.name)} (${esc(p.shop)}) — موجودی: ${fa(p.stock)} عدد</li>`).join('')
     : '<li>تمامی اقلام دارای موجودی کافی هستند.</li>';
 
-  const shown = isAdmin() ? logs : logs.filter(l => l.by === currentUser.name);
-  const labels = { add: 'افزودن', edit: 'ویرایش', delete: 'حذف', system: 'سیستم' };
+  const shown = isAdmin() ? logs : logs.filter(l => l.by === currentUser.name || (isSeller() && l.shop === currentUser.shop));
+  const labels = { add: 'افزودن', edit: 'ویرایش', delete: 'حذف', system: 'سیستم', sale: 'فروش' };
   $('#logList').innerHTML = shown.length ? shown.map((l, i) => `
     <tr><td>${fa(i + 1)}</td>
     <td><span class="badge ${labels[l.type] ? l.type : 'system'}">${labels[l.type] || 'سیستم'}</span></td>
@@ -831,6 +848,9 @@ function render() {
 
 /* ============ مدیریت ورود و تغییر کاربر ============ */
 function applyUserAuth() {
+  shopFilter = 'all';
+  cart = carts[currentUser.id] || [];
+
   save();
   const shopLabel = currentUser.shop ? ` (${currentUser.shop})` : '';
   $('#userGreeting').textContent = `👤 سلام، ${currentUser.name}${shopLabel}`;
@@ -849,7 +869,7 @@ function applyUserAuth() {
   $('#fShop').hidden = !isAdmin();
   $('#clearLogs').hidden = !isAdmin();
   $('#filterLowBtn').hidden = isCustomer();
-  $('#openCartBtn').hidden = !isCustomer(); // فقط برای خریدار نمایش داده می‌شود
+  $('#openCartBtn').hidden = !isCustomer();
 
   const shops = getAllShops();
   $('#filterShop').hidden = isSeller();
@@ -980,9 +1000,13 @@ list.addEventListener('click', e => {
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
 
-  // عملکرد خرید برای خریدار
-  if (btn.dataset.act === 'add-to-cart') {
+  // عملکرد شمارنده سبد خرید برای خریدار
+  if (btn.dataset.act === 'add-to-cart' || btn.dataset.act === 'cart-inc') {
     addToCart(Number(btn.dataset.id));
+    return;
+  }
+  if (btn.dataset.act === 'cart-dec') {
+    changeCartItemQty(Number(btn.dataset.id), -1);
     return;
   }
 
@@ -1166,7 +1190,7 @@ $('#pdfBtn').onclick = () => {
 /* ============ پشتیبان، بازیابی، ریست ============ */
 $('#exportBtn').onclick = () => {
   if (!isAdmin()) return;
-  const data = JSON.stringify({ exportedAt: new Date().toISOString(), products, logs, users }, null, 2);
+  const data = JSON.stringify({ exportedAt: new Date().toISOString(), products, logs, users, customerCarts: carts }, null, 2);
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(new Blob([data], { type: 'application/json' })),
     download: `inventory-backup-${new Date().toISOString().slice(0, 10)}.json`
@@ -1189,7 +1213,9 @@ $('#importBtn').onclick = () => {
       products = normalize(data.products);
       logs = Array.isArray(data.logs) ? data.logs : [];
       if (Array.isArray(data.users)) users = data.users;
+      if (data.customerCarts && typeof data.customerCarts === 'object') carts = data.customerCarts;
       Object.keys(drafts).forEach(id => delete drafts[id]);
+      currentUser = users.find(u => u.id === currentUser.id) || users[0];
       log('system', 'داده‌ها با موفقیت از فایل پشتیبان بازگردانی شدند.');
       applyUserAuth();
       $('#importFile').value = '';
@@ -1202,11 +1228,11 @@ $('#importBtn').onclick = () => {
 $('#resetBtn').onclick = () => {
   if (!isAdmin()) return;
   if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
-  products = []; logs = []; cart = [];
+  products = []; logs = []; carts = {}; cart = [];
   Object.keys(drafts).forEach(id => delete drafts[id]);
   localStorage.removeItem('inventoryData');
   localStorage.removeItem('inventoryLogs');
-  localStorage.removeItem('customerCart');
+  localStorage.removeItem('customerCarts');
   render();
   alert('سامانه به تنظیمات کارخانه بازگشت.');
 };
