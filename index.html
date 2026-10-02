@@ -7,7 +7,7 @@
   
   <style>
     /* =========================================
-       ۱. استایل‌های پایه و ساختار صفحه (حالت روز)
+       ۱. استایل‌های پایه و ساختار کلی
        ========================================= */
     body {
       font-family: sans-serif;
@@ -18,7 +18,7 @@
     }
 
     h1 {
-      margin-top: 60px; /* ایجاد فضا برای دکمه‌های شناور بالای صفحه */
+      margin-top: 60px;
       display: flex;
       align-items: center;
       flex-wrap: wrap;
@@ -32,7 +32,7 @@
     }
 
     /* =========================================
-       ۲. دکمه‌های شناور بالا سمت چپ (تم و منو)
+       ۲. دکمه‌های شناور بالا سمت چپ
        ========================================= */
     .theme-btn, .menu-btn {
       position: fixed;
@@ -69,7 +69,7 @@
     .side-menu {
       position: fixed;
       top: 0;
-      right: -280px; /* پنهان در لبه بیرونی راست */
+      right: -280px;
       width: 260px;
       height: 100%;
       background-color: #ffffff;
@@ -81,7 +81,7 @@
     }
 
     .side-menu.open {
-      right: 0; /* باز شدن کشویی منو */
+      right: 0;
     }
 
     .menu-overlay {
@@ -134,18 +134,18 @@
     }
 
     /* =========================================
-       ۴. کنترل نمایش تب‌ها (معماری SPA)
+       ۴. مدیریت تب‌ها
        ========================================= */
     .tab-content {
-      display: none; /* تمام تب‌ها در ابتدا مخفی هستند */
+      display: none;
     }
 
     .tab-content.active {
-      display: block; /* فقط تب فعال نمایش داده می‌شود */
+      display: block;
     }
 
     /* =========================================
-       ۵. عناصر تب مدیریت انبار (فرم و جدول)
+       ۵. جدول‌ها، فرم‌ها و دکمه‌های مشترک
        ========================================= */
     .form-container {
       background: #f9f9f9;
@@ -168,6 +168,27 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+    }
+
+    .btn-edit {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .btn-cancel-edit {
+      padding: 8px 16px;
+      background: #64748b;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: none;
+      margin-right: 5px;
     }
 
     #success-message {
@@ -209,7 +230,6 @@
       cursor: pointer;
     }
 
-    /* باکس تایید اختصاصی */
     #custom-confirm-box {
       display: none;
       background: #fff3cd;
@@ -221,7 +241,7 @@
     }
 
     /* =========================================
-       ۶. عناصر تب آمار و تحلیل
+       ۶. استایل کارت‌های آمار و بخش‌های داده
        ========================================= */
     .stats-container {
       display: flex;
@@ -271,8 +291,39 @@
       border: 1px solid #e2e8f0;
     }
 
+    /* کارت‌های بخش پشتیبان‌گیری */
+    .backup-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .backup-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .backup-card h3 {
+      margin-top: 0;
+      color: #1e293b;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .badge-add { background: #dcfce7; color: #166534; }
+    .badge-edit { background: #e0f2fe; color: #0369a1; }
+    .badge-delete { background: #fee2e2; color: #991b1b; }
+
     /* =========================================
-       ۷. بازنویسی استایل‌ها در حالت شب (Dark Mode)
+       ۷. بازنویسی حالت دارک‌مود (Dark Mode)
        ========================================= */
     body.dark-mode {
       background-color: #121212;
@@ -309,9 +360,14 @@
       color: #94a3b8;
     }
 
-    body.dark-mode .form-container {
+    body.dark-mode .form-container,
+    body.dark-mode .backup-card {
       background: #1e1e1e;
       border-color: #333;
+    }
+
+    body.dark-mode .backup-card h3 {
+      color: #f1f5f9;
     }
 
     body.dark-mode input {
@@ -372,7 +428,7 @@
   <button id="themeToggle" class="theme-btn">🌙</button>
   <button id="menuToggle" class="menu-btn">☰</button>
 
-  <!-- پرده تاریک و منوی کشویی کناری -->
+  <!-- پرده تاریک و منوی کشویی -->
   <div id="menuOverlay" class="menu-overlay"></div>
   <nav id="sideMenu" class="side-menu">
     <div class="menu-header">
@@ -387,11 +443,11 @@
     </ul>
   </nav>
 
-  <!-- عنوان اصلی به همراه نام پویای تب فعلی -->
+  <!-- عنوان اصلی به همراه نام پویای تب -->
   <h1>سیستم انبار هوشمند <span id="headerSubTitle" class="header-subtitle">(📦 مدیریت انبار)</span></h1>
 
   <!-- ====================================================
-       تب شماره ۱: مدیریت انبار (شامل فرم، جدول و تاییدیه)
+       تب شماره ۱: مدیریت انبار
        ==================================================== -->
   <div id="tab-inventory" class="tab-content active">
     <div class="form-container">
@@ -399,7 +455,8 @@
         <input type="text" id="new-name" placeholder="نام محصول" required>
         <input type="number" id="new-price" placeholder="قیمت (تومان)" required>
         <input type="number" id="new-stock" placeholder="موجودی" required>
-        <button type="submit" class="btn-primary">اضافه کن</button>
+        <button type="submit" id="submit-btn" class="btn-primary">اضافه کن</button>
+        <button type="button" id="cancel-edit-btn" class="btn-cancel-edit">انصراف از ویرایش</button>
       </form>
       <div id="success-message"></div>
     </div>
@@ -455,16 +512,75 @@
   </div>
 
   <!-- ====================================================
+       تب شماره ۳: تاریخچه رویدادها (لاگ سیستم)
+       ==================================================== -->
+  <div id="tab-history" class="tab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>تاریخچه و گزارش رویدادها</h2>
+      <button id="clearLogsBtn" style="padding: 6px 12px; background: #64748b; color: white; border: none; border-radius: 4px; cursor: pointer;">پاک‌سازی لاگ‌ها</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ردیف</th>
+          <th>نوع رویداد</th>
+          <th>توضیحات رویداد</th>
+          <th>تاریخ و زمان ثبت</th>
+        </tr>
+      </thead>
+      <tbody id="logs-list"></tbody>
+    </table>
+  </div>
+
+  <!-- ====================================================
+       تب شماره ۴: پشتیبان‌گیری و داده‌ها
+       ==================================================== -->
+  <div id="tab-backup" class="tab-content">
+    <h2>پشتیبان‌گیری و مدیریت داده‌ها</h2>
+    
+    <div class="backup-section">
+      <!-- دانلود بک‌آپ -->
+      <div class="backup-card">
+        <h3>📥 دریافت فایل پشتیبان (Export)</h3>
+        <p>یک نسخه کامل از داده‌های انبار و تاریخچه را در قالب یک فایل استاندارد روی دستگاه خود دانلود کنید.</p>
+        <button id="downloadBackupBtn" class="btn-primary" style="background: #0284c7;">دانلود فایل JSON پشتیبان</button>
+      </div>
+
+      <!-- بازیابی بک‌آپ -->
+      <div class="backup-card">
+        <h3>📤 بازیابی اطلاعات از فایل (Import)</h3>
+        <p>اگر فایل پشتیبان قبلی دارید، آن را انتخاب کنید تا داده‌های انبار بازگردانی شوند:</p>
+        <input type="file" id="importFileInput" accept=".json" style="margin-right: 0; margin-bottom: 10px;">
+        <br>
+        <button id="restoreBackupBtn" class="btn-primary">بازگردانی اطلاعات</button>
+      </div>
+
+      <!-- پاک‌سازی کامل -->
+      <div class="backup-card" style="border-color: #fecaca;">
+        <h3 style="color: #dc3545;">⚠️ بازنشانی کامل انبار (Factory Reset)</h3>
+        <p>با انجام این عملیات تمام کالاهای ثبت‌شده و تاریخچه رویدادها به طور دائم پاک خواهند شد.</p>
+        <button id="clearAllDataBtn" class="btn-delete" style="padding: 8px 16px;">حذف کامل داده‌های انبار</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
        موتور منطقی برنامه (JavaScript)
        ==================================================== -->
   <script>
-    // --- الف) وضعیت و داده‌های اصلی ---
+    // --- ۱. بارگذاری داده‌های پایه از LocalStorage ---
     let productsArray = JSON.parse(localStorage.getItem('inventoryData')) || [];
-    let rowToDelete = null; // نگهداری شماره ردیف انتخابی برای حذف
+    let logsArray = JSON.parse(localStorage.getItem('inventoryLogs')) || [];
+    let rowToDelete = null;
+    let editIndex = null;
 
-    // --- ب) ارجاع به المان‌های صفحه (DOM Elements) ---
+    // --- ۲. متغیرهای رابط کاربری (DOM Elements) ---
     const tableBody = document.getElementById('product-list');
+    const logsTableBody = document.getElementById('logs-list');
     const form = document.getElementById('add-product-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const totalValueDisplay = document.getElementById('total-value');
     const successMessage = document.getElementById('success-message');
     const confirmBox = document.getElementById('custom-confirm-box');
@@ -477,7 +593,7 @@
     const menuItems = document.querySelectorAll('.menu-item');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    // --- ج) سیستم تم شب و روز با ماندگاری در LocalStorage ---
+    // --- ۳. تم دارک‌مود با ذخیره در حافظه ---
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-mode');
@@ -487,7 +603,7 @@
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       if (document.body.classList.contains('dark-mode')) {
-        themeToggle.textContent = '☀️️';
+        themeToggle.textContent = '☀️';
         localStorage.setItem('theme', 'dark');
       } else {
         themeToggle.textContent = '🌙';
@@ -495,7 +611,7 @@
       }
     });
 
-    // --- د) کنترل منوی کشویی ---
+    // --- ۴. کنترل منوی کشویی ---
     function openMenu() {
       sideMenu.classList.add('open');
       menuOverlay.classList.add('open');
@@ -510,14 +626,12 @@
     closeMenuBtn.addEventListener('click', closeMenu);
     menuOverlay.addEventListener('click', closeMenu);
 
-    // --- ه) تعویض تب‌ها (SPA Navigation) ---
+    // --- ۵. جابه‌جایی تب‌ها (SPA Routing) ---
     menuItems.forEach(item => {
       item.addEventListener('click', () => {
-        // حذف کلاس active از همه گزینه‌ها و تب‌ها
         menuItems.forEach(i => i.classList.remove('active'));
         tabContents.forEach(tab => tab.classList.remove('active'));
 
-        // فعال‌سازی گزینه انتخاب‌شده
         item.classList.add('active');
         const targetTab = item.getAttribute('data-tab');
         const targetElement = document.getElementById(`tab-${targetTab}`);
@@ -525,28 +639,73 @@
           targetElement.classList.add('active');
         }
 
-        // تغییر عنوان داخل پرانتز در هدر
         headerSubTitle.textContent = `(${item.textContent.trim()})`;
 
-        // بروزرسانی آمار موقع ورود به تب آمار
-        if (targetTab === 'analytics') {
-          updateAnalytics();
-        }
+        if (targetTab === 'analytics') updateAnalytics();
+        if (targetTab === 'history') updateLogsTable();
 
         closeMenu();
       });
     });
 
-    // --- و) توابع رندرینگ و محاسبات ---
+    // --- ۶. سیستم ثبت و مدیریت تاریخچه رویدادها (Audit Log) ---
+    function recordLog(type, message) {
+      const now = new Date();
+      const timeString = now.toLocaleDateString('fa-IR') + ' - ' + now.toLocaleTimeString('fa-IR');
+      
+      const logEntry = {
+        id: Date.now(),
+        type: type, // 'add', 'edit', 'delete', 'system'
+        message: message,
+        time: timeString
+      };
 
-    // ۱. بروزرسانی جدول انبار و ارزش ریالی
+      logsArray.unshift(logEntry); // رویداد جدید همیشه بالای لیست می‌نشیند
+      localStorage.setItem('inventoryLogs', JSON.stringify(logsArray));
+    }
+
+    function updateLogsTable() {
+      logsTableBody.innerHTML = '';
+
+      if (logsArray.length === 0) {
+        logsTableBody.innerHTML = '<tr><td colspan="4" style="color: #64748b;">هیچ رویدادی تاکنون ثبت نشده است.</td></tr>';
+        return;
+      }
+
+      logsArray.forEach((log, index) => {
+        const row = document.createElement('tr');
+        
+        let badgeHtml = '';
+        if (log.type === 'add') badgeHtml = '<span class="badge badge-add">افزودن</span>';
+        else if (log.type === 'edit') badgeHtml = '<span class="badge badge-edit">ویرایش</span>';
+        else if (log.type === 'delete') badgeHtml = '<span class="badge badge-delete">حذف</span>';
+        else badgeHtml = '<span class="badge" style="background:#e2e8f0; color:#334155;">سیستم</span>';
+
+        row.innerHTML = `
+          <td>${(index + 1).toLocaleString('fa-IR')}</td>
+          <td>${badgeHtml}</td>
+          <td>${log.message}</td>
+          <td>${log.time}</td>
+        `;
+        logsTableBody.appendChild(row);
+      });
+    }
+
+    document.getElementById('clearLogsBtn').addEventListener('click', () => {
+      if (confirm('آیا مطمئن هستید که می‌خواهید تمام تاریخچه رویدادها را پاک کنید؟')) {
+        logsArray = [];
+        localStorage.removeItem('inventoryLogs');
+        updateLogsTable();
+      }
+    });
+
+    // --- ۷. توابع رندرینگ جدول انبار و داشبورد آمار ---
     function updateTable() {
       tableBody.innerHTML = '';
       let total = 0;
 
       productsArray.forEach((product, index) => {
-        const rowValue = Number(product.price) * Number(product.stock);
-        total += rowValue;
+        total += Number(product.price) * Number(product.stock);
 
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -554,6 +713,7 @@
           <td>${Number(product.price).toLocaleString('fa-IR')} تومان</td>
           <td>${Number(product.stock).toLocaleString('fa-IR')}</td>
           <td>
+            <button class="btn-edit" onclick="startEdit(${index})">ویرایش</button>
             <button class="btn-delete" onclick="deleteProduct(${index})">حذف</button>
           </td>
         `;
@@ -564,14 +724,12 @@
       totalValueDisplay.textContent = `ارزش کل: ${total.toLocaleString('fa-IR')} | با ۱۰٪ تخفیف: ${discountedTotal.toLocaleString('fa-IR')} تومان`;
     }
 
-    // ۲. بروزرسانی کارت‌های تب آمار و هشدارها
     function updateAnalytics() {
       const totalItemsCount = document.getElementById('totalItemsCount');
       const totalValueStat = document.getElementById('totalValueStat');
       const lowStockCount = document.getElementById('lowStockCount');
       const lowStockList = document.getElementById('lowStockList');
 
-      // تعداد تنوع کالاها
       totalItemsCount.textContent = productsArray.length.toLocaleString('fa-IR');
 
       let grandTotal = 0;
@@ -584,11 +742,9 @@
         }
       });
 
-      // درج مقادیر محاسبه‌شده
       totalValueStat.textContent = grandTotal.toLocaleString('fa-IR') + ' تومان';
       lowStockCount.textContent = lowStockItems.length.toLocaleString('fa-IR') + ' قلم';
 
-      // نمایش لیست اقلام با موجودی کم
       lowStockList.innerHTML = '';
       if (lowStockItems.length === 0) {
         lowStockList.innerHTML = '<li>تمامی اقلام موجودی کافی دارند.</li>';
@@ -601,21 +757,46 @@
       }
     }
 
-    // --- ز) مدیریت ثبت، حذف و رویدادها ---
+    // --- ۸. مدیریت ویرایش و حذف کالاها ---
+    function startEdit(index) {
+      editIndex = index;
+      const product = productsArray[index];
 
-    // ۱. کلیک روی دکمه حذف جدول
+      document.getElementById('new-name').value = product.name;
+      document.getElementById('new-price').value = product.price;
+      document.getElementById('new-stock').value = product.stock;
+
+      submitBtn.textContent = 'ثبت تغییرات';
+      submitBtn.style.background = '#0284c7';
+      cancelEditBtn.style.display = 'inline-block';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+      editIndex = null;
+      form.reset();
+      submitBtn.textContent = 'اضافه کن';
+      submitBtn.style.background = '#28a745';
+      cancelEditBtn.style.display = 'none';
+    }
+
+    cancelEditBtn.addEventListener('click', cancelEdit);
+
     function deleteProduct(index) {
       rowToDelete = index;
       confirmBox.style.display = 'block';
     }
 
-    // ۲. تایید نهایی حذف کالا
     document.getElementById('btn-yes').addEventListener('click', () => {
       if (rowToDelete !== null) {
+        const deletedItemName = productsArray[rowToDelete].name;
         productsArray.splice(rowToDelete, 1);
         localStorage.setItem('inventoryData', JSON.stringify(productsArray));
-        
-        // همگام‌سازی همزمان هر دو نما
+
+        // ثبت در لاگ
+        recordLog('delete', `محصول "${deletedItemName}" از انبار حذف گردید.`);
+
         updateTable();
         updateAnalytics();
 
@@ -624,65 +805,136 @@
       }
     });
 
-    // ۳. انصراف از حذف
     document.getElementById('btn-no').addEventListener('click', () => {
       rowToDelete = null;
       confirmBox.style.display = 'none';
     });
 
-    // ۴. ثبت کالای جدید از فرم
-   // ۴. ثبت کالای جدید از فرم با اعتبارسنجی نام تکراری
+    // --- ۹. ثبت یا ویرایش کالا ---
     form.addEventListener('submit', (event) => {
       event.preventDefault();
 
       const nameInput = document.getElementById('new-name');
       const enteredName = nameInput.value.trim();
 
-      // بررسی وجود نام تکراری در آرایه اقلام
-      const isDuplicate = productsArray.some(
-        product => product.name.trim().toLowerCase() === enteredName.toLowerCase()
-      );
+      const isDuplicate = productsArray.some((product, index) => {
+        if (editIndex !== null && index === editIndex) return false;
+        return product.name.trim().toLowerCase() === enteredName.toLowerCase();
+      });
 
       if (isDuplicate) {
-        // ۱. نمایش پیام خطا با رنگ قرمز
-        successMessage.textContent = 'خطا: محصولی با این نام در انبار وجود دارد!';
+        successMessage.textContent = 'خطا: محصول دیگری با این نام در انبار ثبت شده است!';
         successMessage.style.color = '#dc3545';
-
-        // ۲. برگرداندن نشانگر موس به فیلد نام و انتخاب متن جهت ویرایش
         nameInput.focus();
         nameInput.select();
-
-        // ۳. توقف کامل عملیات ثبت
-        setTimeout(() => {
-          successMessage.textContent = '';
-        }, 3500);
+        setTimeout(() => { successMessage.textContent = ''; }, 3500);
         return;
       }
 
-      // ساخت آبجکت محصول در صورت معتبر بودن نام
-      const newProduct = {
+      const productData = {
         name: enteredName,
         price: document.getElementById('new-price').value,
         stock: document.getElementById('new-stock').value
       };
 
-      productsArray.push(newProduct);
-      localStorage.setItem('inventoryData', JSON.stringify(productsArray));
+      if (editIndex !== null) {
+        productsArray[editIndex] = productData;
+        recordLog('edit', `اطلاعات محصول "${enteredName}" ویرایش گردید.`);
+        successMessage.textContent = 'تغییرات کالا با موفقیت ذخیره شد ✏️';
+      } else {
+        productsArray.push(productData);
+        recordLog('add', `محصول جدید "${enteredName}" با موجودی ${productData.stock} عدد افزوده شد.`);
+        successMessage.textContent = 'عملیات با موفقیت انجام شد ✅';
+      }
 
-      // به‌روزرسانی همزمان جدول و آمار
+      localStorage.setItem('inventoryData', JSON.stringify(productsArray));
       updateTable();
       updateAnalytics();
 
-      form.reset();
+      cancelEdit();
 
-      // نمایش پیام موفقیت با رنگ سبز استاندارد
-      successMessage.textContent = 'عملیات با موفقیت انجام شد ✅';
       successMessage.style.color = '#155724';
-      setTimeout(() => {
-        successMessage.textContent = '';
-      }, 3000);
+      setTimeout(() => { successMessage.textContent = ''; }, 3000);
     });
-    // --- ح) بارگذاری اولیه اطلاعات در لحظه باز شدن سایت ---
+
+    // --- ۱۰. موتور پشتیبان‌گیری و بازیابی داده‌ها ---
+
+    // دانلود فایل JSON
+    document.getElementById('downloadBackupBtn').addEventListener('click', () => {
+      const backupData = {
+        exportedAt: new Date().toISOString(),
+        products: productsArray,
+        logs: logsArray
+      };
+
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(backupData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', `inventory-backup-${new Date().toLocaleDateString('fa-IR')}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      recordLog('system', 'فایل پشتیبان کامل از انبار دانلود گردید.');
+    });
+
+    // بازگردانی اطلاعات از فایل انتخابی
+    document.getElementById('restoreBackupBtn').addEventListener('click', () => {
+      const fileInput = document.getElementById('importFileInput');
+      if (!fileInput.files.length) {
+        alert('لطفاً ابتدا یک فایل JSON پشتیبان انتخاب کنید.');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData.products)) {
+            productsArray = importedData.products;
+            logsArray = Array.isArray(importedData.logs) ? importedData.logs : [];
+
+            localStorage.setItem('inventoryData', JSON.stringify(productsArray));
+            localStorage.setItem('inventoryLogs', JSON.stringify(logsArray));
+
+            recordLog('system', 'داده‌های انبار با موفقیت از فایل پشتیبان بازگردانی شد.');
+
+            updateTable();
+            updateAnalytics();
+            updateLogsTable();
+
+            alert('اطلاعات با موفقیت بازگردانی شد ✅');
+            fileInput.value = '';
+          } else {
+            alert('قالب فایل انتخابی معتبر نیست.');
+          }
+        } catch (err) {
+          alert('خطا در خواندن محتوای فایل!');
+        }
+      };
+
+      reader.readAsText(file);
+    });
+
+    // ریست کامل انبار
+    document.getElementById('clearAllDataBtn').addEventListener('click', () => {
+      if (confirm('آیا کاملاً مطمئن هستید؟ این عمل تمامی اطلاعات انبار را پاک می‌کند و قابل بازگشت نیست!')) {
+        productsArray = [];
+        logsArray = [];
+        localStorage.removeItem('inventoryData');
+        localStorage.removeItem('inventoryLogs');
+
+        updateTable();
+        updateAnalytics();
+        updateLogsTable();
+
+        alert('انبار به طور کامل بازنشانی شد.');
+      }
+    });
+
+    // --- بارگذاری اولیه ---
     updateTable();
     updateAnalytics();
   </script>
