@@ -1,212 +1,664 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <title>انبار من</title>
-    <style>
-   /* اصلاح موقعیت دکمه: انتقال به بالا سمت چپ برای سازگاری با متون فارسی */
-.theme-btn {
-  position: fixed;
-  top: 15px;
-  left: 20px;
-  right: auto;
-  font-size: 22px;
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  cursor: pointer;
-  z-index: 1000;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سیستم انبار هوشمند</title>
+  
+  <style>
+    /* =========================================
+       ۱. استایل‌های پایه و ساختار صفحه (حالت روز)
+       ========================================= */
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      background-color: #ffffff;
+      color: #1e293b;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-  /* فرمول سنتر کردن دقیق محتوا در مرکز دایره */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  line-height: 1;
-}
+    h1 {
+      margin-top: 60px; /* ایجاد فضا برای دکمه‌های شناور بالای صفحه */
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
 
-/* استایل بدنه در حالت شب */
-body.dark-mode {
-  background-color: #121212;
-  color: #e0e0e0;
-}
+    .header-subtitle {
+      font-size: 0.65em;
+      color: #64748b;
+      font-weight: normal;
+      margin-right: 8px;
+    }
 
-/* اصلاح دکمه تم در حالت شب */
-body.dark-mode .theme-btn {
-  background-color: #2c2c2c;
-  border-color: #555;
-  color: #fff;
-}
+    /* =========================================
+       ۲. دکمه‌های شناور بالا سمت چپ (تم و منو)
+       ========================================= */
+    .theme-btn, .menu-btn {
+      position: fixed;
+      top: 15px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+      transition: all 0.2s ease;
+    }
 
-/* حل قطعی مشکل محو شدن تیترهای جدول */
-body.dark-mode th {
-  background-color: #1f2937 !important; /* سرمه‌ای تیره و شیک */
-  color: #ffffff !important;           /* متن کاملاً سفید و درخشان */
-  border: 1px solid #374151;
-}
+    .theme-btn {
+      left: 20px;
+      font-size: 22px;
+    }
 
-/* ردیف‌ها و سلول‌های داده */
-body.dark-mode td {
-  background-color: #1a1a1a;
-  color: #d1d5db;
-  border: 1px solid #374151;
-}
+    .menu-btn {
+      left: 75px;
+      font-size: 20px;
+      color: #111111;
+    }
 
-/* اینپوت‌های فرم در حالت شب */
-body.dark-mode input {
-  background-color: #242424;
-  color: #ffffff;
-  border: 1px solid #444;
-}
+    /* =========================================
+       ۳. منوی کشویی سه‌خط و لایه پس‌زمینه
+       ========================================= */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -280px; /* پنهان در لبه بیرونی راست */
+      width: 260px;
+      height: 100%;
+      background-color: #ffffff;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+      transition: right 0.3s ease;
+      z-index: 2000;
+      padding: 20px;
+      box-sizing: border-box;
+    }
 
-/* کادر تایید حذف در حالت شب */
-body.dark-mode #confirmBox {
-  background-color: #242424;
-  color: #ffffff;
-  border: 1px solid #444;
-}   
-        body { font-family: sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-        th { background-color: #f4f4f4; }
-        .form-container { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
-        input { padding: 8px; margin-left: 10px; }
-        button { padding: 8px 15px; background: #28a745; color: white; border: none; cursor: pointer; }
-        .total-box { font-size: 18px; font-weight: bold; color: #0056b3; margin-top: 20px; }
-        
-        /* استایل جدید برای زیباسازی پیام موفقیت */
-        #success-message { color: #155724; font-weight: bold; margin-top: 15px; height: 20px; }
-    </style>
+    .side-menu.open {
+      right: 0; /* باز شدن کشویی منو */
+    }
+
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 1500;
+    }
+
+    .menu-overlay.open {
+      display: block;
+    }
+
+    .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .menu-item {
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background-color: #f0f3f8;
+      font-weight: bold;
+    }
+
+    /* =========================================
+       ۴. کنترل نمایش تب‌ها (معماری SPA)
+       ========================================= */
+    .tab-content {
+      display: none; /* تمام تب‌ها در ابتدا مخفی هستند */
+    }
+
+    .tab-content.active {
+      display: block; /* فقط تب فعال نمایش داده می‌شود */
+    }
+
+    /* =========================================
+       ۵. عناصر تب مدیریت انبار (فرم و جدول)
+       ========================================= */
+    .form-container {
+      background: #f9f9f9;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    input {
+      padding: 8px 12px;
+      margin-left: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button.btn-primary {
+      padding: 8px 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #success-message {
+      color: #155724;
+      font-weight: bold;
+      margin-top: 15px;
+      height: 20px;
+    }
+
+    .total-box {
+      font-size: 18px;
+      font-weight: bold;
+      color: #0056b3;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* باکس تایید اختصاصی */
+    #custom-confirm-box {
+      display: none;
+      background: #fff3cd;
+      padding: 15px;
+      margin-top: 15px;
+      border: 1px solid #ffeeba;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    /* =========================================
+       ۶. عناصر تب آمار و تحلیل
+       ========================================= */
+    .stats-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 200px;
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #64748b;
+    }
+
+    .stat-card p {
+      margin: 0;
+      font-size: 26px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    .stat-card.alert {
+      border-color: #fecaca;
+      background-color: #fff1f2;
+    }
+
+    .stat-card.alert p {
+      color: #e11d48;
+    }
+
+    .low-stock-box {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* =========================================
+       ۷. بازنویسی استایل‌ها در حالت شب (Dark Mode)
+       ========================================= */
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .theme-btn,
+    body.dark-mode .menu-btn {
+      background-color: #2c2c2c;
+      border-color: #555;
+      color: #fff;
+    }
+
+    body.dark-mode .side-menu {
+      background-color: #1e1e1e;
+      color: #fff;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.6);
+    }
+
+    body.dark-mode .menu-header {
+      border-bottom-color: #333;
+    }
+
+    body.dark-mode .close-btn {
+      color: #fff;
+    }
+
+    body.dark-mode .menu-item:hover, 
+    body.dark-mode .menu-item.active {
+      background-color: #2d3748;
+    }
+
+    body.dark-mode .header-subtitle {
+      color: #94a3b8;
+    }
+
+    body.dark-mode .form-container {
+      background: #1e1e1e;
+      border-color: #333;
+    }
+
+    body.dark-mode input {
+      background-color: #242424;
+      color: #ffffff;
+      border: 1px solid #444;
+    }
+
+    body.dark-mode th {
+      background-color: #1f2937 !important;
+      color: #ffffff !important;
+      border: 1px solid #374151;
+    }
+
+    body.dark-mode td {
+      background-color: #1a1a1a;
+      color: #d1d5db;
+      border: 1px solid #374151;
+    }
+
+    body.dark-mode .total-box {
+      color: #60a5fa;
+    }
+
+    body.dark-mode #custom-confirm-box {
+      background-color: #242424;
+      color: #ffffff;
+      border: 1px solid #444;
+    }
+
+    body.dark-mode .stat-card,
+    body.dark-mode .low-stock-box {
+      background-color: #1e293b;
+      border-color: #334155;
+    }
+
+    body.dark-mode .stat-card h3 {
+      color: #94a3b8;
+    }
+
+    body.dark-mode .stat-card p {
+      color: #f8fafc;
+    }
+
+    body.dark-mode .stat-card.alert {
+      background-color: #451a1a;
+      border-color: #7f1d1d;
+    }
+
+    body.dark-mode .stat-card.alert p {
+      color: #f87171;
+    }
+  </style>
 </head>
 <body>
-    <button id="themeToggle" class="theme-btn">🌙</button>
-    <h1>سیستم انبار هوشمند</h1>
 
+  <!-- دکمه‌های کنترل بالا سمت چپ -->
+  <button id="themeToggle" class="theme-btn">🌙</button>
+  <button id="menuToggle" class="menu-btn">☰</button>
+
+  <!-- پرده تاریک و منوی کشویی کناری -->
+  <div id="menuOverlay" class="menu-overlay"></div>
+  <nav id="sideMenu" class="side-menu">
+    <div class="menu-header">
+      <h3>منوی سیستم</h3>
+      <button id="closeMenuBtn" class="close-btn">&times;</button>
+    </div>
+    <ul class="menu-items">
+      <li class="menu-item active" data-tab="inventory">📦 مدیریت انبار</li>
+      <li class="menu-item" data-tab="analytics">📊 آمار و تحلیل</li>
+      <li class="menu-item" data-tab="history">🕒 تاریخچه رویدادها</li>
+      <li class="menu-item" data-tab="backup">💾 پشتیبان‌گیری و داده‌ها</li>
+    </ul>
+  </nav>
+
+  <!-- عنوان اصلی به همراه نام پویای تب فعلی -->
+  <h1>سیستم انبار هوشمند <span id="headerSubTitle" class="header-subtitle">(📦 مدیریت انبار)</span></h1>
+
+  <!-- ====================================================
+       تب شماره ۱: مدیریت انبار (شامل فرم، جدول و تاییدیه)
+       ==================================================== -->
+  <div id="tab-inventory" class="tab-content active">
     <div class="form-container">
-        <form id="add-product-form">
-            <input type="text" id="new-name" placeholder="نام محصول" required>
-            <input type="number" id="new-price" placeholder="قیمت" required>
-            <input type="number" id="new-stock" placeholder="موجودی" required>
-            <button type="submit">اضافه کن</button>
-        </form>
-        
-        <!-- جعبه خالی که پیام موفقیت اینجا ظاهر میشه -->
-        <div id="success-message"></div>
+      <form id="add-product-form">
+        <input type="text" id="new-name" placeholder="نام محصول" required>
+        <input type="number" id="new-price" placeholder="قیمت (تومان)" required>
+        <input type="number" id="new-stock" placeholder="موجودی" required>
+        <button type="submit" class="btn-primary">اضافه کن</button>
+      </form>
+      <div id="success-message"></div>
     </div>
 
     <div class="total-box" id="total-value">ارزش کل انبار: ۰ تومان</div>
 
     <table>
-        <thead>
-            <tr>
-                <th>نام محصول</th>
-                <th>قیمت</th>
-                <th>موجودی</th>
-                <th>عملیات</th>
-            </tr>
-        </thead>
-        <tbody id="product-list"></tbody>
+      <thead>
+        <tr>
+          <th>نام محصول</th>
+          <th>قیمت</th>
+          <th>موجودی</th>
+          <th>عملیات</th>
+        </tr>
+      </thead>
+      <tbody id="product-list"></tbody>
     </table>
-    <!-- جعبه تایید حذف که در حالت عادی مخفی است (display: none) -->
-    <div id="custom-confirm-box" style="display: none; background: #fff3cd; padding: 15px; margin-top: 15px; border: 1px solid #ffeeba; text-align: center;">
-        <p style="color: #856404; font-weight: bold;">آیا از حذف این محصول مطمئن هستید؟</p>
-        <button id="btn-yes" style="background: red; color: white;">بله، حذف کن</button>
-        <button id="btn-no" style="background: gray; color: white;">خیر، پشیمون شدم</button>
+
+    <div id="custom-confirm-box">
+      <p style="color: #b45309; font-weight: bold; margin-bottom: 10px;">آیا از حذف این محصول مطمئن هستید؟</p>
+      <button id="btn-yes" class="btn-delete" style="margin-left: 10px;">بله، حذف کن</button>
+      <button id="btn-no" style="padding: 5px 12px; background: gray; color: white; border: none; border-radius: 4px; cursor: pointer;">انصراف</button>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       تب شماره ۲: داشبورد آمار و تحلیل
+       ==================================================== -->
+  <div id="tab-analytics" class="tab-content">
+    <h2>داشبورد تحلیل انبار</h2>
+    
+    <div class="stats-container">
+      <div class="stat-card">
+        <h3>تنوع اقلام</h3>
+        <p id="totalItemsCount">۰</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>ارزش کل موجودی</h3>
+        <p id="totalValueStat">۰ تومان</p>
+      </div>
+
+      <div class="stat-card alert">
+        <h3>هشدار موجودی اندک</h3>
+        <p id="lowStockCount">۰ قلم</p>
+      </div>
     </div>
 
-    <script>
-        const tableBody = document.getElementById('product-list');
-        const form = document.getElementById('add-product-form');
-        const totalValueDisplay = document.getElementById('total-value');
+    <div class="low-stock-box">
+      <h4>لیست کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4>
+      <ul id="lowStockList"></ul>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       موتور منطقی برنامه (JavaScript)
+       ==================================================== -->
+  <script>
+    // --- الف) وضعیت و داده‌های اصلی ---
+    let productsArray = JSON.parse(localStorage.getItem('inventoryData')) || [];
+    let rowToDelete = null; // نگهداری شماره ردیف انتخابی برای حذف
+
+    // --- ب) ارجاع به المان‌های صفحه (DOM Elements) ---
+    const tableBody = document.getElementById('product-list');
+    const form = document.getElementById('add-product-form');
+    const totalValueDisplay = document.getElementById('total-value');
+    const successMessage = document.getElementById('success-message');
+    const confirmBox = document.getElementById('custom-confirm-box');
+    const headerSubTitle = document.getElementById('headerSubTitle');
+    const themeToggle = document.getElementById('themeToggle');
+    const menuToggle = document.getElementById('menuToggle');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    const sideMenu = document.getElementById('sideMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const menuItems = document.querySelectorAll('.menu-item');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // --- ج) سیستم تم شب و روز با ماندگاری در LocalStorage ---
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeToggle.textContent = '☀️';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      if (document.body.classList.contains('dark-mode')) {
+        themeToggle.textContent = '☀️️';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        themeToggle.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+      }
+    });
+
+    // --- د) کنترل منوی کشویی ---
+    function openMenu() {
+      sideMenu.classList.add('open');
+      menuOverlay.classList.add('open');
+    }
+
+    function closeMenu() {
+      sideMenu.classList.remove('open');
+      menuOverlay.classList.remove('open');
+    }
+
+    menuToggle.addEventListener('click', openMenu);
+    closeMenuBtn.addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('click', closeMenu);
+
+    // --- ه) تعویض تب‌ها (SPA Navigation) ---
+    menuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        // حذف کلاس active از همه گزینه‌ها و تب‌ها
+        menuItems.forEach(i => i.classList.remove('active'));
+        tabContents.forEach(tab => tab.classList.remove('active'));
+
+        // فعال‌سازی گزینه انتخاب‌شده
+        item.classList.add('active');
+        const targetTab = item.getAttribute('data-tab');
+        const targetElement = document.getElementById(`tab-${targetTab}`);
+        if (targetElement) {
+          targetElement.classList.add('active');
+        }
+
+        // تغییر عنوان داخل پرانتز در هدر
+        headerSubTitle.textContent = `(${item.textContent.trim()})`;
+
+        // بروزرسانی آمار موقع ورود به تب آمار
+        if (targetTab === 'analytics') {
+          updateAnalytics();
+        }
+
+        closeMenu();
+      });
+    });
+
+    // --- و) توابع رندرینگ و محاسبات ---
+
+    // ۱. بروزرسانی جدول انبار و ارزش ریالی
+    function updateTable() {
+      tableBody.innerHTML = '';
+      let total = 0;
+
+      productsArray.forEach((product, index) => {
+        const rowValue = Number(product.price) * Number(product.stock);
+        total += rowValue;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${product.name}</td>
+          <td>${Number(product.price).toLocaleString('fa-IR')} تومان</td>
+          <td>${Number(product.stock).toLocaleString('fa-IR')}</td>
+          <td>
+            <button class="btn-delete" onclick="deleteProduct(${index})">حذف</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      const discountedTotal = total * 0.9;
+      totalValueDisplay.textContent = `ارزش کل: ${total.toLocaleString('fa-IR')} | با ۱۰٪ تخفیف: ${discountedTotal.toLocaleString('fa-IR')} تومان`;
+    }
+
+    // ۲. بروزرسانی کارت‌های تب آمار و هشدارها
+    function updateAnalytics() {
+      const totalItemsCount = document.getElementById('totalItemsCount');
+      const totalValueStat = document.getElementById('totalValueStat');
+      const lowStockCount = document.getElementById('lowStockCount');
+      const lowStockList = document.getElementById('lowStockList');
+
+      // تعداد تنوع کالاها
+      totalItemsCount.textContent = productsArray.length.toLocaleString('fa-IR');
+
+      let grandTotal = 0;
+      let lowStockItems = [];
+
+      productsArray.forEach(product => {
+        grandTotal += Number(product.price) * Number(product.stock);
+        if (Number(product.stock) < 5) {
+          lowStockItems.push(product);
+        }
+      });
+
+      // درج مقادیر محاسبه‌شده
+      totalValueStat.textContent = grandTotal.toLocaleString('fa-IR') + ' تومان';
+      lowStockCount.textContent = lowStockItems.length.toLocaleString('fa-IR') + ' قلم';
+
+      // نمایش لیست اقلام با موجودی کم
+      lowStockList.innerHTML = '';
+      if (lowStockItems.length === 0) {
+        lowStockList.innerHTML = '<li>تمامی اقلام موجودی کافی دارند.</li>';
+      } else {
+        lowStockItems.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = `${item.name} — موجودی: ${Number(item.stock).toLocaleString('fa-IR')} عدد`;
+          lowStockList.appendChild(li);
+        });
+      }
+    }
+
+    // --- ز) مدیریت ثبت، حذف و رویدادها ---
+
+    // ۱. کلیک روی دکمه حذف جدول
+    function deleteProduct(index) {
+      rowToDelete = index;
+      confirmBox.style.display = 'block';
+    }
+
+    // ۲. تایید نهایی حذف کالا
+    document.getElementById('btn-yes').addEventListener('click', () => {
+      if (rowToDelete !== null) {
+        productsArray.splice(rowToDelete, 1);
+        localStorage.setItem('inventoryData', JSON.stringify(productsArray));
         
-        // معرفی جعبه پیام به جاوا اسکریپت
-        const successMessage = document.getElementById('success-message'); 
-        const confirmBox = document.getElementById('custom-confirm-box'); // پیدا کردن جعبه جدیدمون
-        let rowToDelete = null; // یک ظرف خالی برای اینکه شماره ردیفِ کلیک‌شده رو موقتاً توش نگه داریم
-
-        let productsArray = JSON.parse(localStorage.getItem('inventoryData')) || [];
-
-        function updateTable() {
-            tableBody.innerHTML = ''; 
-            let total = 0;
-
-            productsArray.forEach((product, index) => {
-                total = total + Number(product.price) * Number(product.stock);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${product.name}</td>
-                    <td>${product.price}</td>
-                    <td>${product.stock}</td>
-                    <td>
-                        <button onclick="deleteProduct(${index})" style="background: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">حذف</button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            let discountedTotal = total * 0.9;
-            totalValueDisplay.textContent = `ارزش کل: ${total} | با ۱۰٪ تخفیف: ${discountedTotal} تومان`;
-        }
-
-       // ۱. وقتی دکمه قرمزِ توی جدول کلیک میشه، دیگه مستقیم پاک نمی‌کنیم
-        function deleteProduct(index) {
-            rowToDelete = index; // شماره ردیفی که کلیک شده رو میندازیم تو ظرف خالیمون
-            confirmBox.style.display = 'block'; // جعبه اخطار رو از حالت مخفی درمیاریم و نمایش میدیم
-        }
-
-        // ۲. منطقِ دکمه "بله، حذف کن"
-        document.getElementById('btn-yes').addEventListener('click', function() {
-            productsArray.splice(rowToDelete, 1); // حالا همون شماره رو از حافظه می‌خونیم و قیچی می‌کنیم
-            localStorage.setItem('inventoryData', JSON.stringify(productsArray)); // دفترچه رو آپدیت می‌کنیم
-            updateTable(); // جدول رو از نو رسم می‌کنیم
-            confirmBox.style.display = 'none'; // جعبه اخطار رو دوباره قایم می‌کنیم
-        });
-
-        // ۳. منطقِ دکمه "خیر، پشیمون شدم"
-        document.getElementById('btn-no').addEventListener('click', function() {
-            rowToDelete = null; // شماره رو از ظرفمون دور می‌ریزیم
-            confirmBox.style.display = 'none'; // فقط جعبه رو قایم می‌کنیم (بدون هیچ تغییری در جدول)
-        });
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            const newProduct = {
-                name: document.getElementById('new-name').value,
-                price: document.getElementById('new-price').value,
-                stock: document.getElementById('new-stock').value
-            };
-            
-            productsArray.push(newProduct);
-            localStorage.setItem('inventoryData', JSON.stringify(productsArray));
-            updateTable();
-            form.reset();
-
-            // --- کدهای اضافه شده برای نمایش پیام تایید ---
-            // ۱. نوشتن متن داخل جعبه
-            successMessage.textContent = "عملیات با موفقیت انجام شد ✅"; 
-            
-            // ۲. تنظیم تایمر برای پاک کردن متن
-            setTimeout(() => {
-                successMessage.textContent = ""; // بعد از اتمام زمان، متن رو خالی کن
-            }, 3000); 
-            // --------------------------------------------
-        });
-
+        // همگام‌سازی همزمان هر دو نما
         updateTable();
-        const themeToggle = document.getElementById('themeToggle');
+        updateAnalytics();
 
-themeToggle.addEventListener('click', () => {
-  // روشن یا خاموش کردن کلاس دارک‌مود روی کل صفحه
-  document.body.classList.toggle('dark-mode');
+        rowToDelete = null;
+        confirmBox.style.display = 'none';
+      }
+    });
 
-  // تغییر آیکون بین ماه و خورشید
-  if (document.body.classList.contains('dark-mode')) {
-    themeToggle.textContent = '☀️';
-  } else {
-    themeToggle.textContent = '🌙';
-  }
-});
-    </script>
+    // ۳. انصراف از حذف
+    document.getElementById('btn-no').addEventListener('click', () => {
+      rowToDelete = null;
+      confirmBox.style.display = 'none';
+    });
+
+    // ۴. ثبت کالای جدید از فرم
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const newProduct = {
+        name: document.getElementById('new-name').value.trim(),
+        price: document.getElementById('new-price').value,
+        stock: document.getElementById('new-stock').value
+      };
+
+      productsArray.push(newProduct);
+      localStorage.setItem('inventoryData', JSON.stringify(productsArray));
+
+      // کلید حل مشکل: فراخوانی همزمان هر دو موتور رندر
+      updateTable();
+      updateAnalytics();
+
+      form.reset();
+
+      // پیام بازخورد زمان‌دار
+      successMessage.textContent = 'عملیات با موفقیت انجام شد ✅';
+      setTimeout(() => {
+        successMessage.textContent = '';
+      }, 3000);
+    });
+
+    // --- ح) بارگذاری اولیه اطلاعات در لحظه باز شدن سایت ---
+    updateTable();
+    updateAnalytics();
+  </script>
 </body>
 </html>
