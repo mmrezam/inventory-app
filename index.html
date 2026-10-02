@@ -69,7 +69,7 @@
     gap: 12px;
     align-items: center;
   }
-  input[type=text], input[type=number], select {
+  input[type=text], input[type=number], select, textarea {
     width: 100%; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
     font: inherit; font-size: 14px; background: var(--input); color: var(--text); outline: none;
   }
@@ -160,14 +160,14 @@
   .badge.delete { background: var(--danger); } .badge.system { background: var(--muted); }
   .badge.sale { background: var(--orange); }
 
-  /* پنجره‌های مدال ورود و سبد خرید */
+  /* پنجره‌های مدال */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 2500;
     display: flex; align-items: center; justify-content: center; padding: 15px;
   }
   .modal-box {
     background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    width: 100%; max-width: 440px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    width: 100%; max-width: 460px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.3);
   }
   .modal-box h3 { margin: 0 0 15px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
   .quick-accounts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
@@ -209,13 +209,20 @@
   .calc-keys .op { background: #fb923c; color: #fff; border-color: #fb923c; }
   .calc-keys .eq { background: var(--ok); color: #fff; border-color: var(--ok); }
 
+  /* گرید و کارت‌های فروشگاه‌ها */
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+  .shop-card { text-align: right; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; }
+  .shop-card:hover { border-color: var(--accent); }
+  .shop-card b { display: block; font-size: 16px; margin-bottom: 6px; color: var(--accent); }
+  .shop-card span { font-size: 12.5px; color: var(--muted); }
+
   /* موبایل و تبلت */
   @media (max-width: 768px) {
     body { padding: 12px; }
     h1 { font-size: 20px; margin: 42px 0 16px; }
     h1 small { display: block; margin: 4px 0 0 0; }
 
-    input[type=text], input[type=number], select { font-size: 16px; padding: 10px; }
+    input[type=text], input[type=number], select, textarea { font-size: 16px; padding: 10px; }
 
     .form-grid { grid-template-columns: 1fr; gap: 10px; }
     .form-actions button { flex: 1; padding: 12px; font-size: 15px; }
@@ -279,6 +286,7 @@
 <nav id="sideMenu" class="side-menu">
   <div class="menu-head"><h3>منوی سامانه</h3><button id="closeMenu">&times;</button></div>
   <ul style="padding:0;margin-top:20px">
+    <li class="menu-item" data-tab="shops">🏬 فروشگاه‌ها</li>
     <li class="menu-item active" data-tab="inventory">📦 مدیریت انبار</li>
     <li class="menu-item" data-tab="analytics">📊 آمار و تحلیل</li>
     <li class="menu-item" data-tab="history">🕒 تاریخچه رویدادها</li>
@@ -289,7 +297,7 @@
 <div class="container">
   <h1>سیستم انبار هوشمند <small id="subtitle">(📦 مدیریت انبار)</small></h1>
 
-  <!-- کارت مشخصات کاربر فعال و دکمه سبد خرید برای خریدار -->
+  <!-- کارت مشخصات کاربر فعال -->
   <div class="user-profile-bar">
     <div class="user-info">
       <span id="userGreeting">👤 سلام</span>
@@ -300,11 +308,24 @@
         🛒 سبد خرید (<span id="cartCount">۰</span>)
       </button>
       <button id="openAuthModal" class="info" style="padding:6px 12px;font-size:12.5px">تغییر حساب / ثبت‌نام</button>
+      <button id="customerLogoutBtn" class="danger" style="padding:6px 12px;font-size:12.5px" hidden>خروج از حساب</button>
     </div>
   </div>
 
+  <!-- تب فروشگاه‌ها (ویژه خریدار) -->
+  <section id="tab-shops" class="tab">
+    <h2>🏬 فروشگاه‌ها</h2>
+    <div id="shopGrid" class="shop-grid"></div>
+  </section>
+
   <!-- تب ۱: انبار / کاتالوگ -->
   <section id="tab-inventory" class="tab active">
+    <!-- نوار بازگشت به فروشگاه‌ها هنگام فیلتر یک فروشگاه -->
+    <div id="shopBar" class="user-profile-bar" hidden>
+      <b id="shopBarName"></b>
+      <button id="backToShops" class="gray" style="padding:6px 12px;font-size:12.5px">← همه فروشگاه‌ها</button>
+    </div>
+
     <div class="card" id="formCard">
       <form id="productForm" class="form-grid" novalidate>
         <input type="text" id="fName" placeholder="نام محصول">
@@ -363,15 +384,15 @@
     <div class="card box"><h4>کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4><ul id="lowList" style="padding-right:20px;line-height:1.8"></ul></div>
   </section>
 
-  <!-- تب ۳: تاریخچه -->
+  <!-- تب ۳: تاریخچه (برای خریدار = سفارش‌های من) -->
   <section id="tab-history" class="tab">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <h2>تاریخچه رویدادهای سیستم</h2>
+      <h2 id="historyTabTitle">تاریخچه رویدادهای سیستم</h2>
       <button id="clearLogs" class="gray">پاک‌سازی تاریخچه</button>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>ردیف</th><th>نوع عملیات</th><th>شرح رویداد</th><th>زمان ثبت</th></tr></thead>
+        <thead id="historyHead"><tr><th>ردیف</th><th>نوع عملیات</th><th>شرح رویداد</th><th>زمان ثبت</th></tr></thead>
         <tbody id="logList"></tbody>
       </table>
     </div>
@@ -414,18 +435,37 @@
       <button id="closeAuthModal" class="gray" style="padding:2px 8px;font-size:18px">&times;</button>
     </div>
 
-    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">ورود سریع به حساب‌های نمونه:</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">ورود سریع به حساب‌های نمونه (مدیران و فروشندگان):</div>
     <div id="quickAccountsList" class="quick-accounts"></div>
 
+    <!-- ورود اختصاصی خریدار با شماره اشتراک ۵ رقمی -->
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:10px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:bold;margin-bottom:8px">🔑 ورود خریدار با شماره اشتراک:</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="loginSub" placeholder="شماره اشتراک ۵ رقمی" maxlength="5" inputmode="numeric">
+        <button type="button" id="loginSubBtn" class="info">ورود</button>
+      </div>
+    </div>
+
+    <!-- ثبت‌نام حساب جدید -->
     <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:10px">
       <div style="font-size:13px;font-weight:bold;margin-bottom:10px">✨ ثبت‌نام یا ساخت حساب جدید:</div>
       <form id="signupForm" style="display:flex;flex-direction:column;gap:8px" novalidate>
-        <input type="text" id="regName" placeholder="نام و نام خانوادگی" required>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <input type="text" id="regFirst" placeholder="نام">
+          <input type="text" id="regLast" placeholder="نام خانوادگی">
+        </div>
         <select id="regRole">
-          <option value="seller">فروشنده (مدیریت فروشگاه اختصاصی)</option>
           <option value="customer">خریدار (مشاهده و خرید کالاها)</option>
+          <option value="seller">فروشنده (مدیریت فروشگاه اختصاصی)</option>
         </select>
-        <input type="text" id="regShop" placeholder="نام فروشگاه شما (مثلاً: سوپرمارکت امید)">
+        <input type="text" id="regShop" placeholder="نام فروشگاه شما (مثلاً: سوپرمارکت امید)" style="display:none">
+        
+        <div id="customerSignupFields" style="display:flex;flex-direction:column;gap:8px">
+          <input type="text" id="regPhone" placeholder="شماره تماس همراه (مثلاً: ۰۹۱۲۳۴۵۶۷۸۹)">
+          <input type="text" id="regAddress" placeholder="شهر و آدرس دقیق محل سکونت">
+        </div>
+
         <button type="submit" class="ok" style="margin-top:4px">ثبت و ورود به حساب</button>
       </form>
     </div>
@@ -440,9 +480,18 @@
       <button id="closeCartModal" class="gray" style="padding:2px 8px;font-size:18px">&times;</button>
     </div>
 
-    <div id="cartItemsList" style="max-height:300px;overflow-y:auto;margin-bottom:15px;padding-left:4px"></div>
+    <div id="cartItemsList" style="max-height:240px;overflow-y:auto;margin-bottom:12px;padding-left:4px"></div>
 
-    <div id="cartSummary" style="border-top:1px solid var(--border);padding-top:12px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:14.5px">
+    <div style="background:var(--head);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px">
+      <div style="font-weight:bold;margin-bottom:8px">📍 اطلاعات گیرنده و آدرس تحویل:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+        <input type="text" id="orderBuyerName" placeholder="نام و نام خانوادگی">
+        <input type="text" id="orderBuyerPhone" placeholder="شماره تماس (الزامی)">
+      </div>
+      <input type="text" id="orderBuyerAddress" placeholder="آدرس دقیق و کامل پستی برای ارسال">
+    </div>
+
+    <div id="cartSummary" style="border-top:1px solid var(--border);padding-top:10px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:14.5px">
       <span>مبلغ قابل پرداخت:</span>
       <span id="cartTotalPrice" style="color:var(--accent);font-size:16.5px">۰ تومان</span>
     </div>
@@ -454,11 +503,20 @@
   </div>
 </div>
 
+<!-- پنجره مدال شبیه‌ساز پیامک دریافتی خریدار -->
+<div id="smsModal" class="modal-overlay" hidden>
+  <div class="modal-box" style="max-width:380px;text-align:center">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📱 پیامک دریافتی</div>
+    <div id="smsText" style="background:var(--head);border:1px solid var(--border);border-radius:12px;padding:14px;line-height:2;font-size:14px;white-space:pre-line"></div>
+    <button id="smsOk" class="ok" style="margin-top:14px;width:100%">متوجه شدم، ادامه</button>
+  </div>
+</div>
+
 <script>
 /* ============ دسته‌بندی‌ها ============ */
 const UNCAT = 'بدون دسته';
 const CATEGORIES = {
-  'مواد غذایی و خوراکی': ['لبنیات و تخم‌مرغ', 'خواربار و اساسی', 'فرآورده‌های پروتئینی', 'نوشیدنی‌ها', 'تنقلات و شیرینی‌جات',
+  'مواد غذایی و خوراکی': ['لبنیات و تخم‌مرغ', 'خواربار و اساسی', 'فرآورده‌های پروتئینی', 'نوشیدنی‌ها', 'تنقلات و شیرینی‌‌جات',
     'صبحانه و نوشیدنی‌های گرم', 'کنسرو و غذاهای آماده', 'سس و چاشنی‌ها', 'نان و فرآورده‌های آردی'],
   'آرایشی، بهداشتی و سلولزی': ['محصولات سلولزی', 'بهداشت فردی و حمام', 'بهداشت دهان و دندان', 'مراقبت از پوست و مو'],
   'شوینده و نظافت منزل': ['شستشوی ظروف', 'شستشوی البسه', 'سطوح و ضدعفونی‌کننده‌ها', 'ملزومات مصرفی خانه'],
@@ -482,15 +540,25 @@ const options = (list, selected) =>
 
 /* ============ سیستم کاربران و احراز هویت ============ */
 const DEFAULT_USERS = [
-  { id: 'u_admin', name: 'مدیر ارشد', role: 'admin', shop: 'دفتر مرکزی' },
-  { id: 'u_s1', name: 'علی رضایی', role: 'seller', shop: 'سوپرمارکت امید' },
-  { id: 'u_s2', name: 'رضا حسینی', role: 'seller', shop: 'هایپرمارکت نگین' },
-  { id: 'u_c1', name: 'سارا محمدی', role: 'customer', shop: '' }
+  { id: 'u_admin', name: 'مدیر ارشد', role: 'admin', shop: 'دفتر مرکزی', phone: '۰۲۱۸۸۸۸۸۸۸', address: 'تهران، دفتر مرکزی' },
+  { id: 'u_s1', name: 'علی رضایی', role: 'seller', shop: 'سوپرمارکت امید', phone: '۰۹۱۲۱۱۱۱۱۱۱', address: 'تهران، خیابان آزادی' },
+  { id: 'u_s2', name: 'رضا حسینی', role: 'seller', shop: 'هایپرمارکت نگین', phone: '۰۹۱۲۲۲۲۲۲۲۲', address: 'تهران، میدان ونک' },
+  { id: 'u_c1', name: 'سارا محمدی', firstName: 'سارا', lastName: 'محمدی', role: 'customer', shop: '', phone: '09351234567', address: 'تهران، سعادت‌آباد، خیابان سرو شرقی، پلاک ۱۲', subscriptionNo: '12345' }
 ];
 
 let users = load('inventoryUsers', DEFAULT_USERS);
-let currentUser = load('currentAuthUser', users[0]);
-if (!users.some(u => u.id === currentUser.id)) currentUser = users[0];
+const faDigits = s => String(s).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+const faRaw = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+function newSubscriptionNo() {
+  let n;
+  do { n = String(10000 + Math.floor(Math.random() * 90000)); } while (users.some(u => u.subscriptionNo === n));
+  return n;
+}
+
+users.forEach(u => { if (u.role === 'customer' && !u.subscriptionNo) u.subscriptionNo = newSubscriptionNo(); });
+const savedId = (load('currentAuthUser', null) || {}).id;
+let currentUser = users.find(u => u.id === savedId) || users[0];
 
 const isAdmin = () => currentUser.role === 'admin';
 const isSeller = () => currentUser.role === 'seller';
@@ -521,7 +589,7 @@ const normalize = list => list.map((p, i) => ({
 let products = normalize(load('inventoryData', []));
 let logs = load('inventoryLogs', []);
 
-/* سبد خرید مجزا برای هر کاربر */
+/* سبد خرید مجزا برای هر حساب خریدار */
 let carts = load('customerCarts', {});
 let cart = carts[currentUser.id] || [];
 
@@ -538,8 +606,17 @@ const save = () => {
   localStorage.setItem('customerCarts', JSON.stringify(carts));
 };
 
-function log(type, message, shop = '') {
-  logs.unshift({ id: Date.now() + Math.random(), type, message, time: new Date().toLocaleString('fa-IR'), by: currentUser.name, shop });
+function log(type, message, shop = '', buyerInfo = null) {
+  logs.unshift({
+    id: Date.now() + Math.random(),
+    type,
+    message,
+    time: new Date().toLocaleString('fa-IR'),
+    by: currentUser.name,
+    uid: currentUser.id,
+    shop,
+    buyerInfo
+  });
   save();
 }
 
@@ -551,7 +628,7 @@ function toast(text, color = 'var(--ok)') {
   toastTimer = setTimeout(() => el.hidden = true, 3000);
 }
 
-/* ============ مدیریت سبد خرید خریدار ============ */
+/* ============ مدیریت سبد خرید و شمارنده در کاتالوگ ============ */
 const cartQty = id => (cart.find(x => x.id === id) || {}).qty || 0;
 
 function cartCell(p) {
@@ -600,7 +677,7 @@ function renderCartModal() {
   cart = cart.filter(i => find(i.id));
   const listEl = $('#cartItemsList');
   if (!cart.length) {
-    listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:25px 0;">سبد خرید شما در حال حاضر خالی است.</div>';
+    listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px 0;">سبد خرید شما در حال حاضر خالی است.</div>';
     $('#cartTotalPrice').textContent = '۰ تومان';
     return;
   }
@@ -610,9 +687,9 @@ function renderCartModal() {
     const cur = find(item.id), price = cur ? cur.price : item.price, itemSubtotal = price * item.qty;
     grandTotal += itemSubtotal;
     return `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);gap:10px">
         <div style="flex:1">
-          <div style="font-weight:bold;font-size:13.5px">${esc(item.name)}</div>
+          <div style="font-weight:bold;font-size:13px">${esc(item.name)}</div>
           <div style="font-size:11.5px;color:var(--muted)">${esc(item.shop)} | هر عدد: ${fa(price)} ت</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
@@ -659,6 +736,9 @@ window.removeCartItem = function(id) {
 
 $('#openCartBtn').onclick = () => {
   renderCartModal();
+  $('#orderBuyerName').value = currentUser.name || '';
+  $('#orderBuyerPhone').value = currentUser.phone || '';
+  $('#orderBuyerAddress').value = currentUser.address || '';
   $('#cartModal').hidden = false;
 };
 $('#closeCartModal').onclick = () => { $('#cartModal').hidden = true; };
@@ -673,10 +753,21 @@ $('#clearCartBtn').onclick = () => {
   render();
 };
 
-// ثبت نهایی سفارش، کسر موجودی و ثبت لاگ فروش برای هر فروشگاه جداگانه
+// ثبت نهایی سفارش همراه با ذخیره مشخصات تحویل
 $('#checkoutBtn').onclick = () => {
   cart = cart.filter(i => find(i.id));
   if (!cart.length) return toast('سبد خرید شما خالی است!', 'var(--danger)');
+
+  const buyerName = $('#orderBuyerName').value.trim();
+  const buyerPhone = $('#orderBuyerPhone').value.trim();
+  const buyerAddress = $('#orderBuyerAddress').value.trim();
+
+  if (!buyerName || !buyerPhone || !buyerAddress) {
+    return alert('لطفاً مشخصات تحویل (نام، شماره تماس و آدرس پستی) را کامل وارد کنید تا سفارش ثبت شود.');
+  }
+
+  currentUser.phone = buyerPhone;
+  currentUser.address = buyerAddress;
 
   for (const item of cart) {
     const prod = find(item.id);
@@ -691,14 +782,23 @@ $('#checkoutBtn').onclick = () => {
     prod.stock -= item.qty;
     (byShop[prod.shop] = byShop[prod.shop] || []).push(`${prod.name} × ${fa(item.qty)} (${fa(prod.price * item.qty)} تومان)`);
   });
-  Object.entries(byShop).forEach(([shop, items]) => log('sale', `خرید ${currentUser.name}: ${items.join('، ')}`, shop));
+
+  const buyerInfo = {
+    name: buyerName,
+    phone: buyerPhone,
+    address: buyerAddress
+  };
+
+  Object.entries(byShop).forEach(([shop, items]) => {
+    log('sale', `خرید: ${items.join('، ')}`, shop, buyerInfo);
+  });
 
   cart = [];
   save();
   updateCartBadge();
   $('#cartModal').hidden = true;
   render();
-  toast('سفارش شما با موفقیت ثبت شد و از موجودی انبار کسر گردید 🎉');
+  toast('سفارش شما با موفقیت ثبت شد و اطلاعات تحویل برای فروشنده ارسال گردید 🎉');
 };
 
 /* ============ پیش‌نویس ردیف‌ها ============ */
@@ -761,6 +861,8 @@ $('#undoAll').onclick = () => {
 addEventListener('beforeunload', e => { if (Object.keys(drafts).length) { e.preventDefault(); e.returnValue = ''; } });
 
 /* ============ رندر صفحه ============ */
+const mine = l => l.uid ? l.uid === currentUser.id : l.by === currentUser.name;
+
 function render() {
   const vis = visible();
   const total = vis.reduce((s, p) => s + p.price * p.stock, 0);
@@ -837,13 +939,53 @@ function render() {
     ? lowItems.map(p => `<li>${esc(p.name)} (${esc(p.shop)}) — موجودی: ${fa(p.stock)} عدد</li>`).join('')
     : '<li>تمامی اقلام دارای موجودی کافی هستند.</li>';
 
-  const shown = isAdmin() ? logs : logs.filter(l => l.by === currentUser.name || (isSeller() && l.shop === currentUser.shop));
+  // تب فروشگاه‌ها و نوار فروشگاه انتخابی
+  $('#shopBar').hidden = !(isCustomer() && shopFilter !== 'all');
+  $('#shopBarName').textContent = '🏪 ' + shopFilter;
+  $('#shopGrid').innerHTML = getAllShops().map(s => {
+    const items = products.filter(p => p.shop === s), avail = items.filter(p => p.stock > 0).length;
+    return `<button class="shop-card" data-shop="${esc(s)}"><b>🏪 ${esc(s)}</b><span>${fa(items.length)} کالا | ${fa(avail)} موجود</span></button>`;
+  }).join('');
+
+  // مدیریت نمایش لاگ‌ها و فیلتر بر اساس uid
+  const shown = isAdmin()
+    ? logs
+    : isSeller()
+    ? logs.filter(l => mine(l) || l.shop === currentUser.shop)
+    : logs.filter(l => l.type === 'sale' && mine(l));
+
   const labels = { add: 'افزودن', edit: 'ویرایش', delete: 'حذف', system: 'سیستم', sale: 'فروش' };
-  $('#logList').innerHTML = shown.length ? shown.map((l, i) => `
-    <tr><td>${fa(i + 1)}</td>
-    <td><span class="badge ${labels[l.type] ? l.type : 'system'}">${labels[l.type] || 'سیستم'}</span></td>
-    <td>${esc(l.message)}</td><td>${esc(l.time)}</td></tr>`).join('')
+
+  if (isCustomer()) {
+    $('#historyHead').innerHTML = '<tr><th>ردیف</th><th>فروشگاه</th><th>شرح خرید</th><th>زمان سفارش</th></tr>';
+    $('#logList').innerHTML = shown.length ? shown.map((l, i) => `
+      <tr>
+        <td>${fa(i + 1)}</td>
+        <td><b style="color:var(--accent)">${esc(l.shop || 'سوپرمارکت')}</b></td>
+        <td style="text-align:right">${esc(l.message)}</td>
+        <td>${esc(l.time)}</td>
+      </tr>`).join('')
+      : '<tr><td colspan="4" class="empty">هنوز هیچ خریدی ثبت نکرده‌اید.</td></tr>';
+  } else {
+    $('#historyHead').innerHTML = '<tr><th>ردیف</th><th>نوع</th><th>شرح رویداد و مشخصات خریدار</th><th>زمان ثبت</th></tr>';
+    $('#logList').innerHTML = shown.length ? shown.map((l, i) => {
+      let buyerDetails = '';
+      if (l.type === 'sale' && l.buyerInfo) {
+        buyerDetails = `<div style="font-size:11.5px;color:var(--accent);margin-top:4px">
+          👤 <b>خریدار:</b> ${esc(l.buyerInfo.name)} | 📞 <b>تماس:</b> ${esc(l.buyerInfo.phone)}<br>
+          🏠 <b>آدرس تحویل:</b> ${esc(l.buyerInfo.address)}
+        </div>`;
+      }
+      return `
+        <tr>
+          <td>${fa(i + 1)}</td>
+          <td><span class="badge ${labels[l.type] ? l.type : 'system'}">${labels[l.type] || 'سیستم'}</span></td>
+          <td style="text-align:right">${esc(l.message)}${buyerDetails}</td>
+          <td>${esc(l.time)}</td>
+        </tr>`;
+    }).join('')
     : '<tr><td colspan="4" class="empty">هیچ رویدادی تاکنون ثبت نشده است.</td></tr>';
+  }
 }
 
 /* ============ مدیریت ورود و تغییر کاربر ============ */
@@ -852,27 +994,38 @@ function applyUserAuth() {
   cart = carts[currentUser.id] || [];
 
   save();
+  const subTxt = currentUser.subscriptionNo ? ` (اشتراک: ${faRaw(currentUser.subscriptionNo)})` : '';
   const shopLabel = currentUser.shop ? ` (${currentUser.shop})` : '';
-  $('#userGreeting').textContent = `👤 سلام، ${currentUser.name}${shopLabel}`;
+  $('#userGreeting').textContent = `👤 سلام، ${currentUser.name}${shopLabel}${subTxt}`;
 
   const badge = $('#userRoleBadge');
   badge.className = 'role-badge ' + currentUser.role;
   badge.textContent = isAdmin() ? '👑 مدیر کل' : isSeller() ? '🏪 فروشنده' : '🛍️ خریدار';
 
   const allowed = isAdmin() ? ['inventory', 'analytics', 'history', 'backup']
-    : isSeller() ? ['inventory', 'analytics', 'history'] : ['inventory'];
+    : isSeller() ? ['inventory', 'analytics', 'history']
+    : ['shops', 'inventory', 'history'];
 
   $$('.menu-item').forEach(i => i.hidden = !allowed.includes(i.dataset.tab));
-  $('.menu-item[data-tab="inventory"]').textContent = isCustomer() ? '🛍️ کاتالوگ و خرید' : '📦 مدیریت انبار';
+  $('.menu-item[data-tab="inventory"]').textContent = isCustomer() ? '🛍️ همه محصولات' : '📦 مدیریت انبار';
+  $('.menu-item[data-tab="history"]').textContent = isCustomer() ? '📦 سفارش‌های من' : '🕒 تاریخچه رویدادها';
+  $('#historyTabTitle').textContent = isCustomer() ? '📦 سفارش‌های من' : 'تاریخچه رویدادهای سیستم';
 
+  // تنظیم دیداری دکمه‌ها
   $('#formCard').hidden = isCustomer();
   $('#fShop').hidden = !isAdmin();
   $('#clearLogs').hidden = !isAdmin();
   $('#filterLowBtn').hidden = isCustomer();
   $('#openCartBtn').hidden = !isCustomer();
 
+  $('#openAuthModal').hidden = isCustomer();
+  $('#customerLogoutBtn').hidden = !isCustomer();
+
+  $('#calcFab').hidden = isCustomer();
+  if (isCustomer()) $('#calc').hidden = true;
+
   const shops = getAllShops();
-  $('#filterShop').hidden = isSeller();
+  $('#filterShop').hidden = isSeller() || isCustomer();
   $('#filterShop').innerHTML = '<option value="all">🏪 همه فروشگاه‌ها</option>' +
     shops.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
 
@@ -886,7 +1039,9 @@ function applyUserAuth() {
   $('#confirm').hidden = true; deleteId = null;
   resetForm();
 
-  if ($('.menu-item.active').hidden) $('.menu-item[data-tab="inventory"]').click();
+  if ($('.menu-item.active').hidden || isCustomer()) {
+    $(`.menu-item[data-tab="${isCustomer() ? 'shops' : 'inventory'}"]`).click();
+  }
   $('#subtitle').textContent = `(${$('.menu-item.active').textContent.trim()})`;
 
   updateCartBadge();
@@ -896,9 +1051,10 @@ function applyUserAuth() {
 
 function renderQuickAccounts() {
   const list = $('#quickAccountsList');
-  list.innerHTML = users.map(u => {
+  // فقط مدیران و فروشندگان در لیست سریع نشان داده می‌شوند تا حریم خصوصی خریداران حفظ شود
+  list.innerHTML = users.filter(u => u.role !== 'customer').map(u => {
     const isCur = u.id === currentUser.id;
-    const roleTxt = u.role === 'admin' ? 'مدیر کل' : u.role === 'seller' ? `فروشنده (${u.shop})` : 'خریدار';
+    const roleTxt = u.role === 'admin' ? 'مدیر کل' : `فروشنده (${u.shop})`;
     return `
       <button class="quick-user-btn" data-uid="${u.id}" style="${isCur ? 'border-color:var(--accent);font-weight:bold' : ''}">
         <span>${esc(u.name)} <span style="font-size:11px;color:var(--muted)">[${roleTxt}]</span></span>
@@ -910,6 +1066,12 @@ function renderQuickAccounts() {
 
 $('#openAuthModal').onclick = () => { $('#authModal').hidden = false; };
 $('#closeAuthModal').onclick = () => { $('#authModal').hidden = true; };
+
+$('#customerLogoutBtn').onclick = () => {
+  if (confirm('آیا قصد خروج از حساب کاربری خود را دارید؟')) {
+    $('#authModal').hidden = false;
+  }
+};
 
 $('#quickAccountsList').addEventListener('click', e => {
   const btn = e.target.closest('[data-uid]');
@@ -927,33 +1089,87 @@ $('#quickAccountsList').addEventListener('click', e => {
 });
 
 $('#regRole').onchange = e => {
-  $('#regShop').style.display = e.target.value === 'seller' ? 'block' : 'none';
+  const isCust = e.target.value === 'customer';
+  $('#regShop').style.display = isCust ? 'none' : 'block';
+  $('#customerSignupFields').style.display = isCust ? 'flex' : 'none';
 };
 
 $('#signupForm').addEventListener('submit', e => {
   e.preventDefault();
-  const name = $('#regName').value.trim();
-  const role = $('#regRole').value;
-  const shop = $('#regShop').value.trim();
+  const first = $('#regFirst').value.trim(), last = $('#regLast').value.trim();
+  const role = $('#regRole').value, shop = $('#regShop').value.trim();
+  const phone = faDigits($('#regPhone').value.trim()), address = $('#regAddress').value.trim();
 
-  if (!name) return alert('لطفاً نام خود را وارد کنید.');
+  if (!first || !last) return alert('لطفاً نام و نام خانوادگی را وارد کنید.');
   if (role === 'seller' && !shop) return alert('لطفاً نام فروشگاه خود را وارد کنید.');
+  if (role === 'customer') {
+    if (!/^09\d{9}$/.test(phone)) return alert('شماره تماس معتبر نیست (مثال: 09123456789).');
+    if (address.length < 10) return alert('لطفاً آدرس را کامل وارد کنید.');
+    if (users.some(u => u.role === 'customer' && faDigits(u.phone) === phone)) {
+      return alert('با این شماره قبلاً ثبت‌نام شده است. لطفاً با شماره اشتراک وارد شوید.');
+    }
+  }
 
   const newUser = {
     id: 'u_' + Date.now(),
-    name: name,
-    role: role,
-    shop: role === 'seller' ? shop : ''
+    name: `${first} ${last}`,
+    firstName: first,
+    lastName: last,
+    role,
+    shop: role === 'seller' ? shop : '',
+    phone: role === 'customer' ? phone : '',
+    address: role === 'customer' ? address : ''
   };
+  if (role === 'customer') newUser.subscriptionNo = newSubscriptionNo();
 
   users.push(newUser);
   currentUser = newUser;
   $('#signupForm').reset();
+  $('#regRole').dispatchEvent(new Event('change'));
   $('#authModal').hidden = true;
-
   applyUserAuth();
-  toast(`حساب کاربری جدید برای "${name}" ساخته شد و وارد شدید ✅`);
+
+  if (role === 'customer') {
+    $('#smsText').textContent = `${first} عزیز، ثبت‌نام شما با موفقیت انجام شد.\nشماره اشتراک شما: ${faRaw(newUser.subscriptionNo)}\nبرای ورودهای بعدی از این شماره استفاده کنید.`;
+    $('#smsModal').hidden = false;
+  } else {
+    toast(`حساب کاربری جدید برای "${newUser.name}" ساخته شد و وارد شدید ✅`);
+  }
 });
+
+// تایید پیامک و باز شدن سبد خرید
+$('#smsOk').onclick = () => {
+  $('#smsModal').hidden = true;
+  $('#openCartBtn').click();
+};
+
+// ورود خریدار با شماره اشتراک
+$('#loginSubBtn').onclick = () => {
+  const no = faDigits($('#loginSub').value.trim());
+  const u = users.find(x => x.role === 'customer' && x.subscriptionNo === no);
+  if (!u) return toast('شماره اشتراک پیدا نشد!', 'var(--danger)');
+  if (Object.keys(drafts).length && !confirm('تغییرات ثبت‌نشده لغو خواهد شد. ادامه می‌دهید؟')) return;
+  Object.keys(drafts).forEach(id => delete drafts[id]);
+  currentUser = u;
+  $('#loginSub').value = '';
+  $('#authModal').hidden = true;
+  applyUserAuth();
+  toast(`خوش آمدید ${u.name} ✅`);
+};
+
+// انتخاب فروشگاه از تب فروشگاه‌ها و بازگشت
+$('#shopGrid').addEventListener('click', e => {
+  const c = e.target.closest('[data-shop]');
+  if (!c) return;
+  shopFilter = c.dataset.shop;
+  $('.menu-item[data-tab="inventory"]').click();
+  render();
+});
+$('#backToShops').onclick = () => {
+  shopFilter = 'all';
+  $('.menu-item[data-tab="shops"]').click();
+  render();
+};
 
 /* ============ تم و منو ============ */
 function setTheme(dark) {
@@ -1000,7 +1216,6 @@ list.addEventListener('click', e => {
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
 
-  // عملکرد شمارنده سبد خرید برای خریدار
   if (btn.dataset.act === 'add-to-cart' || btn.dataset.act === 'cart-inc') {
     addToCart(Number(btn.dataset.id));
     return;
@@ -1213,6 +1428,7 @@ $('#importBtn').onclick = () => {
       products = normalize(data.products);
       logs = Array.isArray(data.logs) ? data.logs : [];
       if (Array.isArray(data.users)) users = data.users;
+      users.forEach(u => { if (u.role === 'customer' && !u.subscriptionNo) u.subscriptionNo = newSubscriptionNo(); });
       if (data.customerCarts && typeof data.customerCarts === 'object') carts = data.customerCarts;
       Object.keys(drafts).forEach(id => delete drafts[id]);
       currentUser = users.find(u => u.id === currentUser.id) || users[0];
