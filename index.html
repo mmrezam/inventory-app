@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>سیستم انبار هوشمند</title>
 <style>
   :root {
@@ -15,23 +15,41 @@
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  body { font-family: Tahoma, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: var(--bg); color: var(--text); transition: background .3s, color .3s; }
+  
+  body {
+    font-family: Tahoma, 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: var(--bg);
+    color: var(--text);
+    transition: background .3s, color .3s;
+    overflow-x: hidden;
+  }
   .container { max-width: 1100px; margin: 0 auto; }
-  h1 { margin: 50px 0 25px; font-size: 24px; }
+  
+  h1 { margin: 45px 0 20px; font-size: 24px; }
   h1 small { font-size: .65em; color: var(--muted); font-weight: normal; margin-right: 10px; }
 
-  button { font-family: inherit; border-radius: 6px; cursor: pointer; border: none; color: #fff; padding: 8px 14px; transition: opacity .2s; }
+  /* دکمه‌های عمومی */
+  button { font-family: inherit; border-radius: 6px; cursor: pointer; border: none; color: #fff; padding: 9px 14px; transition: opacity .2s; }
   button:hover { opacity: .9; }
   .ok { background: var(--ok); } .info { background: var(--accent); } .danger { background: var(--danger); } .gray { background: var(--muted); }
   .save { font-weight: bold; animation: pulse 1.5s infinite; }
   @keyframes pulse { 50% { transform: scale(1.05); } }
 
-  .float { position: fixed; top: 15px; width: 44px; height: 44px; padding: 0; font-size: 20px; z-index: 1000; border-radius: 50%;
-           background: var(--card); color: var(--text); border: 1px solid var(--border); }
-  #themeToggle { left: 15px; } #menuToggle { left: 68px; }
+  /* دکمه‌های شناور بالا سمت چپ */
+  .float {
+    position: fixed; top: 12px; width: 42px; height: 42px; padding: 0; font-size: 19px; z-index: 1000;
+    border-radius: 50%; background: var(--card); color: var(--text); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  }
+  #themeToggle { left: 12px; } #menuToggle { left: 62px; }
 
-  .side-menu { position: fixed; top: 0; right: -290px; width: 270px; height: 100%; padding: 20px; z-index: 2000;
-               background: var(--card); box-shadow: -4px 0 15px rgba(0,0,0,.15); transition: right .3s; }
+  /* منوی کناری */
+  .side-menu {
+    position: fixed; top: 0; right: -300px; width: min(280px, 85vw); height: 100%; padding: 20px; z-index: 2000;
+    background: var(--card); box-shadow: -4px 0 15px rgba(0,0,0,.15); transition: right .3s;
+  }
   .side-menu.open { right: 0; }
   .overlay { position: fixed; inset: 0; background: rgba(15,23,42,.4); z-index: 1500; }
   .menu-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
@@ -40,37 +58,67 @@
   .menu-item { list-style: none; padding: 12px 16px; margin-top: 8px; border-radius: 8px; cursor: pointer; }
   .menu-item:hover, .menu-item.active { background: var(--head); color: var(--accent); font-weight: bold; }
 
+  /* تب‌ها و کارت‌ها */
   .tab { display: none; } .tab.active { display: block; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: center; }
-  input[type=text], input[type=number], select { width: 100%; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
-        font: inherit; font-size: 13.5px; background: var(--input); color: var(--text); outline: none; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  
+  /* چیدمان منعطف گرید فرم */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    align-items: center;
+  }
+  input[type=text], input[type=number], select {
+    width: 100%; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+    font: inherit; font-size: 14px; background: var(--input); color: var(--text); outline: none;
+  }
   .form-actions { display: flex; gap: 8px; }
 
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 3000; padding: 10px 20px;
-           border-radius: 8px; color: #fff; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 3000; padding: 10px 20px;
+    border-radius: 8px; color: #fff; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    max-width: 90vw; text-align: center;
+  }
 
+  /* نوار جستجو و فیلتر */
   .toolbar { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
-  .toolbar input { flex: 1; min-width: 180px; } .toolbar select { width: auto; min-width: 170px; }
+  .toolbar input { flex: 1; min-width: 180px; }
+  .toolbar select { width: auto; min-width: 160px; }
   .filter { background: var(--card); color: var(--text); border: 1px solid var(--border); }
   .filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
   .total { font-size: 17px; font-weight: bold; color: var(--accent); margin: 20px 0 10px; }
 
-  .dirty-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 15px; padding: 10px 15px;
-               background: var(--dirty); border: 1px solid var(--warn); border-radius: 8px; font-weight: bold; }
+  .dirty-bar {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 15px; padding: 10px 15px;
+    background: var(--dirty); border: 1px solid var(--warn); border-radius: 8px; font-weight: bold;
+  }
   .dirty-bar span { flex: 1; }
 
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--card); border-radius: 8px; overflow: hidden; }
-  th, td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 14px; }
+  /* محفظه اختصاصی اسکرول نرم جدول در موبایل */
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+  
+  table { width: 100%; border-collapse: collapse; min-width: 720px; }
+  th, td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 13.5px; }
   th { background: var(--head); }
   tr.dirty td { background: var(--dirty); }
   td.name { font-weight: bold; text-align: right; padding-right: 15px; }
-  .cat-box { display: flex; flex-direction: column; gap: 5px; min-width: 180px; }
+  
+  .cat-box { display: flex; flex-direction: column; gap: 5px; min-width: 170px; }
   .cat-box select { padding: 4px 8px; font-size: 12px; }
   .cat-box .row-cat { font-weight: bold; color: var(--accent); }
   .low { color: var(--danger); font-size: 12px; margin-right: 6px; font-weight: normal; }
-  .empty { color: var(--muted); padding: 20px; }
-  td .btn-row { display: inline-flex; gap: 6px; }
+  .empty { color: var(--muted); padding: 25px; }
+  .btn-row { display: inline-flex; gap: 6px; }
+  
   .stock { display: inline-flex; align-items: center; gap: 5px; }
   .qty { width: 28px; height: 28px; padding: 0; font-size: 16px; font-weight: bold; background: var(--head); color: var(--text); border: 1px solid var(--border); }
   .stock input { width: 65px; padding: 4px; text-align: center; font-weight: bold; font-size: 13px; }
@@ -78,6 +126,7 @@
   #confirm { background: var(--card); border: 1px solid var(--warn); padding: 15px; margin-top: 15px; border-radius: 8px; text-align: center; }
   #confirm p { color: #b45309; font-weight: bold; }
 
+  /* تب‌های آمار و پشتیبان */
   .stats { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
   .stat { flex: 1; min-width: 200px; text-align: center; }
   .stat h3 { margin: 0 0 10px; font-size: 15px; color: var(--muted); }
@@ -91,6 +140,33 @@
   .badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #fff; }
   .badge.add { background: var(--ok); } .badge.edit { background: var(--accent); }
   .badge.delete { background: var(--danger); } .badge.system { background: var(--muted); }
+
+  /* ========================================================
+     قوانین ویژه ریسپانسیو (مخصوص موبایل و تبلت: زیر ۷۶۸ پیکسل)
+     ======================================================== */
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    h1 { font-size: 20px; margin: 42px 0 16px; }
+    h1 small { display: block; margin: 4px 0 0 0; }
+
+    /* فونت ۱۶ پیکسل برای جلوگیری از زوم ناخواسته موبایل موقع فوکوس */
+    input[type=text], input[type=number], select { font-size: 16px; padding: 10px; }
+
+    /* فرم در گوشی تک‌ستونه می‌شود */
+    .form-grid { grid-template-columns: 1fr; gap: 10px; }
+    .form-actions button { flex: 1; padding: 12px; font-size: 15px; }
+
+    /* نوار ابزار در گوشی تمام‌عرض می‌شود */
+    .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+    .toolbar input, .toolbar select, .toolbar button { width: 100% !important; min-width: 0; }
+    
+    .dirty-bar { flex-direction: column; text-align: center; }
+    .dirty-bar button { width: 100%; padding: 10px; }
+
+    .stat { min-width: 100%; }
+    .float { width: 38px; height: 38px; font-size: 17px; }
+    #themeToggle { left: 8px; } #menuToggle { left: 52px; }
+  }
 </style>
 </head>
 <body>
@@ -113,6 +189,7 @@
 <div class="container">
   <h1>سیستم انبار هوشمند <small id="subtitle">(📦 مدیریت انبار)</small></h1>
 
+  <!-- تب ۱: انبار -->
   <section id="tab-inventory" class="tab active">
     <div class="card">
       <form id="productForm" class="form-grid" novalidate>
@@ -144,10 +221,13 @@
       <button id="undoAll" class="gray">لغو همه</button>
     </div>
 
-    <table>
-      <thead><tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr></thead>
-      <tbody id="productList"></tbody>
-    </table>
+    <!-- جدول محافظت‌شده داخل محفظه لمسی مخصوص موبایل -->
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr></thead>
+        <tbody id="productList"></tbody>
+      </table>
+    </div>
 
     <div id="confirm" hidden>
       <p>آیا از حذف این کالا اطمینان دارید؟</p>
@@ -156,6 +236,7 @@
     </div>
   </section>
 
+  <!-- تب ۲: آمار -->
   <section id="tab-analytics" class="tab">
     <h2>داشبورد تحلیل انبار</h2>
     <div class="stats">
@@ -167,17 +248,21 @@
     <div class="card box"><h4>کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4><ul id="lowList" style="padding-right:20px;line-height:1.8"></ul></div>
   </section>
 
+  <!-- تب ۳: تاریخچه -->
   <section id="tab-history" class="tab">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <h2>تاریخچه رویدادهای سیستم</h2>
       <button id="clearLogs" class="gray">پاک‌سازی تاریخچه</button>
     </div>
-    <table>
-      <thead><tr><th>ردیف</th><th>نوع عملیات</th><th>شرح رویداد</th><th>زمان ثبت</th></tr></thead>
-      <tbody id="logList"></tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ردیف</th><th>نوع عملیات</th><th>شرح رویداد</th><th>زمان ثبت</th></tr></thead>
+        <tbody id="logList"></tbody>
+      </table>
+    </div>
   </section>
 
+  <!-- تب ۴: پشتیبان -->
   <section id="tab-backup" class="tab">
     <h2>پشتیبان‌گیری و مدیریت داده‌ها</h2>
     <div class="backup">
@@ -537,7 +622,7 @@ $('#clearLogs').onclick = () => {
   logs = []; save(); render();
 };
 
-/* ============ PDF استاندارد بدون تداخل با لایوسرور ============ */
+/* ============ PDF ایمن بدون تداخل با Live Server ============ */
 $('#pdfBtn').onclick = () => {
   if (!products.length) return alert('انبار در حال حاضر خالی است!');
   const win = window.open('', '_blank');
@@ -618,7 +703,7 @@ $('#importBtn').onclick = () => {
 };
 
 $('#resetBtn').onclick = () => {
-  if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
+  if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
   products = []; logs = [];
   Object.keys(drafts).forEach(id => delete drafts[id]);
   localStorage.removeItem('inventoryData');
