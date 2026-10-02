@@ -28,7 +28,7 @@
   }
   .container { max-width: 1100px; margin: 0 auto; }
 
-  h1 { margin: 45px 0 20px; font-size: 24px; }
+  h1 { margin: 45px 0 15px; font-size: 24px; }
   h1 small { font-size: .65em; color: var(--muted); font-weight: normal; margin-right: 10px; }
 
   /* دکمه‌های عمومی */
@@ -80,6 +80,25 @@
     border-radius: 8px; color: #fff; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.25);
     max-width: 90vw; text-align: center;
   }
+
+  /* نوار اطلاعات کاربری بالای صفحه */
+  .user-profile-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .user-info { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: bold; }
+  .role-badge { padding: 3px 8px; border-radius: 6px; font-size: 11.5px; color: #fff; }
+  .role-badge.admin { background: #8b5cf6; }
+  .role-badge.seller { background: var(--orange); }
+  .role-badge.customer { background: var(--ok); }
 
   /* نوار جستجو و فیلتر */
   .toolbar { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
@@ -140,7 +159,25 @@
   .badge.add { background: var(--ok); } .badge.edit { background: var(--accent); }
   .badge.delete { background: var(--danger); } .badge.system { background: var(--muted); }
 
-  /* ========== دایره نارنجی و ماشین حساب شناور ========== */
+  /* پنجره مدال ورود و ثبت نام حساب کاربری */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 2500;
+    display: flex; align-items: center; justify-content: center; padding: 15px;
+  }
+  .modal-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    width: 100%; max-width: 440px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.3);
+  }
+  .modal-box h3 { margin: 0 0 15px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .quick-accounts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .quick-user-btn {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--head); color: var(--text); padding: 9px 12px; border-radius: 6px;
+    border: 1px solid var(--border); font-size: 13px; text-align: right;
+  }
+  .quick-user-btn:hover { border-color: var(--accent); }
+
+  /* دایره نارنجی و ماشین حساب شناور */
   .calc-fab {
     position: fixed; left: 0; top: 0; width: 46px; height: 46px; padding: 0; border-radius: 50%;
     background: var(--orange); color: #fff; font-size: 21px; z-index: 1100;
@@ -191,6 +228,7 @@
     .stat { min-width: 100%; }
     .float { width: 38px; height: 38px; font-size: 17px; }
     #themeToggle { left: 8px; } #menuToggle { left: 52px; }
+    .user-profile-bar { flex-direction: column; align-items: stretch; text-align: center; }
   }
 </style>
 </head>
@@ -200,7 +238,7 @@
 <button id="menuToggle" class="float" title="منوی بخش‌ها">☰</button>
 <div id="toast" class="toast" hidden></div>
 
-<!-- دایره نارنجی: بکشید تا جابجا شود، یک‌بار بزنید تا ماشین حساب باز شود -->
+<!-- دایره نارنجی ماشین حساب شناور -->
 <button id="calcFab" class="calc-fab" title="ماشین حساب (برای جابجایی بکشید)" aria-label="ماشین حساب">🧮</button>
 
 <div id="calc" class="calc" hidden>
@@ -250,13 +288,25 @@
 <div class="container">
   <h1>سیستم انبار هوشمند <small id="subtitle">(📦 مدیریت انبار)</small></h1>
 
-  <!-- تب ۱: انبار -->
+  <!-- کارت شیک مشخصات کاربر فعال -->
+  <div class="user-profile-bar">
+    <div class="user-info">
+      <span id="userGreeting">👤 سلام</span>
+      <span id="userRoleBadge" class="role-badge admin">مدیر</span>
+    </div>
+    <div>
+      <button id="openAuthModal" class="info" style="padding:6px 12px;font-size:12.5px">تغییر حساب / ثبت‌نام</button>
+    </div>
+  </div>
+
+  <!-- تب ۱: انبار / کاتالوگ -->
   <section id="tab-inventory" class="tab active">
-    <div class="card">
+    <div class="card" id="formCard">
       <form id="productForm" class="form-grid" novalidate>
         <input type="text" id="fName" placeholder="نام محصول">
         <select id="fCategory"></select>
         <select id="fSubCategory"></select>
+        <select id="fShop" title="فروشگاه مبدا"></select>
         <input type="number" id="fPrice" placeholder="قیمت (تومان)" min="0" step="any" data-step="100000">
         <input type="number" id="fStock" placeholder="موجودی" min="0" step="any" data-step="10">
         <div class="form-actions">
@@ -270,8 +320,9 @@
       <input type="text" id="search" placeholder="🔍 جستجو در نام کالاها...">
       <select id="filterCategory"></select>
       <select id="filterSubCategory" hidden></select>
+      <select id="filterShop" title="فیلتر بر اساس فروشگاه"></select>
       <button class="filter active" data-filter="all">همه کالاها</button>
-      <button class="filter" data-filter="low">⚠️ فقط موجودی کم (زیر ۵)</button>
+      <button class="filter" data-filter="low" id="filterLowBtn">⚠️ فقط موجودی کم (زیر ۵)</button>
     </div>
 
     <div class="total" id="total"></div>
@@ -284,7 +335,7 @@
 
     <div class="table-wrap">
       <table>
-        <thead><tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr></thead>
+        <thead id="productHead"><tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr></thead>
         <tbody id="productList"></tbody>
       </table>
     </div>
@@ -351,6 +402,32 @@
   </section>
 </div>
 
+<!-- پنجره مدال ورود و ثبت‌نام حساب‌های کاربری -->
+<div id="authModal" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="margin:0;border:none;padding:0">مدیریت حساب کاربری</h3>
+      <button id="closeAuthModal" class="gray" style="padding:2px 8px;font-size:18px">&times;</button>
+    </div>
+
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">ورود سریع به حساب‌های نمونه:</div>
+    <div id="quickAccountsList" class="quick-accounts"></div>
+
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:10px">
+      <div style="font-size:13px;font-weight:bold;margin-bottom:10px">✨ ثبت‌نام یا ساخت حساب جدید:</div>
+      <form id="signupForm" style="display:flex;flex-direction:column;gap:8px" novalidate>
+        <input type="text" id="regName" placeholder="نام و نام خانوادگی" required>
+        <select id="regRole">
+          <option value="seller">فروشنده (مدیریت فروشگاه اختصاصی)</option>
+          <option value="customer">خریدار (مشاهده و خرید کالاها)</option>
+        </select>
+        <input type="text" id="regShop" placeholder="نام فروشگاه شما (مثلاً: سوپرمارکت امید)">
+        <button type="submit" class="ok" style="margin-top:4px">ثبت و ورود به حساب</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ============ دسته‌بندی‌ها ============ */
 const UNCAT = 'بدون دسته';
@@ -374,14 +451,45 @@ const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(k
 const isLow = p => p.stock < LOW_STOCK;
 const subsOf = cat => CATEGORIES[cat] || [];
 
-// گزینه‌های select؛ اگر مقدار فعلی در لیست نبود (مثلاً از فایل import) اضافه می‌شود
 const options = (list, selected) =>
   (list.includes(selected) ? list : [...list, selected]).map(v => `<option value="${esc(v)}"${v === selected ? ' selected' : ''}>${esc(v)}</option>`).join('');
+
+/* ============ سیستم کاربران و احراز هویت ============ */
+const DEFAULT_USERS = [
+  { id: 'u_admin', name: 'مدیر ارشد', role: 'admin', shop: 'دفتر مرکزی' },
+  { id: 'u_s1', name: 'علی رضایی', role: 'seller', shop: 'سوپرمارکت امید' },
+  { id: 'u_s2', name: 'رضا حسینی', role: 'seller', shop: 'هایپرمارکت نگین' },
+  { id: 'u_c1', name: 'سارا محمدی', role: 'customer', shop: '' }
+];
+
+let users = load('inventoryUsers', DEFAULT_USERS);
+let currentUser = load('currentAuthUser', users[0]);
+// اگر کاربر ذخیره‌شده معتبر نبود به پیش‌فرض برگردد
+if (!users.some(u => u.id === currentUser.id)) currentUser = users[0];
+
+const isAdmin = () => currentUser.role === 'admin';
+const isSeller = () => currentUser.role === 'seller';
+const isCustomer = () => currentUser.role === 'customer';
+
+const canEdit = p => isAdmin() || (isSeller() && p.shop === currentUser.shop);
+
+// بازگرداندن تمام فروشگاه‌های ثبت‌شده در انبار یا توسط فروشنده‌ها
+function getAllShops() {
+  const s = new Set();
+  users.filter(u => u.role === 'seller' && u.shop).forEach(u => s.add(u.shop));
+  products.forEach(p => { if (p.shop) s.add(p.shop); });
+  if (!s.size) s.add('سوپرمارکت امید');
+  return Array.from(s);
+}
+
+// کالاهای قابل رویت بسته به نقش: فروشنده فقط کالاهای خود را می‌بیند
+const visible = () => isSeller() ? products.filter(p => p.shop === currentUser.shop) : products;
 
 const normalize = list => list.map((p, i) => ({
   id: p.id ?? Date.now() + i,
   name: String(p.name),
   category: p.category || UNCAT,
+  shop: p.shop || 'سوپرمارکت امید',
   subcategory: p.subcategory || subsOf(p.category || UNCAT)[0] || 'متفرقه',
   price: Number(p.price) || 0,
   stock: Number(p.stock) || 0
@@ -389,18 +497,22 @@ const normalize = list => list.map((p, i) => ({
 
 let products = normalize(load('inventoryData', []));
 let logs = load('inventoryLogs', []);
-let editId = null, deleteId = null, stockFilter = 'all', catFilter = 'all', subFilter = 'all';
-const drafts = {};   // تغییرات ثبت‌نشده‌ی هر ردیف: { id: {stock, category, subcategory} }
+let editId = null, deleteId = null, stockFilter = 'all', catFilter = 'all', subFilter = 'all', shopFilter = 'all';
+const drafts = {};
 
 const find = id => products.find(p => p.id === id);
 const save = () => {
   localStorage.setItem('inventoryData', JSON.stringify(products));
   localStorage.setItem('inventoryLogs', JSON.stringify(logs));
+  localStorage.setItem('inventoryUsers', JSON.stringify(users));
+  localStorage.setItem('currentAuthUser', JSON.stringify(currentUser));
 };
+
 function log(type, message) {
-  logs.unshift({ id: Date.now() + Math.random(), type, message, time: new Date().toLocaleString('fa-IR') });
+  logs.unshift({ id: Date.now() + Math.random(), type, message, time: new Date().toLocaleString('fa-IR'), by: currentUser.name });
   save();
 }
+
 let toastTimer;
 function toast(text, color = 'var(--ok)') {
   const el = $('#toast');
@@ -430,10 +542,9 @@ function updateDirtyBar() {
   $('#dirtyText').textContent = `${fa(n)} ردیف تغییر ثبت‌نشده دارد`;
 }
 
-// تغییرات یک ردیف را اعمال می‌کند: 'ok' | 'invalid' | 'none'
 function commit(id) {
   const p = find(id), d = drafts[id];
-  if (!p || !d) return 'none';
+  if (!p || !d || !canEdit(p)) return 'none';
   const stock = Number(d.stock);
   if (d.stock.trim() === '' || !isFinite(stock) || stock < 0) return 'invalid';
   const changes = [];
@@ -467,69 +578,202 @@ $('#undoAll').onclick = () => {
   render();
 };
 
-// هشدار هنگام بستن صفحه با تغییرات ثبت‌نشده
 addEventListener('beforeunload', e => { if (Object.keys(drafts).length) { e.preventDefault(); e.returnValue = ''; } });
 
-/* ============ رندر ============ */
+/* ============ رندر صفحه ============ */
 function render() {
-  const total = products.reduce((s, p) => s + p.price * p.stock, 0);
-  const lowItems = products.filter(isLow);
+  const vis = visible();
+  const total = vis.reduce((s, p) => s + p.price * p.stock, 0);
+  const lowItems = vis.filter(isLow);
+  $('#total').hidden = isCustomer();
   $('#total').textContent = `ارزش کل انبار: ${fa(total)} تومان | با ۱۰٪ تخفیف: ${fa(total * DISCOUNT)} تومان`;
 
   const q = $('#search').value.trim().toLowerCase();
-  const rows = products.filter(p =>
+  const rows = vis.filter(p =>
     p.name.toLowerCase().includes(q) &&
     (stockFilter === 'all' || isLow(p)) &&
     (catFilter === 'all' || p.category === catFilter) &&
-    (subFilter === 'all' || p.subcategory === subFilter));
+    (subFilter === 'all' || p.subcategory === subFilter) &&
+    (shopFilter === 'all' || p.shop === shopFilter));
 
-  $('#productList').innerHTML = rows.length ? rows.map(p => {
-    const d = draftOf(p), dirty = p.id in drafts;
-    return `
-    <tr data-id="${p.id}"${dirty ? ' class="dirty"' : ''}>
-      <td class="name">${esc(p.name)}${isLow(p) ? '<span class="low">(موجودی کم)</span>' : ''}</td>
-      <td><div class="cat-box">
-        <select class="row-cat">${options(Object.keys(CATEGORIES), d.category)}</select>
-        <select class="row-subcat">${options(subsOf(d.category), d.subcategory)}</select>
-      </div></td>
-      <td>${fa(p.price)} تومان</td>
-      <td><div class="stock">
-        <button type="button" class="qty" data-act="dec">-</button>
-        <input type="number" value="${esc(d.stock)}" min="0" step="any">
-        <button type="button" class="qty" data-act="inc">+</button>
-      </div></td>
-      <td><div class="btn-row">
-        <button class="ok save" data-act="save"${dirty ? '' : ' hidden'}>ثبت</button>
-        <button class="gray undo" data-act="undo" title="بازگشت به مقدار ذخیره‌شده"${dirty ? '' : ' hidden'}>لغو</button>
-        <button class="info" data-act="edit">ویرایش</button>
-        <button class="danger" data-act="del">حذف</button>
-      </div></td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="5" class="empty">هیچ کالایی با این مشخصات یافت نشد.</td></tr>';
+  $('#productHead').innerHTML = isCustomer()
+    ? '<tr><th>نام کالا</th><th>فروشگاه مبدا</th><th>دسته‌بندی</th><th>قیمت</th><th>وضعیت موجودی</th></tr>'
+    : '<tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr>';
+
+  const status = p => p.stock <= 0
+    ? '<b style="color:var(--danger)">ناموجود</b>'
+    : isLow(p) ? '<b style="color:var(--warn)">موجودی اندک</b>' : '<b style="color:var(--ok)">موجود</b>';
+
+  $('#productList').innerHTML = !rows.length
+    ? `<tr><td colspan="5" class="empty">هیچ کالایی با این مشخصات یافت نشد.</td></tr>`
+    : isCustomer()
+    ? rows.map(p => `<tr>
+        <td class="name">${esc(p.name)}</td>
+        <td><b style="color:var(--accent)">${esc(p.shop)}</b></td>
+        <td>${esc(p.category)}</td>
+        <td>${fa(p.price)} تومان</td>
+        <td>${status(p)}</td>
+      </tr>`).join('')
+    : rows.map(p => {
+      const d = draftOf(p), dirty = p.id in drafts;
+      return `
+      <tr data-id="${p.id}"${dirty ? ' class="dirty"' : ''}>
+        <td class="name">${esc(p.name)}${isLow(p) ? '<span class="low">(موجودی کم)</span>' : ''}
+          <div style="font-size:11px;color:var(--muted);font-weight:normal">${esc(p.shop)}</div>
+        </td>
+        <td><div class="cat-box">
+          <select class="row-cat">${options(Object.keys(CATEGORIES), d.category)}</select>
+          <select class="row-subcat">${options(subsOf(d.category), d.subcategory)}</select>
+        </div></td>
+        <td>${fa(p.price)} تومان</td>
+        <td><div class="stock">
+          <button type="button" class="qty" data-act="dec">-</button>
+          <input type="number" value="${esc(d.stock)}" min="0" step="any">
+          <button type="button" class="qty" data-act="inc">+</button>
+        </div></td>
+        <td><div class="btn-row">
+          <button class="ok save" data-act="save"${dirty ? '' : ' hidden'}>ثبت</button>
+          <button class="gray undo" data-act="undo" title="بازگشت به مقدار ذخیره‌شده"${dirty ? '' : ' hidden'}>لغو</button>
+          <button class="info" data-act="edit">ویرایش</button>
+          <button class="danger" data-act="del">حذف</button>
+        </div></td>
+      </tr>`;
+    }).join('');
   updateDirtyBar();
 
-  $('#statCount').textContent = fa(products.length);
+  $('#statCount').textContent = fa(vis.length);
   $('#statValue').textContent = fa(total) + ' تومان';
   $('#statLow').textContent = fa(lowItems.length) + ' قلم';
 
   const byCat = {};
-  products.forEach(p => byCat[p.category] = (byCat[p.category] || 0) + p.price * p.stock);
+  vis.forEach(p => byCat[p.category] = (byCat[p.category] || 0) + p.price * p.stock);
   $('#catStats').innerHTML = Object.keys(byCat).length
     ? Object.entries(byCat).map(([c, v]) =>
         `<div><strong>${esc(c)}:</strong> ${fa(v)} تومان <span style="color:var(--muted)">(${fa(total ? (v / total * 100).toFixed(1) : 0)}٪ کل انبار)</span></div>`).join('')
     : '<div style="color:var(--muted)">کالایی ثبت نشده است.</div>';
 
   $('#lowList').innerHTML = lowItems.length
-    ? lowItems.map(p => `<li>${esc(p.name)} (${esc(p.category)} / ${esc(p.subcategory)}) — موجودی: ${fa(p.stock)} عدد</li>`).join('')
+    ? lowItems.map(p => `<li>${esc(p.name)} (${esc(p.shop)}) — موجودی: ${fa(p.stock)} عدد</li>`).join('')
     : '<li>تمامی اقلام دارای موجودی کافی هستند.</li>';
 
+  const shown = isAdmin() ? logs : logs.filter(l => l.by === currentUser.name);
   const labels = { add: 'افزودن', edit: 'ویرایش', delete: 'حذف', system: 'سیستم' };
-  $('#logList').innerHTML = logs.length ? logs.map((l, i) => `
+  $('#logList').innerHTML = shown.length ? shown.map((l, i) => `
     <tr><td>${fa(i + 1)}</td>
     <td><span class="badge ${labels[l.type] ? l.type : 'system'}">${labels[l.type] || 'سیستم'}</span></td>
     <td>${esc(l.message)}</td><td>${esc(l.time)}</td></tr>`).join('')
     : '<tr><td colspan="4" class="empty">هیچ رویدادی تاکنون ثبت نشده است.</td></tr>';
 }
+
+/* ============ مدیریت ورود و تغییر کاربر ============ */
+function applyUserAuth() {
+  save();
+  // نمایش خوش‌آمدگویی و نام کاربر
+  const shopLabel = currentUser.shop ? ` (${currentUser.shop})` : '';
+  $('#userGreeting').textContent = `👤 سلام، ${currentUser.name}${shopLabel}`;
+
+  const badge = $('#userRoleBadge');
+  badge.className = 'role-badge ' + currentUser.role;
+  badge.textContent = isAdmin() ? '👑 مدیر کل' : isSeller() ? '🏪 فروشنده' : '🛍️ خریدار';
+
+  // محدودیت تب‌ها
+  const allowed = isAdmin() ? ['inventory', 'analytics', 'history', 'backup']
+    : isSeller() ? ['inventory', 'analytics', 'history'] : ['inventory'];
+
+  $$('.menu-item').forEach(i => i.hidden = !allowed.includes(i.dataset.tab));
+  $('.menu-item[data-tab="inventory"]').textContent = isCustomer() ? '🛍️ کاتالوگ و خرید' : '📦 مدیریت انبار';
+
+  $('#formCard').hidden = isCustomer();
+  $('#fShop').hidden = !isAdmin();
+  $('#clearLogs').hidden = !isAdmin();
+  $('#filterLowBtn').hidden = isCustomer();
+
+  // فیلتر فروشگاه‌ها
+  const shops = getAllShops();
+  $('#filterShop').hidden = isSeller(); // فروشنده همیشه انبار خودش را می‌بیند
+  $('#filterShop').innerHTML = '<option value="all">🏪 همه فروشگاه‌ها</option>' +
+    shops.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+
+  $('#fShop').innerHTML = shops.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+
+  if (isCustomer() && stockFilter === 'low') {
+    stockFilter = 'all';
+    $$('.filter').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
+  }
+
+  $('#confirm').hidden = true; deleteId = null;
+  resetForm();
+
+  if ($('.menu-item.active').hidden) $('.menu-item[data-tab="inventory"]').click();
+  $('#subtitle').textContent = `(${$('.menu-item.active').textContent.trim()})`;
+
+  renderQuickAccounts();
+  render();
+}
+
+// رندر حساب‌های نمونه در مدال
+function renderQuickAccounts() {
+  const list = $('#quickAccountsList');
+  list.innerHTML = users.map(u => {
+    const isCur = u.id === currentUser.id;
+    const roleTxt = u.role === 'admin' ? 'مدیر کل' : u.role === 'seller' ? `فروشنده (${u.shop})` : 'خریدار';
+    return `
+      <button class="quick-user-btn" data-uid="${u.id}" style="${isCur ? 'border-color:var(--accent);font-weight:bold' : ''}">
+        <span>${esc(u.name)} <span style="font-size:11px;color:var(--muted)">[${roleTxt}]</span></span>
+        <span>${isCur ? '✓ فعال' : 'ورود'}</span>
+      </button>
+    `;
+  }).join('');
+}
+
+// کنترل پاپ‌آپ ورود
+$('#openAuthModal').onclick = () => { $('#authModal').hidden = false; };
+$('#closeAuthModal').onclick = () => { $('#authModal').hidden = true; };
+
+$('#quickAccountsList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-uid]');
+  if (!btn) return;
+  const uid = btn.dataset.uid;
+  if (uid === currentUser.id) { $('#authModal').hidden = true; return; }
+
+  if (Object.keys(drafts).length && !confirm('تغییرات ثبت‌نشده شما لغو خواهد شد. ادامه می‌دهید؟')) return;
+  Object.keys(drafts).forEach(id => delete drafts[id]);
+
+  currentUser = users.find(u => u.id === uid) || users[0];
+  $('#authModal').hidden = true;
+  applyUserAuth();
+  toast(`با موفقیت وارد حساب "${currentUser.name}" شدید ✅`);
+});
+
+// ثبت‌نام حساب جدید
+$('#regRole').onchange = e => {
+  $('#regShop').style.display = e.target.value === 'seller' ? 'block' : 'none';
+};
+
+$('#signupForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('#regName').value.trim();
+  const role = $('#regRole').value;
+  const shop = $('#regShop').value.trim();
+
+  if (!name) return alert('لطفاً نام خود را وارد کنید.');
+  if (role === 'seller' && !shop) return alert('لطفاً نام فروشگاه خود را وارد کنید.');
+
+  const newUser = {
+    id: 'u_' + Date.now(),
+    name: name,
+    role: role,
+    shop: role === 'seller' ? shop : ''
+  };
+
+  users.push(newUser);
+  currentUser = newUser;
+  $('#signupForm').reset();
+  $('#authModal').hidden = true;
+
+  applyUserAuth();
+  toast(`حساب کاربری جدید برای "${name}" ساخته شد و وارد شدید ✅`);
+});
 
 /* ============ تم و منو ============ */
 function setTheme(dark) {
@@ -576,6 +820,7 @@ list.addEventListener('click', e => {
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
   const tr = btn.closest('tr'), id = Number(tr.dataset.id), p = find(id);
+  if (!p || !canEdit(p)) return;
 
   switch (btn.dataset.act) {
     case 'inc':
@@ -592,6 +837,7 @@ list.addEventListener('click', e => {
       $('#fName').value = p.name;
       $('#fCategory').value = p.category;
       fillFormSubs(p.subcategory);
+      $('#fShop').value = p.shop;
       $('#fPrice').value = p.price; $('#fStock').value = p.stock;
       $('#submitBtn').textContent = 'ثبت تغییرات'; $('#submitBtn').className = 'info';
       $('#cancelEdit').hidden = false;
@@ -604,7 +850,7 @@ list.addEventListener('click', e => {
 
 $('#yes').onclick = () => {
   const p = find(deleteId);
-  if (p) {
+  if (p && canEdit(p)) {
     products = products.filter(x => x.id !== deleteId);
     delete drafts[deleteId];
     log('delete', `کالای "${p.name}" از لیست انبار حذف گردید.`);
@@ -629,6 +875,7 @@ function fillFormSubs(selected) {
 $('#fCategory').onchange = () => fillFormSubs();
 
 $('#search').oninput = render;
+
 $('#filterCategory').onchange = e => {
   catFilter = e.target.value; subFilter = 'all';
   const sel = $('#filterSubCategory');
@@ -637,9 +884,14 @@ $('#filterCategory').onchange = e => {
   render();
 };
 $('#filterSubCategory').onchange = e => { subFilter = e.target.value; render(); };
-$$('.filter').forEach(btn => btn.onclick = () => {
-  stockFilter = btn.dataset.filter;
-  $$('.filter').forEach(b => b.classList.toggle('active', b === btn));
+
+$('#filterShop').onchange = e => {
+  shopFilter = e.target.value;
+  render();
+};
+
+$$('.filter').forEach(btn => btn.onclick = () => {   stockFilter = btn.dataset.filter;   $$
+('.filter').forEach(b => b.classList.toggle('active', b === btn));
   render();
 });
 
@@ -661,25 +913,28 @@ $('#cancelEdit').onclick = resetForm;
 
 $('#productForm').addEventListener('submit', e => {
   e.preventDefault();
+  if (isCustomer()) return;
   const name = $('#fName').value.trim(), category = $('#fCategory').value, subcategory = $('#fSubCategory').value;
+  const shop = isSeller() ? currentUser.shop : $('#fShop').value;
   const priceStr = $('#fPrice').value.trim(), stockStr = $('#fStock').value.trim();
   const fail = t => toast(t, 'var(--danger)');
 
   if (!name || priceStr === '' || stockStr === '') return fail('خطا: لطفاً تمام فیلدها را وارد کنید!');
   const price = Number(priceStr), stock = Number(stockStr);
   if (price < 0 || stock < 0) return fail('خطا: قیمت و موجودی نمی‌توانند منفی باشند!');
-  if (products.some(p => p.id !== editId && p.name.toLowerCase() === name.toLowerCase())) {
+  if (products.some(p => p.id !== editId && p.shop === shop && p.name.toLowerCase() === name.toLowerCase())) {
     $('#fName').select();
-    return fail('خطا: محصولی با همین نام در انبار موجود است!');
+    return fail('خطا: این فروشگاه قبلاً کالایی با همین نام ثبت کرده است!');
   }
 
   if (editId !== null) {
-    Object.assign(find(editId), { name, category, subcategory, price, stock });
+    if (!canEdit(find(editId))) return fail('خطا: اجازه ویرایش این کالا را ندارید!');
+    Object.assign(find(editId), { name, category, subcategory, shop, price, stock });
     log('edit', `مشخصات کالای "${name}" به‌روزرسانی شد.`);
     toast('تغییرات با موفقیت ذخیره شد ✏️');
   } else {
-    products.push({ id: Date.now(), name, category, subcategory, price, stock });
-    log('add', `کالای "${name}" در دسته (${category} / ${subcategory}) ثبت شد.`);
+    products.push({ id: Date.now(), name, category, subcategory, shop, price, stock });
+    log('add', `کالای "${name}" در فروشگاه (${shop}) ثبت شد.`);
     toast('کالا با موفقیت به انبار افزوده شد ✅');
   }
   save(); render(); resetForm();
@@ -687,12 +942,14 @@ $('#productForm').addEventListener('submit', e => {
 
 /* ============ تاریخچه ============ */
 $('#clearLogs').onclick = () => {
+  if (!isAdmin()) return;
   if (!confirm('آیا از پاک کردن کل تاریخچه اطمینان دارید؟')) return;
   logs = []; save(); render();
 };
 
-/* ============ PDF (فقط با document.body.innerHTML، سازگار با Live Server) ============ */
+/* ============ PDF ایمن (سازگار با Live Server) ============ */
 $('#pdfBtn').onclick = () => {
+  if (!isAdmin()) return;
   if (!products.length) return alert('انبار در حال حاضر خالی است!');
   const win = window.open('', '_blank');
   if (!win) return alert('لطفاً اجازه باز شدن پنجره پاپ‌آپ را بدهید.');
@@ -703,13 +960,14 @@ $('#pdfBtn').onclick = () => {
     <tr style="${isLow(p) ? 'background:#fff1f2' : ''}">
       <td style="${cell}">${fa(i + 1)}</td>
       <td style="${cell};text-align:right;font-weight:bold">${esc(p.name)}</td>
+      <td style="${cell}">${esc(p.shop)}</td>
       <td style="${cell}">${esc(p.category)} - ${esc(p.subcategory)}</td>
       <td style="${cell}">${fa(p.price)} تومان</td>
       <td style="${cell}">${fa(p.stock)}</td>
       <td style="${cell}">${fa(p.price * p.stock)} تومان</td>
       <td style="${cell};color:${isLow(p) ? '#e11d48' : '#166534'}">${isLow(p) ? 'موجودی اندک' : 'کافی'}</td>
     </tr>`).join('');
-  const heads = ['ردیف', 'نام کالا', 'دسته‌بندی', 'قیمت واحد', 'موجودی', 'ارزش کل', 'وضعیت']
+  const heads = ['ردیف', 'نام کالا', 'فروشگاه', 'دسته‌بندی', 'قیمت واحد', 'موجودی', 'ارزش کل', 'وضعیت']
     .map(h => `<th style="${cell};background:#f1f5f9">${h}</th>`).join('');
 
   win.document.title = 'گزارش موجودی انبار';
@@ -720,14 +978,14 @@ $('#pdfBtn').onclick = () => {
   win.document.body.style.color = '#0f172a';
 
   win.document.body.innerHTML = `
-    <h2 style="text-align:center;border-bottom:2px solid #0284c7;padding-bottom:12px">گزارش رسمی و جامع موجودی انبار</h2>
+    <h2 style="text-align:center;border-bottom:2px solid #0284c7;padding-bottom:12px">گزارش جامع موجودی کل فروشگاه‌ها</h2>
     <div style="display:flex;justify-content:space-between;font-size:13px;color:#475569;margin:15px 0">
       <span>تاریخ چاپ: ${new Date().toLocaleString('fa-IR')}</span>
       <span>تعداد کل اقلام: ${fa(products.length)} کالا</span>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>
     <div style="margin-top:25px;border-top:2px dashed #94a3b8;padding-top:15px;display:flex;justify-content:space-between;font-weight:bold">
-      <div>ارزش کل انبار: ${fa(total)} تومان</div>
+      <div>ارزش کل بازار: ${fa(total)} تومان</div>
       <div>ارزش با ۱۰٪ تخفیف: ${fa(total * DISCOUNT)} تومان</div>
     </div>
   `;
@@ -740,7 +998,8 @@ $('#pdfBtn').onclick = () => {
 
 /* ============ پشتیبان، بازیابی، ریست ============ */
 $('#exportBtn').onclick = () => {
-  const data = JSON.stringify({ exportedAt: new Date().toISOString(), products, logs }, null, 2);
+  if (!isAdmin()) return;
+  const data = JSON.stringify({ exportedAt: new Date().toISOString(), products, logs, users }, null, 2);
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(new Blob([data], { type: 'application/json' })),
     download: `inventory-backup-${new Date().toISOString().slice(0, 10)}.json`
@@ -752,6 +1011,7 @@ $('#exportBtn').onclick = () => {
 };
 
 $('#importBtn').onclick = () => {
+  if (!isAdmin()) return;
   const file = $('#importFile').files[0];
   if (!file) return alert('لطفاً یک فایل پشتیبان JSON انتخاب کنید.');
   const reader = new FileReader();
@@ -761,9 +1021,10 @@ $('#importBtn').onclick = () => {
       if (!Array.isArray(data.products)) return alert('قالب فایل پشتیبان معتبر نیست.');
       products = normalize(data.products);
       logs = Array.isArray(data.logs) ? data.logs : [];
+      if (Array.isArray(data.users)) users = data.users;
       Object.keys(drafts).forEach(id => delete drafts[id]);
       log('system', 'داده‌ها با موفقیت از فایل پشتیبان بازگردانی شدند.');
-      render();
+      applyUserAuth();
       $('#importFile').value = '';
       alert('اطلاعات با موفقیت بازگردانی شد ✅');
     } catch { alert('خطا در پردازش فایل!'); }
@@ -772,6 +1033,7 @@ $('#importBtn').onclick = () => {
 };
 
 $('#resetBtn').onclick = () => {
+  if (!isAdmin()) return;
   if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
   products = []; logs = [];
   Object.keys(drafts).forEach(id => delete drafts[id]);
@@ -781,10 +1043,9 @@ $('#resetBtn').onclick = () => {
   alert('سامانه به تنظیمات کارخانه بازگشت.');
 };
 
-/* ============ جابجایی آزاد عناصر شناور (ماوس و لمس) ============ */
+/* ============ جابجایی عناصر شناور (ماوس و لمس) ============ */
 const clamp = (v, min, max) => Math.min(Math.max(v, min), Math.max(min, max));
 
-// عنصر را در مختصات داده‌شده می‌گذارد، به‌طوری که از صفحه بیرون نزند
 function place(el, x, y) {
   x = clamp(x, 0, window.innerWidth - el.offsetWidth);
   y = clamp(y, 0, window.innerHeight - el.offsetHeight);
@@ -797,13 +1058,12 @@ const savedPos = key => {
   return p && isFinite(p.x) && isFinite(p.y) ? p : null;
 };
 
-// handle را با ماوس یا انگشت بکشید تا el جابجا شود؛ اگر فقط کلیک شد، onTap اجرا می‌شود
 function makeDraggable(el, handle, storageKey, onTap) {
   let active = false, moved = false, startX = 0, startY = 0, origin = { x: 0, y: 0 };
 
   handle.addEventListener('pointerdown', e => {
-    if (e.button) return;                          // فقط کلیک چپ یا لمس
-    if (e.target.closest('[data-nodrag]')) return; // دکمه بستن
+    if (e.button) return;
+    if (e.target.closest('[data-nodrag]')) return;
     active = true; moved = false;
     startX = e.clientX; startY = e.clientY;
     origin = posOf(el);
@@ -813,7 +1073,7 @@ function makeDraggable(el, handle, storageKey, onTap) {
   handle.addEventListener('pointermove', e => {
     if (!active) return;
     const dx = e.clientX - startX, dy = e.clientY - startY;
-    if (!moved && Math.hypot(dx, dy) < 5) return;  // لرزش دست، جابجایی حساب نمی‌شود
+    if (!moved && Math.hypot(dx, dy) < 5) return;
     moved = true;
     el.classList.add('dragging');
     place(el, origin.x + dx, origin.y + dy);
@@ -898,7 +1158,6 @@ $('#calcKeys').addEventListener('click', e => {
   if (b) calcKey(b.dataset.k);
 });
 
-// باز و بسته کردن؛ بار اول کنار دایره نارنجی باز می‌شود
 function toggleCalc(open = calc.hidden) {
   calc.hidden = !open;
   if (!open) return;
@@ -909,15 +1168,11 @@ function toggleCalc(open = calc.hidden) {
   place(calc, f.x + 46 - calc.offsetWidth, below ? f.y + 56 : f.y - h - 10);
 }
 
-// دایره نارنجی: کشیدن = جابجایی، یک ضربه = باز و بسته شدن ماشین حساب
 makeDraggable(fab, fab, 'calcFabPos', () => toggleCalc());
-// ماشین حساب را از نوار نارنجی بالایش بکشید
 makeDraggable(calc, $('#calcHead'), 'calcPanelPos');
 $('#calcClose').onclick = () => toggleCalc(false);
-// فعال‌سازی با کیبورد (Enter یا Space روی دایره)
 fab.addEventListener('click', e => { if (e.detail === 0) toggleCalc(); });
 
-// میانبرهای کیبورد وقتی ماشین حساب باز است و در فیلد دیگری تایپ نمی‌کنید
 document.addEventListener('keydown', e => {
   if (calc.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.target.closest && e.target.closest('input, select, textarea')) return;
@@ -927,7 +1182,6 @@ document.addEventListener('keydown', e => {
   if (/^[0-9.+\-=×÷%]$/.test(k) || k === 'C' || k === '⌫') { e.preventDefault(); calcKey(k); }
 });
 
-// موقعیت اولیه دایره (پایین سمت راست) و اصلاح موقعیت با تغییر اندازه صفحه
 const fp = savedPos('calcFabPos') || { x: window.innerWidth - 70, y: window.innerHeight - 150 };
 place(fab, fp.x, fp.y);
 addEventListener('resize', () => {
@@ -937,7 +1191,7 @@ addEventListener('resize', () => {
 
 calcShow();
 initCategories();
-render();
+applyUserAuth();
 </script>
 </body>
 </html>
