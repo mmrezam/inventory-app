@@ -461,8 +461,8 @@
       <div class="form-container">
         <form id="add-product-form">
           <input type="text" id="new-name" placeholder="نام محصول" required>
-          <input type="number" id="new-price" placeholder="قیمت (تومان)" required>
-          <input type="number" id="new-stock" placeholder="موجودی" required>
+          <input type="number" id="new-price" placeholder="قیمت (تومان)" step="100000" min="0" required>
+<input type="number" id="new-stock" placeholder="موجودی" step="10" min="0" required>
           <button type="submit" id="submit-btn" class="btn-primary">اضافه کن</button>
           <button type="button" id="cancel-edit-btn" class="btn-cancel-edit">انصراف از ویرایش</button>
         </form>
