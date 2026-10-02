@@ -631,11 +631,37 @@
     });
 
     // ۴. ثبت کالای جدید از فرم
+   // ۴. ثبت کالای جدید از فرم با اعتبارسنجی نام تکراری
     form.addEventListener('submit', (event) => {
       event.preventDefault();
 
+      const nameInput = document.getElementById('new-name');
+      const enteredName = nameInput.value.trim();
+
+      // بررسی وجود نام تکراری در آرایه اقلام
+      const isDuplicate = productsArray.some(
+        product => product.name.trim().toLowerCase() === enteredName.toLowerCase()
+      );
+
+      if (isDuplicate) {
+        // ۱. نمایش پیام خطا با رنگ قرمز
+        successMessage.textContent = 'خطا: محصولی با این نام در انبار وجود دارد!';
+        successMessage.style.color = '#dc3545';
+
+        // ۲. برگرداندن نشانگر موس به فیلد نام و انتخاب متن جهت ویرایش
+        nameInput.focus();
+        nameInput.select();
+
+        // ۳. توقف کامل عملیات ثبت
+        setTimeout(() => {
+          successMessage.textContent = '';
+        }, 3500);
+        return;
+      }
+
+      // ساخت آبجکت محصول در صورت معتبر بودن نام
       const newProduct = {
-        name: document.getElementById('new-name').value.trim(),
+        name: enteredName,
         price: document.getElementById('new-price').value,
         stock: document.getElementById('new-stock').value
       };
@@ -643,19 +669,19 @@
       productsArray.push(newProduct);
       localStorage.setItem('inventoryData', JSON.stringify(productsArray));
 
-      // کلید حل مشکل: فراخوانی همزمان هر دو موتور رندر
+      // به‌روزرسانی همزمان جدول و آمار
       updateTable();
       updateAnalytics();
 
       form.reset();
 
-      // پیام بازخورد زمان‌دار
+      // نمایش پیام موفقیت با رنگ سبز استاندارد
       successMessage.textContent = 'عملیات با موفقیت انجام شد ✅';
+      successMessage.style.color = '#155724';
       setTimeout(() => {
         successMessage.textContent = '';
       }, 3000);
     });
-
     // --- ح) بارگذاری اولیه اطلاعات در لحظه باز شدن سایت ---
     updateTable();
     updateAnalytics();
