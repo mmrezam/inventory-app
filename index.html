@@ -159,7 +159,7 @@
   .badge.add { background: var(--ok); } .badge.edit { background: var(--accent); }
   .badge.delete { background: var(--danger); } .badge.system { background: var(--muted); }
 
-  /* پنجره مدال ورود و ثبت نام حساب کاربری */
+  /* پنجره‌های مدال ورود و سبد خرید */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 2500;
     display: flex; align-items: center; justify-content: center; padding: 15px;
@@ -288,13 +288,16 @@
 <div class="container">
   <h1>سیستم انبار هوشمند <small id="subtitle">(📦 مدیریت انبار)</small></h1>
 
-  <!-- کارت شیک مشخصات کاربر فعال -->
+  <!-- کارت مشخصات کاربر فعال و دکمه سبد خرید برای خریدار -->
   <div class="user-profile-bar">
     <div class="user-info">
       <span id="userGreeting">👤 سلام</span>
       <span id="userRoleBadge" class="role-badge admin">مدیر</span>
     </div>
-    <div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="openCartBtn" class="ok" style="padding:6px 14px;font-size:13px" hidden>
+        🛒 سبد خرید (<span id="cartCount">۰</span>)
+      </button>
       <button id="openAuthModal" class="info" style="padding:6px 12px;font-size:12.5px">تغییر حساب / ثبت‌نام</button>
     </div>
   </div>
@@ -428,6 +431,28 @@
   </div>
 </div>
 
+<!-- پنجره مدال سبد خرید مشتری -->
+<div id="cartModal" class="modal-overlay" hidden>
+  <div class="modal-box" style="max-width:540px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="margin:0;border:none;padding:0">🛒 سبد خرید شما</h3>
+      <button id="closeCartModal" class="gray" style="padding:2px 8px;font-size:18px">&times;</button>
+    </div>
+
+    <div id="cartItemsList" style="max-height:300px;overflow-y:auto;margin-bottom:15px;padding-left:4px"></div>
+
+    <div id="cartSummary" style="border-top:1px solid var(--border);padding-top:12px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:14.5px">
+      <span>مبلغ قابل پرداخت:</span>
+      <span id="cartTotalPrice" style="color:var(--accent);font-size:16.5px">۰ تومان</span>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button id="checkoutBtn" class="ok" style="flex:1;padding:10px 14px">تکمیل و ثبت نهایی سفارش</button>
+      <button id="clearCartBtn" class="gray" style="padding:10px 14px">خالی کردن سبد</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ============ دسته‌بندی‌ها ============ */
 const UNCAT = 'بدون دسته';
@@ -464,7 +489,6 @@ const DEFAULT_USERS = [
 
 let users = load('inventoryUsers', DEFAULT_USERS);
 let currentUser = load('currentAuthUser', users[0]);
-// اگر کاربر ذخیره‌شده معتبر نبود به پیش‌فرض برگردد
 if (!users.some(u => u.id === currentUser.id)) currentUser = users[0];
 
 const isAdmin = () => currentUser.role === 'admin';
@@ -473,7 +497,6 @@ const isCustomer = () => currentUser.role === 'customer';
 
 const canEdit = p => isAdmin() || (isSeller() && p.shop === currentUser.shop);
 
-// بازگرداندن تمام فروشگاه‌های ثبت‌شده در انبار یا توسط فروشنده‌ها
 function getAllShops() {
   const s = new Set();
   users.filter(u => u.role === 'seller' && u.shop).forEach(u => s.add(u.shop));
@@ -482,7 +505,6 @@ function getAllShops() {
   return Array.from(s);
 }
 
-// کالاهای قابل رویت بسته به نقش: فروشنده فقط کالاهای خود را می‌بیند
 const visible = () => isSeller() ? products.filter(p => p.shop === currentUser.shop) : products;
 
 const normalize = list => list.map((p, i) => ({
@@ -497,6 +519,7 @@ const normalize = list => list.map((p, i) => ({
 
 let products = normalize(load('inventoryData', []));
 let logs = load('inventoryLogs', []);
+let cart = load('customerCart', []); // سبد خرید اختصاصی
 let editId = null, deleteId = null, stockFilter = 'all', catFilter = 'all', subFilter = 'all', shopFilter = 'all';
 const drafts = {};
 
@@ -506,6 +529,7 @@ const save = () => {
   localStorage.setItem('inventoryLogs', JSON.stringify(logs));
   localStorage.setItem('inventoryUsers', JSON.stringify(users));
   localStorage.setItem('currentAuthUser', JSON.stringify(currentUser));
+  localStorage.setItem('customerCart', JSON.stringify(cart));
 };
 
 function log(type, message) {
@@ -520,6 +544,141 @@ function toast(text, color = 'var(--ok)') {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.hidden = true, 3000);
 }
+
+/* ============ مدیریت سبد خرید خریدار ============ */
+function updateCartBadge() {
+  const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  $('#cartCount').textContent = fa(totalCount);
+}
+
+function addToCart(productId) {
+  const product = find(productId);
+  if (!product || product.stock <= 0) {
+    return toast('متاسفانه این کالا در انبار ناموجود است!', 'var(--danger)');
+  }
+
+  const existingItem = cart.find(item => item.id === productId);
+  if (existingItem) {
+    if (existingItem.qty >= product.stock) {
+      return toast(`حداکثر موجودی این کالا در انبار (${fa(product.stock)} عدد) است!`, 'var(--danger)');
+    }
+    existingItem.qty += 1;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      shop: product.shop,
+      qty: 1
+    });
+  }
+
+  save();
+  updateCartBadge();
+  toast(`کالای "${product.name}" به سبد خرید اضافه شد 🛒`);
+}
+
+function renderCartModal() {
+  const listEl = $('#cartItemsList');
+  if (!cart.length) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:25px 0;">سبد خرید شما در حال حاضر خالی است.</div>';
+    $('#cartTotalPrice').textContent = '۰ تومان';
+    return;
+  }
+
+  let grandTotal = 0;
+  listEl.innerHTML = cart.map(item => {
+    const itemSubtotal = item.price * item.qty;
+    grandTotal += itemSubtotal;
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:10px">
+        <div style="flex:1">
+          <div style="font-weight:bold;font-size:13.5px">${esc(item.name)}</div>
+          <div style="font-size:11.5px;color:var(--muted)">${esc(item.shop)} | هر عدد: ${fa(item.price)} ت</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button type="button" class="qty" onclick="changeCartItemQty(${item.id}, -1)">-</button>
+          <span style="min-width:24px;text-align:center;font-weight:bold;font-size:13px">${fa(item.qty)}</span>
+          <button type="button" class="qty" onclick="changeCartItemQty(${item.id}, 1)">+</button>
+          <button type="button" class="danger" style="padding:4px 8px;font-size:12px;margin-right:2px" onclick="removeCartItem(${item.id})" title="حذف کالا">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  $('#cartTotalPrice').textContent = `${fa(grandTotal)} تومان`;
+}
+
+window.changeCartItemQty = function(id, delta) {
+  const item = cart.find(x => x.id === id);
+  const product = find(id);
+  if (!item || !product) return;
+
+  const newQty = item.qty + delta;
+  if (newQty <= 0) {
+    removeCartItem(id);
+    return;
+  }
+  if (newQty > product.stock) {
+    return toast(`موجودی کالا در انبار (${fa(product.stock)} عدد) است!`, 'var(--danger)');
+  }
+
+  item.qty = newQty;
+  save();
+  updateCartBadge();
+  renderCartModal();
+};
+
+window.removeCartItem = function(id) {
+  cart = cart.filter(x => x.id !== id);
+  save();
+  updateCartBadge();
+  renderCartModal();
+};
+
+$('#openCartBtn').onclick = () => {
+  renderCartModal();
+  $('#cartModal').hidden = false;
+};
+$('#closeCartModal').onclick = () => { $('#cartModal').hidden = true; };
+
+$('#clearCartBtn').onclick = () => {
+  if (!cart.length) return;
+  if (!confirm('آیا از خالی کردن کل سبد خرید اطمینان دارید؟')) return;
+  cart = [];
+  save();
+  updateCartBadge();
+  renderCartModal();
+};
+
+// ثبت نهایی سفارش، کسر موجودی و ثبت لاگ
+$('#checkoutBtn').onclick = () => {
+  if (!cart.length) return toast('سبد خرید شما خالی است!', 'var(--danger)');
+
+  // بازبینی مجدد موجودی‌ها پیش از کسر
+  for (const item of cart) {
+    const prod = find(item.id);
+    if (!prod || prod.stock < item.qty) {
+      return alert(`موجودی کالای "${item.name}" تغییر کرده و کافی نیست!`);
+    }
+  }
+
+  // کسر موجودی
+  const boughtItemsSummary = [];
+  cart.forEach(item => {
+    const prod = find(item.id);
+    prod.stock -= item.qty;
+    boughtItemsSummary.push(`${item.name} (${item.qty} عدد از ${item.shop})`);
+  });
+
+  log('edit', `خرید آنلاین موفق توسط ${currentUser.name}: ${boughtItemsSummary.join('، ')}.`);
+  cart = [];
+  save();
+  updateCartBadge();
+  $('#cartModal').hidden = true;
+  render();
+  toast('سفارش شما با موفقیت ثبت شد و از موجودی انبار کسر گردید 🎉');
+};
 
 /* ============ پیش‌نویس ردیف‌ها ============ */
 const same = (p, d) => d.stock.trim() !== '' && Number(d.stock) === p.stock && d.category === p.category && d.subcategory === p.subcategory;
@@ -597,7 +756,7 @@ function render() {
     (shopFilter === 'all' || p.shop === shopFilter));
 
   $('#productHead').innerHTML = isCustomer()
-    ? '<tr><th>نام کالا</th><th>فروشگاه مبدا</th><th>دسته‌بندی</th><th>قیمت</th><th>وضعیت موجودی</th></tr>'
+    ? '<tr><th>نام کالا</th><th>فروشگاه مبدا</th><th>دسته‌بندی</th><th>قیمت</th><th>وضعیت</th><th>خرید</th></tr>'
     : '<tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr>';
 
   const status = p => p.stock <= 0
@@ -605,7 +764,7 @@ function render() {
     : isLow(p) ? '<b style="color:var(--warn)">موجودی اندک</b>' : '<b style="color:var(--ok)">موجود</b>';
 
   $('#productList').innerHTML = !rows.length
-    ? `<tr><td colspan="5" class="empty">هیچ کالایی با این مشخصات یافت نشد.</td></tr>`
+    ? `<tr><td colspan="${isCustomer() ? 6 : 5}" class="empty">هیچ کالایی با این مشخصات یافت نشد.</td></tr>`
     : isCustomer()
     ? rows.map(p => `<tr>
         <td class="name">${esc(p.name)}</td>
@@ -613,6 +772,11 @@ function render() {
         <td>${esc(p.category)}</td>
         <td>${fa(p.price)} تومان</td>
         <td>${status(p)}</td>
+        <td>
+          <button class="ok" data-act="add-to-cart" data-id="${p.id}" ${p.stock <= 0 ? 'disabled style="opacity:0.45;cursor:not-allowed"' : ''}>
+            🛒 افزودن
+          </button>
+        </td>
       </tr>`).join('')
     : rows.map(p => {
       const d = draftOf(p), dirty = p.id in drafts;
@@ -668,7 +832,6 @@ function render() {
 /* ============ مدیریت ورود و تغییر کاربر ============ */
 function applyUserAuth() {
   save();
-  // نمایش خوش‌آمدگویی و نام کاربر
   const shopLabel = currentUser.shop ? ` (${currentUser.shop})` : '';
   $('#userGreeting').textContent = `👤 سلام، ${currentUser.name}${shopLabel}`;
 
@@ -676,7 +839,6 @@ function applyUserAuth() {
   badge.className = 'role-badge ' + currentUser.role;
   badge.textContent = isAdmin() ? '👑 مدیر کل' : isSeller() ? '🏪 فروشنده' : '🛍️ خریدار';
 
-  // محدودیت تب‌ها
   const allowed = isAdmin() ? ['inventory', 'analytics', 'history', 'backup']
     : isSeller() ? ['inventory', 'analytics', 'history'] : ['inventory'];
 
@@ -687,10 +849,10 @@ function applyUserAuth() {
   $('#fShop').hidden = !isAdmin();
   $('#clearLogs').hidden = !isAdmin();
   $('#filterLowBtn').hidden = isCustomer();
+  $('#openCartBtn').hidden = !isCustomer(); // فقط برای خریدار نمایش داده می‌شود
 
-  // فیلتر فروشگاه‌ها
   const shops = getAllShops();
-  $('#filterShop').hidden = isSeller(); // فروشنده همیشه انبار خودش را می‌بیند
+  $('#filterShop').hidden = isSeller();
   $('#filterShop').innerHTML = '<option value="all">🏪 همه فروشگاه‌ها</option>' +
     shops.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
 
@@ -707,11 +869,11 @@ function applyUserAuth() {
   if ($('.menu-item.active').hidden) $('.menu-item[data-tab="inventory"]').click();
   $('#subtitle').textContent = `(${$('.menu-item.active').textContent.trim()})`;
 
+  updateCartBadge();
   renderQuickAccounts();
   render();
 }
 
-// رندر حساب‌های نمونه در مدال
 function renderQuickAccounts() {
   const list = $('#quickAccountsList');
   list.innerHTML = users.map(u => {
@@ -726,7 +888,6 @@ function renderQuickAccounts() {
   }).join('');
 }
 
-// کنترل پاپ‌آپ ورود
 $('#openAuthModal').onclick = () => { $('#authModal').hidden = false; };
 $('#closeAuthModal').onclick = () => { $('#authModal').hidden = true; };
 
@@ -745,7 +906,6 @@ $('#quickAccountsList').addEventListener('click', e => {
   toast(`با موفقیت وارد حساب "${currentUser.name}" شدید ✅`);
 });
 
-// ثبت‌نام حساب جدید
 $('#regRole').onchange = e => {
   $('#regShop').style.display = e.target.value === 'seller' ? 'block' : 'none';
 };
@@ -819,6 +979,13 @@ list.addEventListener('keydown', e => {
 list.addEventListener('click', e => {
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
+
+  // عملکرد خرید برای خریدار
+  if (btn.dataset.act === 'add-to-cart') {
+    addToCart(Number(btn.dataset.id));
+    return;
+  }
+
   const tr = btn.closest('tr'), id = Number(tr.dataset.id), p = find(id);
   if (!p || !canEdit(p)) return;
 
@@ -1035,10 +1202,11 @@ $('#importBtn').onclick = () => {
 $('#resetBtn').onclick = () => {
   if (!isAdmin()) return;
   if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
-  products = []; logs = [];
+  products = []; logs = []; cart = [];
   Object.keys(drafts).forEach(id => delete drafts[id]);
   localStorage.removeItem('inventoryData');
   localStorage.removeItem('inventoryLogs');
+  localStorage.removeItem('customerCart');
   render();
   alert('سامانه به تنظیمات کارخانه بازگشت.');
 };
