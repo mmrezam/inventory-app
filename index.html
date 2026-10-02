@@ -8,6 +8,7 @@
   :root {
     --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --head:#f1f5f9;
     --input:#fff; --accent:#0284c7; --ok:#10b981; --danger:#ef4444; --alert:#fff1f2; --dirty:#fffbeb; --warn:#eab308;
+    --orange:#f97316;
   }
   body.dark {
     --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --border:#334155; --head:#334155;
@@ -15,7 +16,7 @@
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  
+
   body {
     font-family: Tahoma, 'Segoe UI', sans-serif;
     margin: 0;
@@ -26,7 +27,7 @@
     overflow-x: hidden;
   }
   .container { max-width: 1100px; margin: 0 auto; }
-  
+
   h1 { margin: 45px 0 20px; font-size: 24px; }
   h1 small { font-size: .65em; color: var(--muted); font-weight: normal; margin-right: 10px; }
 
@@ -61,8 +62,7 @@
   /* تب‌ها و کارت‌ها */
   .tab { display: none; } .tab.active { display: block; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
-  
-  /* چیدمان منعطف گرید فرم */
+
   .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -95,7 +95,7 @@
   }
   .dirty-bar span { flex: 1; }
 
-  /* محفظه اختصاصی اسکرول نرم جدول در موبایل */
+  /* جدول با اسکرول افقی نرم در موبایل */
   .table-wrap {
     width: 100%;
     overflow-x: auto;
@@ -105,20 +105,19 @@
     border: 1px solid var(--border);
     background: var(--card);
   }
-  
   table { width: 100%; border-collapse: collapse; min-width: 720px; }
   th, td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 13.5px; }
   th { background: var(--head); }
   tr.dirty td { background: var(--dirty); }
   td.name { font-weight: bold; text-align: right; padding-right: 15px; }
-  
+
   .cat-box { display: flex; flex-direction: column; gap: 5px; min-width: 170px; }
   .cat-box select { padding: 4px 8px; font-size: 12px; }
   .cat-box .row-cat { font-weight: bold; color: var(--accent); }
   .low { color: var(--danger); font-size: 12px; margin-right: 6px; font-weight: normal; }
   .empty { color: var(--muted); padding: 25px; }
   .btn-row { display: inline-flex; gap: 6px; }
-  
+
   .stock { display: inline-flex; align-items: center; gap: 5px; }
   .qty { width: 28px; height: 28px; padding: 0; font-size: 16px; font-weight: bold; background: var(--head); color: var(--text); border: 1px solid var(--border); }
   .stock input { width: 65px; padding: 4px; text-align: center; font-weight: bold; font-size: 13px; }
@@ -141,25 +140,51 @@
   .badge.add { background: var(--ok); } .badge.edit { background: var(--accent); }
   .badge.delete { background: var(--danger); } .badge.system { background: var(--muted); }
 
-  /* ========================================================
-     قوانین ویژه ریسپانسیو (مخصوص موبایل و تبلت: زیر ۷۶۸ پیکسل)
-     ======================================================== */
+  /* ========== دایره نارنجی و ماشین حساب شناور ========== */
+  .calc-fab {
+    position: fixed; left: 0; top: 0; width: 46px; height: 46px; padding: 0; border-radius: 50%;
+    background: var(--orange); color: #fff; font-size: 21px; z-index: 1100;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(249,115,22,.55);
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  .calc-fab.dragging { cursor: grabbing; opacity: .85; transform: scale(1.1); }
+
+  .calc {
+    position: fixed; left: 0; top: 0; width: min(260px, 92vw); z-index: 1200; direction: ltr;
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.3); overflow: hidden;
+  }
+  .calc.dragging { opacity: .92; }
+  .calc-head {
+    display: flex; justify-content: space-between; align-items: center; padding: 8px 12px;
+    background: var(--orange); color: #fff; font-size: 13px; font-weight: bold;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  .calc-head button { background: none; padding: 0 4px; font-size: 22px; line-height: 1; }
+  .calc-screen { padding: 10px 14px; text-align: right; background: var(--head); }
+  .calc-expr { min-height: 18px; font-size: 12px; color: var(--muted); }
+  .calc-val { font-size: 28px; font-weight: bold; overflow-x: auto; white-space: nowrap; }
+  .calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px; }
+  .calc-keys button { padding: 12px 0; font-size: 17px; background: var(--head); color: var(--text); border: 1px solid var(--border); }
+  .calc-keys .fn { background: var(--muted); color: #fff; border-color: var(--muted); }
+  .calc-keys .op { background: #fb923c; color: #fff; border-color: #fb923c; }
+  .calc-keys .eq { background: var(--ok); color: #fff; border-color: var(--ok); }
+
+  /* موبایل و تبلت */
   @media (max-width: 768px) {
     body { padding: 12px; }
     h1 { font-size: 20px; margin: 42px 0 16px; }
     h1 small { display: block; margin: 4px 0 0 0; }
 
-    /* فونت ۱۶ پیکسل برای جلوگیری از زوم ناخواسته موبایل موقع فوکوس */
     input[type=text], input[type=number], select { font-size: 16px; padding: 10px; }
 
-    /* فرم در گوشی تک‌ستونه می‌شود */
     .form-grid { grid-template-columns: 1fr; gap: 10px; }
     .form-actions button { flex: 1; padding: 12px; font-size: 15px; }
 
-    /* نوار ابزار در گوشی تمام‌عرض می‌شود */
     .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
     .toolbar input, .toolbar select, .toolbar button { width: 100% !important; min-width: 0; }
-    
+
     .dirty-bar { flex-direction: column; text-align: center; }
     .dirty-bar button { width: 100%; padding: 10px; }
 
@@ -174,6 +199,42 @@
 <button id="themeToggle" class="float" title="تغییر تم">🌙</button>
 <button id="menuToggle" class="float" title="منوی بخش‌ها">☰</button>
 <div id="toast" class="toast" hidden></div>
+
+<!-- دایره نارنجی: بکشید تا جابجا شود، یک‌بار بزنید تا ماشین حساب باز شود -->
+<button id="calcFab" class="calc-fab" title="ماشین حساب (برای جابجایی بکشید)" aria-label="ماشین حساب">🧮</button>
+
+<div id="calc" class="calc" hidden>
+  <div id="calcHead" class="calc-head">
+    <span dir="rtl">🧮 ماشین حساب</span>
+    <button id="calcClose" data-nodrag title="بستن">&times;</button>
+  </div>
+  <div class="calc-screen">
+    <div id="calcExpr" class="calc-expr"></div>
+    <div id="calcVal" class="calc-val">0</div>
+  </div>
+  <div id="calcKeys" class="calc-keys">
+    <button data-k="C" class="fn">C</button>
+    <button data-k="⌫" class="fn">⌫</button>
+    <button data-k="%" class="fn">%</button>
+    <button data-k="÷" class="op">÷</button>
+    <button data-k="7">7</button>
+    <button data-k="8">8</button>
+    <button data-k="9">9</button>
+    <button data-k="×" class="op">×</button>
+    <button data-k="4">4</button>
+    <button data-k="5">5</button>
+    <button data-k="6">6</button>
+    <button data-k="-" class="op">−</button>
+    <button data-k="1">1</button>
+    <button data-k="2">2</button>
+    <button data-k="3">3</button>
+    <button data-k="+" class="op">+</button>
+    <button data-k="±" class="fn">±</button>
+    <button data-k="0">0</button>
+    <button data-k=".">.</button>
+    <button data-k="=" class="eq">=</button>
+  </div>
+</div>
 
 <div id="overlay" class="overlay" hidden></div>
 <nav id="sideMenu" class="side-menu">
@@ -221,7 +282,6 @@
       <button id="undoAll" class="gray">لغو همه</button>
     </div>
 
-    <!-- جدول محافظت‌شده داخل محفظه لمسی مخصوص موبایل -->
     <div class="table-wrap">
       <table>
         <thead><tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr></thead>
@@ -314,6 +374,7 @@ const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(k
 const isLow = p => p.stock < LOW_STOCK;
 const subsOf = cat => CATEGORIES[cat] || [];
 
+// گزینه‌های select؛ اگر مقدار فعلی در لیست نبود (مثلاً از فایل import) اضافه می‌شود
 const options = (list, selected) =>
   (list.includes(selected) ? list : [...list, selected]).map(v => `<option value="${esc(v)}"${v === selected ? ' selected' : ''}>${esc(v)}</option>`).join('');
 
@@ -329,7 +390,7 @@ const normalize = list => list.map((p, i) => ({
 let products = normalize(load('inventoryData', []));
 let logs = load('inventoryLogs', []);
 let editId = null, deleteId = null, stockFilter = 'all', catFilter = 'all', subFilter = 'all';
-const drafts = {};
+const drafts = {};   // تغییرات ثبت‌نشده‌ی هر ردیف: { id: {stock, category, subcategory} }
 
 const find = id => products.find(p => p.id === id);
 const save = () => {
@@ -369,6 +430,7 @@ function updateDirtyBar() {
   $('#dirtyText').textContent = `${fa(n)} ردیف تغییر ثبت‌نشده دارد`;
 }
 
+// تغییرات یک ردیف را اعمال می‌کند: 'ok' | 'invalid' | 'none'
 function commit(id) {
   const p = find(id), d = drafts[id];
   if (!p || !d) return 'none';
@@ -405,6 +467,7 @@ $('#undoAll').onclick = () => {
   render();
 };
 
+// هشدار هنگام بستن صفحه با تغییرات ثبت‌نشده
 addEventListener('beforeunload', e => { if (Object.keys(drafts).length) { e.preventDefault(); e.returnValue = ''; } });
 
 /* ============ رندر ============ */
@@ -479,7 +542,12 @@ $('#themeToggle').onclick = () => setTheme(!document.body.classList.contains('da
 
 const toggleMenu = open => { $('#sideMenu').classList.toggle('open', open); $('#overlay').hidden = !open; };
 $('#menuToggle').onclick = () => toggleMenu(true);
-$('#closeMenu').onclick = $('#overlay').onclick = () => toggleMenu(false);  $$('.menu-item').forEach(item => item.onclick = () => {$$('.menu-item').forEach(i => i.classList.toggle('active', i === item));$$('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + item.dataset.tab));$('#subtitle').textContent = `(${item.textContent.trim()})`;
+$('#closeMenu').onclick = $('#overlay').onclick = () => toggleMenu(false);
+
+$$('.menu-item').forEach(item => item.onclick = () => {
+  $$('.menu-item').forEach(i => i.classList.toggle('active', i === item));
+  $$('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + item.dataset.tab));
+  $('#subtitle').textContent = `(${item.textContent.trim()})`;
   toggleMenu(false);
 });
 
@@ -569,8 +637,9 @@ $('#filterCategory').onchange = e => {
   render();
 };
 $('#filterSubCategory').onchange = e => { subFilter = e.target.value; render(); };
-$$('.filter').forEach(btn => btn.onclick = () => {   stockFilter = btn.dataset.filter;   $$
-('.filter').forEach(b => b.classList.toggle('active', b === btn));
+$$('.filter').forEach(btn => btn.onclick = () => {
+  stockFilter = btn.dataset.filter;
+  $$('.filter').forEach(b => b.classList.toggle('active', b === btn));
   render();
 });
 
@@ -622,7 +691,7 @@ $('#clearLogs').onclick = () => {
   logs = []; save(); render();
 };
 
-/* ============ PDF ایمن بدون تداخل با Live Server ============ */
+/* ============ PDF (فقط با document.body.innerHTML، سازگار با Live Server) ============ */
 $('#pdfBtn').onclick = () => {
   if (!products.length) return alert('انبار در حال حاضر خالی است!');
   const win = window.open('', '_blank');
@@ -703,7 +772,7 @@ $('#importBtn').onclick = () => {
 };
 
 $('#resetBtn').onclick = () => {
-  if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
+  if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
   products = []; logs = [];
   Object.keys(drafts).forEach(id => delete drafts[id]);
   localStorage.removeItem('inventoryData');
@@ -712,6 +781,161 @@ $('#resetBtn').onclick = () => {
   alert('سامانه به تنظیمات کارخانه بازگشت.');
 };
 
+/* ============ جابجایی آزاد عناصر شناور (ماوس و لمس) ============ */
+const clamp = (v, min, max) => Math.min(Math.max(v, min), Math.max(min, max));
+
+// عنصر را در مختصات داده‌شده می‌گذارد، به‌طوری که از صفحه بیرون نزند
+function place(el, x, y) {
+  x = clamp(x, 0, window.innerWidth - el.offsetWidth);
+  y = clamp(y, 0, window.innerHeight - el.offsetHeight);
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+}
+const posOf = el => ({ x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0 });
+const savedPos = key => {
+  const p = load(key, null);
+  return p && isFinite(p.x) && isFinite(p.y) ? p : null;
+};
+
+// handle را با ماوس یا انگشت بکشید تا el جابجا شود؛ اگر فقط کلیک شد، onTap اجرا می‌شود
+function makeDraggable(el, handle, storageKey, onTap) {
+  let active = false, moved = false, startX = 0, startY = 0, origin = { x: 0, y: 0 };
+
+  handle.addEventListener('pointerdown', e => {
+    if (e.button) return;                          // فقط کلیک چپ یا لمس
+    if (e.target.closest('[data-nodrag]')) return; // دکمه بستن
+    active = true; moved = false;
+    startX = e.clientX; startY = e.clientY;
+    origin = posOf(el);
+    if (handle.setPointerCapture) handle.setPointerCapture(e.pointerId);
+  });
+
+  handle.addEventListener('pointermove', e => {
+    if (!active) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if (!moved && Math.hypot(dx, dy) < 5) return;  // لرزش دست، جابجایی حساب نمی‌شود
+    moved = true;
+    el.classList.add('dragging');
+    place(el, origin.x + dx, origin.y + dy);
+  });
+
+  const finish = isTap => {
+    if (!active) return;
+    active = false;
+    el.classList.remove('dragging');
+    if (moved) localStorage.setItem(storageKey, JSON.stringify(posOf(el)));
+    else if (isTap && onTap) onTap();
+  };
+  handle.addEventListener('pointerup', () => finish(true));
+  handle.addEventListener('pointercancel', () => finish(false));
+}
+
+/* ============ ماشین حساب ============ */
+const fab = $('#calcFab'), calc = $('#calc');
+const calcState = { cur: '0', prev: null, op: null, fresh: false, expr: '' };
+const fmt = n => String(parseFloat(Number(n).toPrecision(12)));
+
+function calcShow() {
+  $('#calcVal').textContent = calcState.cur;
+  $('#calcExpr').textContent = calcState.expr;
+}
+function calcReset() {
+  Object.assign(calcState, { cur: '0', prev: null, op: null, fresh: false, expr: '' });
+}
+function calcError() {
+  calcReset();
+  calcState.cur = 'خطا';
+  calcShow();
+}
+function calcOp(a, op, b) {
+  a = Number(a); b = Number(b);
+  if (op === '+') return a + b;
+  if (op === '-') return a - b;
+  if (op === '×') return a * b;
+  if (op === '÷') return b === 0 ? null : a / b;
+  return b;
+}
+
+function calcKey(k) {
+  const s = calcState;
+  if (s.cur === 'خطا') calcReset();
+
+  if (/^\d$/.test(k)) {
+    if (s.fresh) { s.cur = k; s.fresh = false; if (!s.op) s.expr = ''; }
+    else if (s.cur === '0') s.cur = k;
+    else if (s.cur.length < 15) s.cur += k;
+  } else if (k === '.') {
+    if (s.fresh) { s.cur = '0.'; s.fresh = false; if (!s.op) s.expr = ''; }
+    else if (!s.cur.includes('.')) s.cur += '.';
+  } else if (k === '+' || k === '-' || k === '×' || k === '÷') {
+    if (s.op && !s.fresh) {
+      const r = calcOp(s.prev, s.op, s.cur);
+      if (r === null) return calcError();
+      s.cur = fmt(r);
+    }
+    s.prev = s.cur; s.op = k; s.fresh = true;
+    s.expr = `${s.prev} ${k}`;
+  } else if (k === '=') {
+    if (!s.op) return;
+    const r = calcOp(s.prev, s.op, s.cur);
+    if (r === null) return calcError();
+    s.expr = `${s.prev} ${s.op} ${s.cur} =`;
+    s.cur = fmt(r); s.prev = null; s.op = null; s.fresh = true;
+  } else if (k === 'C') {
+    calcReset();
+  } else if (k === '⌫') {
+    if (!s.fresh) s.cur = s.cur.length > 1 && !(s.cur.length === 2 && s.cur[0] === '-') ? s.cur.slice(0, -1) : '0';
+  } else if (k === '%') {
+    s.cur = fmt(Number(s.cur) / 100);
+  } else if (k === '±') {
+    if (s.cur !== '0') s.cur = s.cur[0] === '-' ? s.cur.slice(1) : '-' + s.cur;
+  }
+  calcShow();
+}
+
+$('#calcKeys').addEventListener('click', e => {
+  const b = e.target.closest('[data-k]');
+  if (b) calcKey(b.dataset.k);
+});
+
+// باز و بسته کردن؛ بار اول کنار دایره نارنجی باز می‌شود
+function toggleCalc(open = calc.hidden) {
+  calc.hidden = !open;
+  if (!open) return;
+  const sp = savedPos('calcPanelPos');
+  if (sp) return place(calc, sp.x, sp.y);
+  const f = posOf(fab), h = calc.offsetHeight;
+  const below = f.y + 56 + h < window.innerHeight;
+  place(calc, f.x + 46 - calc.offsetWidth, below ? f.y + 56 : f.y - h - 10);
+}
+
+// دایره نارنجی: کشیدن = جابجایی، یک ضربه = باز و بسته شدن ماشین حساب
+makeDraggable(fab, fab, 'calcFabPos', () => toggleCalc());
+// ماشین حساب را از نوار نارنجی بالایش بکشید
+makeDraggable(calc, $('#calcHead'), 'calcPanelPos');
+$('#calcClose').onclick = () => toggleCalc(false);
+// فعال‌سازی با کیبورد (Enter یا Space روی دایره)
+fab.addEventListener('click', e => { if (e.detail === 0) toggleCalc(); });
+
+// میانبرهای کیبورد وقتی ماشین حساب باز است و در فیلد دیگری تایپ نمی‌کنید
+document.addEventListener('keydown', e => {
+  if (calc.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.closest && e.target.closest('input, select, textarea')) return;
+  const map = { '*': '×', '/': '÷', Enter: '=', Backspace: '⌫', Delete: 'C', c: 'C', C: 'C' };
+  const k = map[e.key] || e.key;
+  if (e.key === 'Escape') return toggleCalc(false);
+  if (/^[0-9.+\-=×÷%]$/.test(k) || k === 'C' || k === '⌫') { e.preventDefault(); calcKey(k); }
+});
+
+// موقعیت اولیه دایره (پایین سمت راست) و اصلاح موقعیت با تغییر اندازه صفحه
+const fp = savedPos('calcFabPos') || { x: window.innerWidth - 70, y: window.innerHeight - 150 };
+place(fab, fp.x, fp.y);
+addEventListener('resize', () => {
+  const f = posOf(fab); place(fab, f.x, f.y);
+  if (!calc.hidden) { const c = posOf(calc); place(calc, c.x, c.y); }
+});
+
+calcShow();
 initCategories();
 render();
 </script>
