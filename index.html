@@ -152,7 +152,7 @@
     }
 
     /* =========================================================
-       ۴. کنترل نمایش تب‌ها (معماری SPA)
+       ۴. مدیریت نمایش تب‌ها (معماری SPA)
        ========================================================= */
     .tab-content {
       display: none;
@@ -201,6 +201,23 @@
       border: none;
     }
 
+    /* دکمه سبز ثبت در ردیف عملیات */
+    .btn-save {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      margin-left: 6px;
+      font-weight: bold;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
     .btn-edit {
       background: #0284c7;
       color: white;
@@ -225,21 +242,23 @@
       margin-right: 6px;
     }
 
-    /* دکمه‌های سریع + و - برای موجودی */
+    /* کنترل‌های شمارشگر موجودی در جدول */
     .stock-control {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
     }
 
     .btn-quick-stock {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border: 1px solid #cbd5e1;
       background: #f1f5f9;
       color: #0f172a;
       border-radius: 4px;
       font-weight: bold;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -249,6 +268,18 @@
 
     .btn-quick-stock:hover {
       background: #e2e8f0;
+    }
+
+    .table-stock-input {
+      width: 70px;
+      padding: 5px;
+      text-align: center;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 0 !important;
     }
 
     /* نوار ابزار جستجو و فیلتر */
@@ -456,10 +487,21 @@
     }
 
     body.dark-mode input[type="text"], 
-    body.dark-mode input[type="number"] {
+    body.dark-mode input[type="number"],
+    body.dark-mode .table-stock-input {
       background-color: #0f172a;
       color: #ffffff;
       border-color: #334155;
+    }
+
+    body.dark-mode .btn-quick-stock {
+      background: #334155;
+      border-color: #475569;
+      color: #ffffff;
+    }
+
+    body.dark-mode .btn-quick-stock:hover {
+      background: #475569;
     }
 
     body.dark-mode .filter-btn {
@@ -471,16 +513,6 @@
     body.dark-mode .filter-btn.active {
       background: #0284c7;
       color: #ffffff;
-    }
-
-    body.dark-mode .btn-quick-stock {
-      background: #334155;
-      border-color: #475569;
-      color: #ffffff;
-    }
-
-    body.dark-mode .btn-quick-stock:hover {
-      background: #475569;
     }
 
     body.dark-mode th {
@@ -524,7 +556,7 @@
 </head>
 <body>
 
-  <!-- دکمه‌های شناور تم و منو -->
+  <!-- دکمه‌های شناور -->
   <button id="themeToggle" class="theme-btn" title="تغییر تم">🌙</button>
   <button id="menuToggle" class="menu-btn" title="منوی بخش‌ها">☰</button>
 
@@ -551,17 +583,18 @@
          ========================================== -->
     <div id="tab-inventory" class="tab-content active">
       <div class="form-container">
-        <form id="add-product-form">
+        <!-- فرم با step="any" تا اجازه ثبت هر عدد دلخواه (مانند ۲۶) را بدون گیر دادن به مضارب بدهد -->
+        <form id="add-product-form" novalidate>
           <input type="text" id="new-name" placeholder="نام محصول" required>
-          <input type="number" id="new-price" placeholder="قیمت (تومان)" step="100000" min="0" required>
-          <input type="number" id="new-stock" placeholder="موجودی" step="10" min="0" required>
+          <input type="number" id="new-price" placeholder="قیمت (تومان)" min="0" step="any" required>
+          <input type="number" id="new-stock" placeholder="موجودی" min="0" step="any" required>
           <button type="submit" id="submit-btn" class="btn-primary">اضافه کن</button>
           <button type="button" id="cancel-edit-btn" class="btn-cancel-edit">انصراف از ویرایش</button>
         </form>
         <div id="success-message"></div>
       </div>
 
-      <!-- نوار جستجو و فیلترها -->
+      <!-- نوار ابزار جستجو و فیلترها -->
       <div class="toolbar-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 جستجو در نام کالاها...">
         <button id="filterAllBtn" class="filter-btn active">همه کالاها</button>
@@ -575,7 +608,7 @@
           <tr>
             <th>نام محصول</th>
             <th>قیمت واحد</th>
-            <th>موجودی و تغییر سریع</th>
+            <th>موجودی</th>
             <th>عملیات</th>
           </tr>
         </thead>
@@ -682,7 +715,7 @@
     let logsArray = JSON.parse(localStorage.getItem('inventoryLogs')) || [];
     let rowToDelete = null;
     let editIndex = null;
-    let currentFilter = 'all'; // وضعیت فیلتر: 'all' یا 'lowStock'
+    let currentFilter = 'all';
 
     const tableBody = document.getElementById('product-list');
     const logsTableBody = document.getElementById('logs-list');
@@ -704,6 +737,34 @@
     const searchInput = document.getElementById('searchInput');
     const filterAllBtn = document.getElementById('filterAllBtn');
     const filterLowStockBtn = document.getElementById('filterLowStockBtn');
+
+    // گام‌های بالا و پایین در فرم بالا با کیبورد (بدون خطای مضارب)
+    const priceInput = document.getElementById('new-price');
+    const stockInput = document.getElementById('new-stock');
+
+    priceInput.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const current = Number(priceInput.value) || 0;
+        priceInput.value = current + 100000;
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const current = Number(priceInput.value) || 0;
+        priceInput.value = Math.max(0, current - 100000);
+      }
+    });
+
+    stockInput.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const current = Number(stockInput.value) || 0;
+        stockInput.value = current + 10;
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const current = Number(stockInput.value) || 0;
+        stockInput.value = Math.max(0, current - 10);
+      }
+    });
 
     // تم دارک‌مود
     const savedTheme = localStorage.getItem('theme');
@@ -760,7 +821,7 @@
       });
     });
 
-    // ثبت لاگ
+    // ثبت لاگ در تاریخچه
     function recordLog(type, message) {
       const now = new Date();
       const timeString = now.toLocaleDateString('fa-IR') + ' - ' + now.toLocaleTimeString('fa-IR');
@@ -808,12 +869,11 @@
       }
     });
 
-    // رندر جدول انبار به همراه فیلتر و جستجو
+    // رندر جدول انبار
     function updateTable() {
       tableBody.innerHTML = '';
       let total = 0;
 
-      // محاسبه ارزش مالی کل بر اساس کل انبار
       productsArray.forEach(p => {
         total += Number(p.price) * Number(p.stock);
       });
@@ -822,7 +882,6 @@
 
       const searchKeyword = searchInput.value.trim().toLowerCase();
 
-      // فیلتر کردن اقلام با حفظ اندیس اصلی
       const displayedItems = [];
       productsArray.forEach((product, originalIndex) => {
         const matchesSearch = product.name.toLowerCase().includes(searchKeyword);
@@ -849,12 +908,14 @@
           <td>${Number(product.price).toLocaleString('fa-IR')} تومان</td>
           <td>
             <div class="stock-control">
-              <button class="btn-quick-stock" onclick="quickStockChange(${originalIndex}, -1)" title="کاهش یک عدد">-</button>
-              <span style="min-width: 35px; font-weight: bold;">${Number(product.stock).toLocaleString('fa-IR')}</span>
-              <button class="btn-quick-stock" onclick="quickStockChange(${originalIndex}, 1)" title="افزایش یک عدد">+</button>
+              <button type="button" class="btn-quick-stock" onclick="changeTempStock(${originalIndex}, -1)">-</button>
+              <input type="number" id="temp-stock-${originalIndex}" class="table-stock-input" value="${product.stock}" min="0" step="any" oninput="onStockChange(${originalIndex})">
+              <button type="button" class="btn-quick-stock" onclick="changeTempStock(${originalIndex}, 1)">+</button>
             </div>
           </td>
           <td>
+            <!-- دکمه سبز ثبت در سمت راست قرار دارد و تا تغییری ایجاد نشود پنهان است -->
+            <button id="save-btn-${originalIndex}" class="btn-save" style="display: none;" onclick="commitStockChange(${originalIndex})">ثبت</button>
             <button class="btn-edit" onclick="startEdit(${originalIndex})">ویرایش</button>
             <button class="btn-delete" onclick="deleteProduct(${originalIndex})">حذف</button>
           </td>
@@ -863,28 +924,60 @@
       });
     }
 
-    // تغییر سریع موجودی با دکمه‌های + و -
-    function quickStockChange(originalIndex, change) {
-      const product = productsArray[originalIndex];
-      const newStock = Number(product.stock) + change;
+    // تغییر مقدار نمایشی با دکمه‌های + و - بدون ذخیره تا زمان زدن ثبت
+    function changeTempStock(index, delta) {
+      const input = document.getElementById(`temp-stock-${index}`);
+      if (!input) return;
+      let currentVal = Number(input.value) || 0;
+      let newVal = Math.max(0, currentVal + delta);
+      input.value = newVal;
+      onStockChange(index);
+    }
 
-      if (newStock < 0) {
-        alert('موجودی کالا نمی‌تواند منفی شود!');
+    // نمایش دکمه سبز «ثبت» در صورت وجود هرگونه تغییر در مقدار موجودی
+    function onStockChange(index) {
+      const input = document.getElementById(`temp-stock-${index}`);
+      const saveBtn = document.getElementById(`save-btn-${index}`);
+      if (!input || !saveBtn) return;
+
+      const currentVal = Number(input.value);
+      const originalVal = Number(productsArray[index].stock);
+
+      if (currentVal !== originalVal) {
+        saveBtn.style.display = 'inline-block';
+      } else {
+        saveBtn.style.display = 'none';
+      }
+    }
+
+    // اعمال قطعی و ذخیره موجودی با زدن دکمه سبز «ثبت»
+    function commitStockChange(index) {
+      const input = document.getElementById(`temp-stock-${index}`);
+      if (!input) return;
+
+      const newVal = Number(input.value);
+      if (isNaN(newVal) || newVal < 0 || input.value.trim() === '') {
+        alert('لطفاً یک عدد معتبر و نامنفی برای موجودی وارد کنید!');
         return;
       }
 
-      product.stock = newStock;
-      localStorage.setItem('inventoryData', JSON.stringify(productsArray));
+      const product = productsArray[index];
+      const oldStock = product.stock;
+      product.stock = newVal;
 
-      const actionText = change > 0 ? 'افزایش' : 'کاهش';
-      recordLog('edit', `${actionText} سریع موجودی "${product.name}" به ${newStock} عدد.`);
+      localStorage.setItem('inventoryData', JSON.stringify(productsArray));
+      recordLog('edit', `موجودی کالای "${product.name}" از ${oldStock} به ${newVal} به‌روزرسانی شد.`);
 
       updateTable();
       updateAnalytics();
       updateLogsTable();
+
+      successMessage.textContent = `موجودی "${product.name}" با موفقیت ذخیره شد ✅`;
+      successMessage.style.color = '#10b981';
+      setTimeout(() => { successMessage.textContent = ''; }, 3000);
     }
 
-    // رویدادهای جستجو و فیلتر
+    // کنترل رویدادهای جستجو و فیلتر
     searchInput.addEventListener('input', () => {
       updateTable();
     });
@@ -937,7 +1030,7 @@
       }
     }
 
-    // ویرایش کالا
+    // بارگذاری کالا در فرم برای ویرایش کامل
     function startEdit(originalIndex) {
       editIndex = originalIndex;
       const product = productsArray[originalIndex];
@@ -963,7 +1056,7 @@
 
     cancelEditBtn.addEventListener('click', cancelEdit);
 
-    // حذف کالا
+    // حذف کالا با تاییدیه
     function deleteProduct(originalIndex) {
       rowToDelete = originalIndex;
       confirmBox.style.display = 'block';
@@ -990,12 +1083,31 @@
       confirmBox.style.display = 'none';
     });
 
-    // ثبت یا به‌روزرسانی در فرم
+    // ثبت یا به‌روزرسانی فرم با پذیرش تمام اعداد دلخواه
     form.addEventListener('submit', (event) => {
       event.preventDefault();
 
       const nameInput = document.getElementById('new-name');
+      const priceInput = document.getElementById('new-price');
+      const stockInput = document.getElementById('new-stock');
+
       const enteredName = nameInput.value.trim();
+      const enteredPrice = priceInput.value.trim();
+      const enteredStock = stockInput.value.trim();
+
+      if (!enteredName || enteredPrice === '' || enteredStock === '') {
+        successMessage.textContent = 'خطا: لطفاً تمام فیلدها را وارد کنید!';
+        successMessage.style.color = '#ef4444';
+        setTimeout(() => { successMessage.textContent = ''; }, 3500);
+        return;
+      }
+
+      if (Number(enteredPrice) < 0 || Number(enteredStock) < 0) {
+        successMessage.textContent = 'خطا: قیمت و موجودی نمی‌توانند عدد منفی باشند!';
+        successMessage.style.color = '#ef4444';
+        setTimeout(() => { successMessage.textContent = ''; }, 3500);
+        return;
+      }
 
       const isDuplicate = productsArray.some((product, index) => {
         if (editIndex !== null && index === editIndex) return false;
@@ -1013,8 +1125,8 @@
 
       const productData = {
         name: enteredName,
-        price: document.getElementById('new-price').value,
-        stock: document.getElementById('new-stock').value
+        price: enteredPrice,
+        stock: enteredStock
       };
 
       if (editIndex !== null) {
@@ -1037,7 +1149,7 @@
       setTimeout(() => { successMessage.textContent = ''; }, 3000);
     });
 
-    // صدور PDF استاندارد
+    // صدور گزارش چاپی PDF
     document.getElementById('downloadPdfBtn').addEventListener('click', () => {
       if (productsArray.length === 0) {
         alert('انبار در حال حاضر خالی است!');
@@ -1119,7 +1231,7 @@
       updateLogsTable();
     });
 
-    // دانلود بک‌آپ JSON
+    // دانلود فایل JSON
     document.getElementById('downloadBackupBtn').addEventListener('click', () => {
       const backupData = {
         exportedAt: new Date().toISOString(),
@@ -1139,7 +1251,7 @@
       updateLogsTable();
     });
 
-    // بازیابی بک‌آپ
+    // بازیابی فایل JSON
     document.getElementById('restoreBackupBtn').addEventListener('click', () => {
       const fileInput = document.getElementById('importFileInput');
       if (!fileInput.files.length) {
@@ -1192,7 +1304,7 @@
       }
     });
 
-    // لود اولیه
+    // بارگذاری اولیه
     updateTable();
     updateAnalytics();
     updateLogsTable();
