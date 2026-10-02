@@ -1,99 +1,103 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>سیستم انبار هوشمند</title>
-  <style>
-    /* ---------- تم: رنگ‌ها در یک جا (روز/شب) ---------- */
-    :root {
-      --bg: #f8fafc; --card: #fff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0;
-      --head: #f1f5f9; --input: #fff; --accent: #0284c7; --ok: #10b981; --danger: #ef4444; --alert: #fff1f2;
-    }
-    body.dark {
-      --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --muted: #94a3b8; --border: #334155;
-      --head: #334155; --input: #0f172a; --alert: #451a1a;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سیستم انبار هوشمند</title>
+<style>
+  :root {
+    --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --head:#f1f5f9;
+    --input:#fff; --accent:#0284c7; --ok:#10b981; --danger:#ef4444; --alert:#fff1f2; --dirty:#fffbeb; --warn:#eab308;
+  }
+  body.dark {
+    --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --border:#334155; --head:#334155;
+    --input:#0f172a; --alert:#451a1a; --dirty:#3a3213;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { font-family: Tahoma, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: var(--bg); color: var(--text); transition: background .3s, color .3s; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { margin: 50px 0 25px; font-size: 24px; }
+  h1 small { font-size: .65em; color: var(--muted); font-weight: normal; margin-right: 10px; }
 
-    * { box-sizing: border-box; }
-    [hidden] { display: none !important; }
-    body { font-family: Tahoma, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: var(--bg); color: var(--text); transition: .3s; }
-    .container { max-width: 1000px; margin: 0 auto; }
-    h1 { margin: 50px 0 25px; font-size: 24px; }
-    h1 small { font-size: .65em; color: var(--muted); font-weight: normal; margin-right: 10px; }
+  button { font-family: inherit; border-radius: 6px; cursor: pointer; border: none; color: #fff; padding: 8px 14px; transition: opacity .2s; }
+  button:hover { opacity: .9; }
+  .ok { background: var(--ok); } .info { background: var(--accent); } .danger { background: var(--danger); } .gray { background: var(--muted); }
+  .save { font-weight: bold; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 50% { transform: scale(1.05); } }
 
-    /* ---------- دکمه‌ها ---------- */
-    button { font-family: inherit; border-radius: 6px; cursor: pointer; border: none; color: #fff; padding: 8px 14px; transition: opacity .2s; }
-    button:hover { opacity: .9; }
-    .ok { background: var(--ok); } .info { background: var(--accent); }
-    .danger { background: var(--danger); } .gray { background: var(--muted); }
-    .save { font-weight: bold; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 50% { transform: scale(1.05); } }
+  .float { position: fixed; top: 15px; width: 44px; height: 44px; padding: 0; font-size: 20px; z-index: 1000; border-radius: 50%;
+           background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  #themeToggle { left: 15px; } #menuToggle { left: 68px; }
 
-    .float { position: fixed; top: 15px; width: 44px; height: 44px; padding: 0; font-size: 20px; z-index: 1000;
-             border-radius: 50%; background: var(--card); color: var(--text); border: 1px solid var(--border); }
-    #themeToggle { left: 15px; } #menuToggle { left: 68px; }
+  .side-menu { position: fixed; top: 0; right: -290px; width: 270px; height: 100%; padding: 20px; z-index: 2000;
+               background: var(--card); box-shadow: -4px 0 15px rgba(0,0,0,.15); transition: right .3s; }
+  .side-menu.open { right: 0; }
+  .overlay { position: fixed; inset: 0; background: rgba(15,23,42,.4); z-index: 1500; }
+  .menu-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  .menu-head h3 { margin: 0; }
+  .menu-head button { background: none; color: var(--muted); font-size: 24px; padding: 0; }
+  .menu-item { list-style: none; padding: 12px 16px; margin-top: 8px; border-radius: 8px; cursor: pointer; }
+  .menu-item:hover, .menu-item.active { background: var(--head); color: var(--accent); font-weight: bold; }
 
-    /* ---------- منوی کشویی ---------- */
-    .side-menu { position: fixed; top: 0; right: -290px; width: 270px; height: 100%; padding: 20px; z-index: 2000;
-                 background: var(--card); box-shadow: -4px 0 15px rgba(0,0,0,.15); transition: right .3s; }
-    .side-menu.open { right: 0; }
-    .overlay { position: fixed; inset: 0; background: rgba(15,23,42,.4); z-index: 1500; }
-    .menu-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-    .menu-head h3 { margin: 0; }
-    .menu-head button { background: none; color: var(--muted); font-size: 24px; padding: 0; }
-    .menu-item { list-style: none; padding: 12px 16px; margin-top: 8px; border-radius: 8px; cursor: pointer; }
-    .menu-item:hover, .menu-item.active { background: var(--head); color: var(--accent); font-weight: bold; }
+  .tab { display: none; } .tab.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: center; }
+  input[type=text], input[type=number], select { width: 100%; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+        font: inherit; font-size: 13.5px; background: var(--input); color: var(--text); outline: none; }
+  .form-actions { display: flex; gap: 8px; }
 
-    /* ---------- تب‌ها، کارت‌ها، فرم ---------- */
-    .tab { display: none; } .tab.active { display: block; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
-    input[type=text], input[type=number] { padding: 10px 14px; margin: 0 0 10px 10px; border: 1px solid var(--border); border-radius: 6px;
-                                           font: inherit; font-size: 14px; background: var(--input); color: var(--text); }
-    #msg { font-weight: bold; margin-top: 12px; min-height: 22px; font-size: 14px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 3000; padding: 10px 20px;
+           border-radius: 8px; color: #fff; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
 
-    .toolbar { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
-    .toolbar input { flex: 1; min-width: 240px; margin: 0; }
-    .filter { background: var(--card); color: var(--text); border: 1px solid var(--border); }
-    .filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .total { font-size: 17px; font-weight: bold; color: var(--accent); margin: 20px 0 10px; }
+  .toolbar { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
+  .toolbar input { flex: 1; min-width: 180px; } .toolbar select { width: auto; min-width: 170px; }
+  .filter { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  .filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .total { font-size: 17px; font-weight: bold; color: var(--accent); margin: 20px 0 10px; }
 
-    /* ---------- جدول ---------- */
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--card); border-radius: 8px; overflow: hidden; }
-    th, td { border: 1px solid var(--border); padding: 12px; text-align: center; font-size: 14px; }
-    th { background: var(--head); }
-    td.name { font-weight: bold; text-align: right; padding-right: 20px; }
-    .low { color: var(--danger); font-size: 12px; margin-right: 6px; font-weight: normal; }
-    .empty { color: var(--muted); padding: 20px; }
-    td .btn-row { display: inline-flex; gap: 6px; }
+  .dirty-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 15px; padding: 10px 15px;
+               background: var(--dirty); border: 1px solid var(--warn); border-radius: 8px; font-weight: bold; }
+  .dirty-bar span { flex: 1; }
 
-    .stock { display: inline-flex; align-items: center; gap: 6px; }
-    .qty { width: 28px; height: 28px; padding: 0; font-size: 16px; font-weight: bold; background: var(--head); color: var(--text); border: 1px solid var(--border); }
-    .stock input { width: 70px; margin: 0; padding: 5px; text-align: center; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--card); border-radius: 8px; overflow: hidden; }
+  th, td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 14px; }
+  th { background: var(--head); }
+  tr.dirty td { background: var(--dirty); }
+  td.name { font-weight: bold; text-align: right; padding-right: 15px; }
+  .cat-box { display: flex; flex-direction: column; gap: 5px; min-width: 180px; }
+  .cat-box select { padding: 4px 8px; font-size: 12px; }
+  .cat-box .row-cat { font-weight: bold; color: var(--accent); }
+  .low { color: var(--danger); font-size: 12px; margin-right: 6px; font-weight: normal; }
+  .empty { color: var(--muted); padding: 20px; }
+  td .btn-row { display: inline-flex; gap: 6px; }
+  .stock { display: inline-flex; align-items: center; gap: 5px; }
+  .qty { width: 28px; height: 28px; padding: 0; font-size: 16px; font-weight: bold; background: var(--head); color: var(--text); border: 1px solid var(--border); }
+  .stock input { width: 65px; padding: 4px; text-align: center; font-weight: bold; font-size: 13px; }
 
-    #confirm { background: var(--card); border: 1px solid #eab308; padding: 15px; margin-top: 15px; border-radius: 8px; text-align: center; }
-    #confirm p { color: #b45309; font-weight: bold; }
+  #confirm { background: var(--card); border: 1px solid var(--warn); padding: 15px; margin-top: 15px; border-radius: 8px; text-align: center; }
+  #confirm p { color: #b45309; font-weight: bold; }
 
-    /* ---------- آمار و پشتیبان ---------- */
-    .stats { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
-    .stat { flex: 1; min-width: 220px; text-align: center; }
-    .stat h3 { margin: 0 0 10px; font-size: 15px; color: var(--muted); }
-    .stat p { margin: 0; font-size: 24px; font-weight: bold; }
-    .stat.alert { background: var(--alert); border-color: var(--danger); }
-    .stat.alert p { color: var(--danger); }
-    .box { margin-top: 25px; }
-    .backup { display: grid; gap: 15px; margin-top: 20px; }
-    .backup h3 { margin-top: 0; }
+  .stats { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
+  .stat { flex: 1; min-width: 200px; text-align: center; }
+  .stat h3 { margin: 0 0 10px; font-size: 15px; color: var(--muted); }
+  .stat p { margin: 0; font-size: 24px; font-weight: bold; }
+  .stat.alert { background: var(--alert); border-color: var(--danger); }
+  .stat.alert p { color: var(--danger); }
+  .box { margin-top: 20px; }
+  .backup { display: grid; gap: 15px; margin-top: 20px; }
+  .backup h3 { margin-top: 0; }
 
-    .badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #fff; }
-    .badge.add { background: var(--ok); } .badge.edit { background: var(--accent); }
-    .badge.delete { background: var(--danger); } .badge.system { background: var(--muted); }
-  </style>
+  .badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #fff; }
+  .badge.add { background: var(--ok); } .badge.edit { background: var(--accent); }
+  .badge.delete { background: var(--danger); } .badge.system { background: var(--muted); }
+</style>
 </head>
 <body>
 
 <button id="themeToggle" class="float" title="تغییر تم">🌙</button>
 <button id="menuToggle" class="float" title="منوی بخش‌ها">☰</button>
+<div id="toast" class="toast" hidden></div>
 
 <div id="overlay" class="overlay" hidden></div>
 <nav id="sideMenu" class="side-menu">
@@ -109,29 +113,39 @@
 <div class="container">
   <h1>سیستم انبار هوشمند <small id="subtitle">(📦 مدیریت انبار)</small></h1>
 
-  <!-- تب ۱: انبار -->
   <section id="tab-inventory" class="tab active">
     <div class="card">
-      <form id="productForm" novalidate>
+      <form id="productForm" class="form-grid" novalidate>
         <input type="text" id="fName" placeholder="نام محصول">
+        <select id="fCategory"></select>
+        <select id="fSubCategory"></select>
         <input type="number" id="fPrice" placeholder="قیمت (تومان)" min="0" step="any" data-step="100000">
         <input type="number" id="fStock" placeholder="موجودی" min="0" step="any" data-step="10">
-        <button type="submit" id="submitBtn" class="ok">اضافه کن</button>
-        <button type="button" id="cancelEdit" class="gray" hidden>انصراف از ویرایش</button>
+        <div class="form-actions">
+          <button type="submit" id="submitBtn" class="ok" style="flex:1">اضافه کن</button>
+          <button type="button" id="cancelEdit" class="gray" hidden>انصراف</button>
+        </div>
       </form>
-      <div id="msg"></div>
     </div>
 
     <div class="toolbar">
       <input type="text" id="search" placeholder="🔍 جستجو در نام کالاها...">
+      <select id="filterCategory"></select>
+      <select id="filterSubCategory" hidden></select>
       <button class="filter active" data-filter="all">همه کالاها</button>
       <button class="filter" data-filter="low">⚠️ فقط موجودی کم (زیر ۵)</button>
     </div>
 
     <div class="total" id="total"></div>
 
+    <div id="dirtyBar" class="dirty-bar" hidden>
+      <span id="dirtyText"></span>
+      <button id="saveAll" class="ok">ثبت همه</button>
+      <button id="undoAll" class="gray">لغو همه</button>
+    </div>
+
     <table>
-      <thead><tr><th>نام محصول</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr></thead>
+      <thead><tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr></thead>
       <tbody id="productList"></tbody>
     </table>
 
@@ -142,7 +156,6 @@
     </div>
   </section>
 
-  <!-- تب ۲: آمار -->
   <section id="tab-analytics" class="tab">
     <h2>داشبورد تحلیل انبار</h2>
     <div class="stats">
@@ -150,13 +163,10 @@
       <div class="card stat"><h3>ارزش کل موجودی</h3><p id="statValue"></p></div>
       <div class="card stat alert"><h3>هشدار موجودی اندک</h3><p id="statLow"></p></div>
     </div>
-    <div class="card box">
-      <h4>کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4>
-      <ul id="lowList" style="padding-right:20px;line-height:1.8"></ul>
-    </div>
+    <div class="card box"><h4>ارزش موجودی به تفکیک دسته:</h4><div id="catStats" style="line-height:2"></div></div>
+    <div class="card box"><h4>کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4><ul id="lowList" style="padding-right:20px;line-height:1.8"></ul></div>
   </section>
 
-  <!-- تب ۳: تاریخچه -->
   <section id="tab-history" class="tab">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <h2>تاریخچه رویدادهای سیستم</h2>
@@ -168,13 +178,12 @@
     </table>
   </section>
 
-  <!-- تب ۴: پشتیبان -->
   <section id="tab-backup" class="tab">
     <h2>پشتیبان‌گیری و مدیریت داده‌ها</h2>
     <div class="backup">
       <div class="card" style="border-right:4px solid var(--danger)">
         <h3>📄 گزارش اداری و چاپی (PDF)</h3>
-        <p>مشاهده و ذخیره صورت‌جلسه موجودی، قیمت‌ها و ارزش مالی انبار به صورت PDF.</p>
+        <p>مشاهده و ذخیره صورت‌جلسه موجودی، دسته‌بندی‌ها و ارزش مالی انبار به صورت PDF.</p>
         <button id="pdfBtn" class="danger">ایجاد و دانلود فایل PDF</button>
       </div>
       <div class="card">
@@ -198,88 +207,179 @@
 </div>
 
 <script>
-/* ============ تنظیمات و ابزارها ============ */
-const LOW_STOCK = 5;
-const DISCOUNT = 0.9;
-const $ = s => document.querySelector(s); const $$ = s => [...document.querySelectorAll(s)];
+/* ============ دسته‌بندی‌ها ============ */
+const UNCAT = 'بدون دسته';
+const CATEGORIES = {
+  'مواد غذایی و خوراکی': ['لبنیات و تخم‌مرغ', 'خواربار و اساسی', 'فرآورده‌های پروتئینی', 'نوشیدنی‌ها', 'تنقلات و شیرینی‌جات',
+    'صبحانه و نوشیدنی‌های گرم', 'کنسرو و غذاهای آماده', 'سس و چاشنی‌ها', 'نان و فرآورده‌های آردی'],
+  'آرایشی، بهداشتی و سلولزی': ['محصولات سلولزی', 'بهداشت فردی و حمام', 'بهداشت دهان و دندان', 'مراقبت از پوست و مو'],
+  'شوینده و نظافت منزل': ['شستشوی ظروف', 'شستشوی البسه', 'سطوح و ضدعفونی‌کننده‌ها', 'ملزومات مصرفی خانه'],
+  'دخانیات و ملزومات وابسته': ['سیگار', 'تنباکو و معسل', 'زغال و وسایل مشتعل‌کننده', 'ویپ، پاد و اکسسوری', 'کاغذ و پیپ'],
+  'ملزومات روزمره و ابزارک‌ها': ['وسایل الکتریکی مصرفی', 'پلاستیک و یکبارمصرف'],
+  [UNCAT]: ['متفرقه']
+};
+
+/* ============ ابزارها ============ */
+const LOW_STOCK = 5, DISCOUNT = 0.9;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
 const fa = n => Number(n).toLocaleString('fa-IR');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 const isLow = p => p.stock < LOW_STOCK;
+const subsOf = cat => CATEGORIES[cat] || [];
+
+const options = (list, selected) =>
+  (list.includes(selected) ? list : [...list, selected]).map(v => `<option value="${esc(v)}"${v === selected ? ' selected' : ''}>${esc(v)}</option>`).join('');
 
 const normalize = list => list.map((p, i) => ({
   id: p.id ?? Date.now() + i,
   name: String(p.name),
+  category: p.category || UNCAT,
+  subcategory: p.subcategory || subsOf(p.category || UNCAT)[0] || 'متفرقه',
   price: Number(p.price) || 0,
   stock: Number(p.stock) || 0
 }));
 
 let products = normalize(load('inventoryData', []));
 let logs = load('inventoryLogs', []);
-let editId = null, deleteId = null, filter = 'all';
+let editId = null, deleteId = null, stockFilter = 'all', catFilter = 'all', subFilter = 'all';
+const drafts = {};
 
+const find = id => products.find(p => p.id === id);
 const save = () => {
   localStorage.setItem('inventoryData', JSON.stringify(products));
   localStorage.setItem('inventoryLogs', JSON.stringify(logs));
 };
-
 function log(type, message) {
-  logs.unshift({ id: Date.now(), type, message, time: new Date().toLocaleString('fa-IR') });
+  logs.unshift({ id: Date.now() + Math.random(), type, message, time: new Date().toLocaleString('fa-IR') });
   save();
 }
-
-let msgTimer;
+let toastTimer;
 function toast(text, color = 'var(--ok)') {
-  const el = $('#msg');
-  el.textContent = text; el.style.color = color;
-  clearTimeout(msgTimer);
-  msgTimer = setTimeout(() => el.textContent = '', 3000);
+  const el = $('#toast');
+  el.textContent = text; el.style.background = color; el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.hidden = true, 3000);
 }
 
-/* ============ نمایش (یک تابع برای همه‌چیز) ============ */
+/* ============ پیش‌نویس ردیف‌ها ============ */
+const same = (p, d) => d.stock.trim() !== '' && Number(d.stock) === p.stock && d.category === p.category && d.subcategory === p.subcategory;
+const draftOf = p => drafts[p.id] || { stock: String(p.stock), category: p.category, subcategory: p.subcategory };
+
+function syncRow(tr) {
+  const id = Number(tr.dataset.id), p = find(id);
+  if (!p) return;
+  const d = { stock: tr.querySelector('.stock input').value, category: tr.querySelector('.row-cat').value, subcategory: tr.querySelector('.row-subcat').value };
+  if (same(p, d)) delete drafts[id]; else drafts[id] = d;
+  const isDirty = id in drafts;
+  tr.classList.toggle('dirty', isDirty);
+  tr.querySelectorAll('.save, .undo').forEach(b => b.hidden = !isDirty);
+  updateDirtyBar();
+}
+
+function updateDirtyBar() {
+  const n = Object.keys(drafts).length;
+  $('#dirtyBar').hidden = n === 0;
+  $('#dirtyText').textContent = `${fa(n)} ردیف تغییر ثبت‌نشده دارد`;
+}
+
+function commit(id) {
+  const p = find(id), d = drafts[id];
+  if (!p || !d) return 'none';
+  const stock = Number(d.stock);
+  if (d.stock.trim() === '' || !isFinite(stock) || stock < 0) return 'invalid';
+  const changes = [];
+  if (stock !== p.stock) { changes.push(`موجودی از ${p.stock} به ${stock}`); p.stock = stock; }
+  if (d.category !== p.category || d.subcategory !== p.subcategory) {
+    changes.push(`دسته‌بندی به (${d.category} / ${d.subcategory})`);
+    p.category = d.category; p.subcategory = d.subcategory;
+  }
+  delete drafts[id];
+  log('edit', `ویرایش کالای "${p.name}": ${changes.join(' و ')}.`);
+  return 'ok';
+}
+
+function saveOne(id) {
+  const r = commit(id);
+  if (r === 'invalid') return toast('خطا: موجودی باید یک عدد معتبر و نامنفی باشد', 'var(--danger)');
+  save(); render();
+  toast(`تغییرات "${find(id).name}" ثبت شد ✅`);
+}
+
+$('#saveAll').onclick = () => {
+  let done = 0, bad = 0;
+  Object.keys(drafts).forEach(id => { const r = commit(Number(id)); if (r === 'ok') done++; else if (r === 'invalid') bad++; });
+  save(); render();
+  bad ? toast(`${fa(done)} ردیف ثبت شد؛ ${fa(bad)} ردیف مقدار نامعتبر دارد`, 'var(--danger)') : toast(`${fa(done)} ردیف ثبت شد ✅`);
+};
+$('#undoAll').onclick = () => {
+  const n = Object.keys(drafts).length;
+  if (!confirm(`تغییرات ${fa(n)} ردیف لغو شود؟`)) return;
+  Object.keys(drafts).forEach(id => delete drafts[id]);
+  render();
+};
+
+addEventListener('beforeunload', e => { if (Object.keys(drafts).length) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ============ رندر ============ */
 function render() {
   const total = products.reduce((s, p) => s + p.price * p.stock, 0);
   const lowItems = products.filter(isLow);
-
-  // جدول انبار
   $('#total').textContent = `ارزش کل انبار: ${fa(total)} تومان | با ۱۰٪ تخفیف: ${fa(total * DISCOUNT)} تومان`;
-  const q = $('#search').value.trim().toLowerCase();
-  const rows = products.filter(p => p.name.toLowerCase().includes(q) && (filter === 'all' || isLow(p)));
 
-  $('#productList').innerHTML = rows.length ? rows.map(p => `
-    <tr data-id="${p.id}">
+  const q = $('#search').value.trim().toLowerCase();
+  const rows = products.filter(p =>
+    p.name.toLowerCase().includes(q) &&
+    (stockFilter === 'all' || isLow(p)) &&
+    (catFilter === 'all' || p.category === catFilter) &&
+    (subFilter === 'all' || p.subcategory === subFilter));
+
+  $('#productList').innerHTML = rows.length ? rows.map(p => {
+    const d = draftOf(p), dirty = p.id in drafts;
+    return `
+    <tr data-id="${p.id}"${dirty ? ' class="dirty"' : ''}>
       <td class="name">${esc(p.name)}${isLow(p) ? '<span class="low">(موجودی کم)</span>' : ''}</td>
+      <td><div class="cat-box">
+        <select class="row-cat">${options(Object.keys(CATEGORIES), d.category)}</select>
+        <select class="row-subcat">${options(subsOf(d.category), d.subcategory)}</select>
+      </div></td>
       <td>${fa(p.price)} تومان</td>
       <td><div class="stock">
         <button type="button" class="qty" data-act="dec">-</button>
-        <input type="number" value="${p.stock}" min="0" step="any">
+        <input type="number" value="${esc(d.stock)}" min="0" step="any">
         <button type="button" class="qty" data-act="inc">+</button>
       </div></td>
       <td><div class="btn-row">
-        <button class="ok save" data-act="save" hidden>ثبت</button>
+        <button class="ok save" data-act="save"${dirty ? '' : ' hidden'}>ثبت</button>
+        <button class="gray undo" data-act="undo" title="بازگشت به مقدار ذخیره‌شده"${dirty ? '' : ' hidden'}>لغو</button>
         <button class="info" data-act="edit">ویرایش</button>
         <button class="danger" data-act="del">حذف</button>
       </div></td>
-    </tr>`).join('')
-    : '<tr><td colspan="4" class="empty">هیچ کالایی با این مشخصات یافت نشد.</td></tr>';
+    </tr>`;
+  }).join('') : '<tr><td colspan="5" class="empty">هیچ کالایی با این مشخصات یافت نشد.</td></tr>';
+  updateDirtyBar();
 
-  // آمار
   $('#statCount').textContent = fa(products.length);
   $('#statValue').textContent = fa(total) + ' تومان';
   $('#statLow').textContent = fa(lowItems.length) + ' قلم';
+
+  const byCat = {};
+  products.forEach(p => byCat[p.category] = (byCat[p.category] || 0) + p.price * p.stock);
+  $('#catStats').innerHTML = Object.keys(byCat).length
+    ? Object.entries(byCat).map(([c, v]) =>
+        `<div><strong>${esc(c)}:</strong> ${fa(v)} تومان <span style="color:var(--muted)">(${fa(total ? (v / total * 100).toFixed(1) : 0)}٪ کل انبار)</span></div>`).join('')
+    : '<div style="color:var(--muted)">کالایی ثبت نشده است.</div>';
+
   $('#lowList').innerHTML = lowItems.length
-    ? lowItems.map(p => `<li>${esc(p.name)} — موجودی فعلی: ${fa(p.stock)} عدد</li>`).join('')
+    ? lowItems.map(p => `<li>${esc(p.name)} (${esc(p.category)} / ${esc(p.subcategory)}) — موجودی: ${fa(p.stock)} عدد</li>`).join('')
     : '<li>تمامی اقلام دارای موجودی کافی هستند.</li>';
 
-  // تاریخچه
   const labels = { add: 'افزودن', edit: 'ویرایش', delete: 'حذف', system: 'سیستم' };
   $('#logList').innerHTML = logs.length ? logs.map((l, i) => `
-    <tr>
-      <td>${fa(i + 1)}</td>
-      <td><span class="badge ${labels[l.type] ? l.type : 'system'}">${labels[l.type] || 'سیستم'}</span></td>
-      <td>${esc(l.message)}</td>
-      <td>${esc(l.time)}</td>
-    </tr>`).join('')
+    <tr><td>${fa(i + 1)}</td>
+    <td><span class="badge ${labels[l.type] ? l.type : 'system'}">${labels[l.type] || 'سیستم'}</span></td>
+    <td>${esc(l.message)}</td><td>${esc(l.time)}</td></tr>`).join('')
     : '<tr><td colspan="4" class="empty">هیچ رویدادی تاکنون ثبت نشده است.</td></tr>';
 }
 
@@ -298,59 +398,62 @@ $('#closeMenu').onclick = $('#overlay').onclick = () => toggleMenu(false);  $$('
   toggleMenu(false);
 });
 
-/* ============ جدول: رویدادها با event delegation ============ */
+/* ============ رویدادهای جدول ============ */
 const list = $('#productList');
 
-function markDirty(tr) {
-  const p = products.find(x => x.id === +tr.dataset.id);
-  tr.querySelector('.save').hidden = Number(tr.querySelector('input').value) === p.stock;
-}
+list.addEventListener('input', e => { if (e.target.matches('.stock input')) syncRow(e.target.closest('tr')); });
 
-list.addEventListener('input', e => markDirty(e.target.closest('tr')));
+list.addEventListener('change', e => {
+  const tr = e.target.closest('tr');
+  if (!tr) return;
+  if (e.target.matches('.row-cat')) {
+    tr.querySelector('.row-subcat').innerHTML = options(subsOf(e.target.value), subsOf(e.target.value)[0]);
+  }
+  if (e.target.matches('.row-cat, .row-subcat')) syncRow(tr);
+});
+
+list.addEventListener('keydown', e => {
+  if (!e.target.matches('.stock input')) return;
+  const id = Number(e.target.closest('tr').dataset.id);
+  if (e.key === 'Enter') { e.preventDefault(); saveOne(id); }
+  if (e.key === 'Escape') { delete drafts[id]; render(); }
+});
 
 list.addEventListener('click', e => {
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
-  const tr = btn.closest('tr'), id = +tr.dataset.id, input = tr.querySelector('input');
-  const p = products.find(x => x.id === id);
+  const tr = btn.closest('tr'), id = Number(tr.dataset.id), p = find(id);
 
   switch (btn.dataset.act) {
     case 'inc':
-    case 'dec':
+    case 'dec': {
+      const input = tr.querySelector('.stock input');
       input.value = Math.max(0, (Number(input.value) || 0) + (btn.dataset.act === 'inc' ? 1 : -1));
-      markDirty(tr);
-      break;
-
-    case 'save': {
-      const val = Number(input.value);
-      if (input.value.trim() === '' || isNaN(val) || val < 0) return alert('لطفاً یک عدد معتبر و نامنفی وارد کنید!');
-      log('edit', `موجودی کالای "${p.name}" از ${p.stock} به ${val} به‌روزرسانی شد.`);
-      p.stock = val;
-      save(); render();
-      toast(`موجودی "${p.name}" با موفقیت ذخیره شد ✅`);
+      syncRow(tr);
       break;
     }
-
+    case 'save': saveOne(id); break;
+    case 'undo': delete drafts[id]; render(); break;
     case 'edit':
-      editId = id;
-      $('#fName').value = p.name; $('#fPrice').value = p.price; $('#fStock').value = p.stock;
-      $('#submitBtn').textContent = 'ثبت تغییرات';
-      $('#submitBtn').className = 'info';
+      editId = id; delete drafts[id];
+      $('#fName').value = p.name;
+      $('#fCategory').value = p.category;
+      fillFormSubs(p.subcategory);
+      $('#fPrice').value = p.price; $('#fStock').value = p.stock;
+      $('#submitBtn').textContent = 'ثبت تغییرات'; $('#submitBtn').className = 'info';
       $('#cancelEdit').hidden = false;
+      render();
       scrollTo({ top: 0, behavior: 'smooth' });
       break;
-
-    case 'del':
-      deleteId = id;
-      $('#confirm').hidden = false;
-      break;
+    case 'del': deleteId = id; $('#confirm').hidden = false; break;
   }
 });
 
 $('#yes').onclick = () => {
-  const p = products.find(x => x.id === deleteId);
+  const p = find(deleteId);
   if (p) {
     products = products.filter(x => x.id !== deleteId);
+    delete drafts[deleteId];
     log('delete', `کالای "${p.name}" از لیست انبار حذف گردید.`);
     if (editId === deleteId) resetForm();
     save(); render();
@@ -359,9 +462,29 @@ $('#yes').onclick = () => {
 };
 $('#no').onclick = () => { deleteId = null; $('#confirm').hidden = true; };
 
-/* ============ جستجو و فیلتر ============ */
+/* ============ جستجو و فیلترها ============ */
+function initCategories() {
+  const names = Object.keys(CATEGORIES);
+  $('#fCategory').innerHTML = names.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  $('#filterCategory').innerHTML = '<option value="all">📂 همه دسته‌بندی‌ها</option>' + names.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  fillFormSubs();
+}
+function fillFormSubs(selected) {
+  const subs = subsOf($('#fCategory').value);
+  $('#fSubCategory').innerHTML = options(subs, selected ?? subs[0]);
+}
+$('#fCategory').onchange = () => fillFormSubs();
+
 $('#search').oninput = render;
-$$('.filter').forEach(btn => btn.onclick = () => {   filter = btn.dataset.filter;   $$
+$('#filterCategory').onchange = e => {
+  catFilter = e.target.value; subFilter = 'all';
+  const sel = $('#filterSubCategory');
+  sel.hidden = catFilter === 'all';
+  sel.innerHTML = '<option value="all">📁 همه زیردسته‌ها</option>' + subsOf(catFilter).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  render();
+};
+$('#filterSubCategory').onchange = e => { subFilter = e.target.value; render(); };
+$$('.filter').forEach(btn => btn.onclick = () => {   stockFilter = btn.dataset.filter;   $$
 ('.filter').forEach(b => b.classList.toggle('active', b === btn));
   render();
 });
@@ -370,41 +493,39 @@ $$('.filter').forEach(btn => btn.onclick = () => {   filter = btn.dataset.filter
 [$('#fPrice'), $('#fStock')].forEach(input => input.addEventListener('keydown', e => {
   if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
   e.preventDefault();
-  const step = Number(input.dataset.step) * (e.key === 'ArrowUp' ? 1 : -1);
-  input.value = Math.max(0, (Number(input.value) || 0) + step);
+  input.value = Math.max(0, (Number(input.value) || 0) + Number(input.dataset.step) * (e.key === 'ArrowUp' ? 1 : -1));
 }));
 
 function resetForm() {
   editId = null;
   $('#productForm').reset();
-  $('#submitBtn').textContent = 'اضافه کن';
-  $('#submitBtn').className = 'ok';
+  fillFormSubs();
+  $('#submitBtn').textContent = 'اضافه کن'; $('#submitBtn').className = 'ok';
   $('#cancelEdit').hidden = true;
 }
 $('#cancelEdit').onclick = resetForm;
 
 $('#productForm').addEventListener('submit', e => {
   e.preventDefault();
-  const name = $('#fName').value.trim();
+  const name = $('#fName').value.trim(), category = $('#fCategory').value, subcategory = $('#fSubCategory').value;
   const priceStr = $('#fPrice').value.trim(), stockStr = $('#fStock').value.trim();
-  const fail = text => toast(text, 'var(--danger)');
+  const fail = t => toast(t, 'var(--danger)');
 
   if (!name || priceStr === '' || stockStr === '') return fail('خطا: لطفاً تمام فیلدها را وارد کنید!');
   const price = Number(priceStr), stock = Number(stockStr);
   if (price < 0 || stock < 0) return fail('خطا: قیمت و موجودی نمی‌توانند منفی باشند!');
-
   if (products.some(p => p.id !== editId && p.name.toLowerCase() === name.toLowerCase())) {
     $('#fName').select();
     return fail('خطا: محصولی با همین نام در انبار موجود است!');
   }
 
   if (editId !== null) {
-    Object.assign(products.find(p => p.id === editId), { name, price, stock });
+    Object.assign(find(editId), { name, category, subcategory, price, stock });
     log('edit', `مشخصات کالای "${name}" به‌روزرسانی شد.`);
     toast('تغییرات با موفقیت ذخیره شد ✏️');
   } else {
-    products.push({ id: Date.now(), name, price, stock });
-    log('add', `کالای جدید "${name}" با تعداد ${stock} ثبت شد.`);
+    products.push({ id: Date.now(), name, category, subcategory, price, stock });
+    log('add', `کالای "${name}" در دسته (${category} / ${subcategory}) ثبت شد.`);
     toast('کالا با موفقیت به انبار افزوده شد ✅');
   }
   save(); render(); resetForm();
@@ -416,7 +537,7 @@ $('#clearLogs').onclick = () => {
   logs = []; save(); render();
 };
 
-/* ============ پشتیبان‌گیری و گزارش (اصلاح‌شده برای سازگاری ۱۰۰٪ با Live Server) ============ */
+/* ============ PDF استاندارد بدون تداخل با لایوسرور ============ */
 $('#pdfBtn').onclick = () => {
   if (!products.length) return alert('انبار در حال حاضر خالی است!');
   const win = window.open('', '_blank');
@@ -428,12 +549,13 @@ $('#pdfBtn').onclick = () => {
     <tr style="${isLow(p) ? 'background:#fff1f2' : ''}">
       <td style="${cell}">${fa(i + 1)}</td>
       <td style="${cell};text-align:right;font-weight:bold">${esc(p.name)}</td>
+      <td style="${cell}">${esc(p.category)} - ${esc(p.subcategory)}</td>
       <td style="${cell}">${fa(p.price)} تومان</td>
       <td style="${cell}">${fa(p.stock)}</td>
       <td style="${cell}">${fa(p.price * p.stock)} تومان</td>
       <td style="${cell};color:${isLow(p) ? '#e11d48' : '#166534'}">${isLow(p) ? 'موجودی اندک' : 'کافی'}</td>
     </tr>`).join('');
-  const heads = ['ردیف', 'نام کالا', 'قیمت واحد', 'موجودی', 'ارزش کل', 'وضعیت']
+  const heads = ['ردیف', 'نام کالا', 'دسته‌بندی', 'قیمت واحد', 'موجودی', 'ارزش کل', 'وضعیت']
     .map(h => `<th style="${cell};background:#f1f5f9">${h}</th>`).join('');
 
   win.document.title = 'گزارش موجودی انبار';
@@ -458,11 +580,11 @@ $('#pdfBtn').onclick = () => {
 
   win.focus();
   setTimeout(() => win.print(), 350);
-
   log('system', 'گزارش PDF از وضعیت انبار استخراج گردید.');
   render();
 };
 
+/* ============ پشتیبان، بازیابی، ریست ============ */
 $('#exportBtn').onclick = () => {
   const data = JSON.stringify({ exportedAt: new Date().toISOString(), products, logs }, null, 2);
   const a = Object.assign(document.createElement('a'), {
@@ -485,6 +607,7 @@ $('#importBtn').onclick = () => {
       if (!Array.isArray(data.products)) return alert('قالب فایل پشتیبان معتبر نیست.');
       products = normalize(data.products);
       logs = Array.isArray(data.logs) ? data.logs : [];
+      Object.keys(drafts).forEach(id => delete drafts[id]);
       log('system', 'داده‌ها با موفقیت از فایل پشتیبان بازگردانی شدند.');
       render();
       $('#importFile').value = '';
@@ -497,12 +620,14 @@ $('#importBtn').onclick = () => {
 $('#resetBtn').onclick = () => {
   if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
   products = []; logs = [];
+  Object.keys(drafts).forEach(id => delete drafts[id]);
   localStorage.removeItem('inventoryData');
   localStorage.removeItem('inventoryLogs');
   render();
   alert('سامانه به تنظیمات کارخانه بازگشت.');
 };
 
+initCategories();
 render();
 </script>
 </body>
