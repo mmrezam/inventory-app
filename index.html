@@ -2,8 +2,8 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>سیستم انبار هوشمند</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>سیستم مدیریت انبار و فروش هوشمند</title>
 <style>
   :root {
     --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --head:#f1f5f9;
@@ -69,11 +69,41 @@
     gap: 12px;
     align-items: center;
   }
-  input[type=text], input[type=number], input[type=password], select, textarea {
+  input[type=text], input[type=number], input[type=password], input[type=date], select, textarea {
     width: 100%; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
     font: inherit; font-size: 14px; background: var(--input); color: var(--text); outline: none;
   }
   .form-actions { display: flex; gap: 8px; }
+
+  /* پنهان‌سازی آیکون چشمک‌زن پیش‌فرض مرورگرها */
+  input::-ms-reveal, input::-ms-clear { display: none; }
+
+  .pass-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .pass-wrapper input {
+    padding-left: 40px !important;
+  }
+  .toggle-pass-btn {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent !important;
+    border: none !important;
+    color: var(--muted);
+    font-size: 16px;
+    padding: 6px 10px;
+    cursor: pointer;
+    line-height: 1;
+    border-radius: 4px;
+  }
+  .toggle-pass-btn:hover {
+    color: var(--accent);
+  }
 
   .toast {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 3000; padding: 10px 20px;
@@ -147,9 +177,9 @@
 
   /* تب‌های آمار و پشتیبان */
   .stats { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
-  .stat { flex: 1; min-width: 200px; text-align: center; }
-  .stat h3 { margin: 0 0 10px; font-size: 15px; color: var(--muted); }
-  .stat p { margin: 0; font-size: 24px; font-weight: bold; }
+  .stat { flex: 1; min-width: 190px; text-align: center; }
+  .stat h3 { margin: 0 0 10px; font-size: 14.5px; color: var(--muted); }
+  .stat p { margin: 0; font-size: 23px; font-weight: bold; }
   .stat.alert { background: var(--alert); border-color: var(--danger); }
   .stat.alert p { color: var(--danger); }
   .box { margin-top: 20px; }
@@ -168,8 +198,8 @@
     display: flex; align-items: center; justify-content: center; padding: 15px;
   }
   .modal-box {
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    width: 100%; max-width: 460px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 12px 36px rgba(0,0,0,.35);
   }
   .modal-box h3 { margin: 0 0 15px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 
@@ -212,27 +242,93 @@
   .shop-card span { font-size: 12.5px; color: var(--muted); }
   .order-meta { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
 
-  /* موبایل و تبلت */
+  /* تب‌های دایره‌ای و کپسولی شیک برای ورود / عضویت */
+  .auth-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: var(--head);
+    padding: 6px;
+    border-radius: 35px;
+    border: 1px solid var(--border);
+  }
+  .auth-nav button {
+    flex: 1;
+    padding: 9px 16px;
+    font-size: 13.5px;
+    font-weight: bold;
+    border-radius: 25px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+  }
+  .auth-nav button.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  }
+
+  .demo-hint-box {
+    margin-top: 15px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.9;
+    background: var(--head);
+    border: 1px dashed var(--border);
+    color: var(--muted);
+  }
+  .demo-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    cursor: pointer;
+    margin: 3px 2px;
+    transition: border-color .2s;
+  }
+  .demo-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
   @media (max-width: 768px) {
     body { padding: 12px; }
     h1 { font-size: 20px; margin: 42px 0 16px; }
     h1 small { display: block; margin: 4px 0 0 0; }
-
-    input[type=text], input[type=number], input[type=password], select, textarea { font-size: 16px; padding: 10px; }
-
+    input[type=text], input[type=number], input[type=password], input[type=date], select, textarea { font-size: 16px; padding: 10px; }
     .form-grid { grid-template-columns: 1fr; gap: 10px; }
     .form-actions button { flex: 1; padding: 12px; font-size: 15px; }
-
     .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
     .toolbar input, .toolbar select, .toolbar button { width: 100% !important; min-width: 0; }
-
     .dirty-bar { flex-direction: column; text-align: center; }
     .dirty-bar button { width: 100%; padding: 10px; }
-
     .stat { min-width: 100%; }
     .float { width: 38px; height: 38px; font-size: 17px; }
     #themeToggle { left: 8px; } #menuToggle { left: 52px; }
     .user-profile-bar { flex-direction: column; align-items: stretch; text-align: center; }
+  }
+
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    outline-offset: 2px;
+  }
+  button:disabled { opacity:.55; cursor:not-allowed; }
+  @media (max-width: 600px) {
+    .modal-box { max-height:92vh; overflow:auto; }
+    .shop-grid { grid-template-columns:1fr; }
+    .btn-row { flex-wrap:wrap; justify-content:center; }
+    .calc { max-width:calc(100vw - 24px); }
   }
 </style>
 </head>
@@ -281,18 +377,19 @@
 <div id="overlay" class="overlay" hidden></div>
 <nav id="sideMenu" class="side-menu">
   <div class="menu-head"><h3>منوی سامانه</h3><button id="closeMenu">&times;</button></div>
-  <ul style="padding:0;margin-top:20px">
-    <li class="menu-item" data-tab="shops">🏬 فروشگاه‌ها</li>
+  <ul id="menuList" style="padding:0;margin-top:20px">
+    <li class="menu-item" data-tab="analytics">📊 داشبورد و آمار</li>
     <li class="menu-item active" data-tab="inventory">📦 مدیریت انبار</li>
-    <li class="menu-item" data-tab="orders">📋 سفارش‌ها</li>
-    <li class="menu-item" data-tab="analytics">📊 آمار و تحلیل</li>
-    <li class="menu-item" data-tab="history">🕒 تاریخچه رویدادها</li>
-    <li class="menu-item" data-tab="backup">💾 پشتیبان‌گیری و داده‌ها</li>
+    <li class="menu-item" data-tab="orders">🧾 سفارش‌ها و فروش</li>
+    <li class="menu-item" data-tab="shops">🏪 فروشگاه‌ها</li>
+    <li class="menu-item" data-tab="users">👥 کاربران</li>
+    <li class="menu-item" data-tab="history">🕒 تاریخچه فعالیت</li>
+    <li class="menu-item" data-tab="backup">💾 پشتیبان‌گیری</li>
   </ul>
 </nav>
 
 <div class="container">
-  <h1>سیستم انبار هوشمند <small id="subtitle">(📦 مدیریت انبار)</small></h1>
+  <h1>سیستم مدیریت انبار و فروش هوشمند <small id="subtitle">(📦 مدیریت انبار)</small></h1>
 
   <!-- کارت مشخصات کاربر فعال -->
   <div class="user-profile-bar">
@@ -304,23 +401,57 @@
       <button id="openCartBtn" class="ok" style="padding:6px 14px;font-size:13px" hidden>
         🛒 سبد خرید (<span id="cartCount">۰</span>)
       </button>
-      <button id="openAuthModal" class="info" style="padding:6px 12px;font-size:12.5px">ورود / ثبت‌نام</button>
+      <button id="openAuthModal" class="info" style="padding:6px 12px;font-size:12.5px">ورود / عضویت</button>
       <button id="changePinBtn" class="gray" style="padding:6px 12px;font-size:12.5px" hidden>🔑 تغییر رمز</button>
-      <button id="customerLogoutBtn" class="danger" style="padding:6px 12px;font-size:12.5px" hidden>خروج از حساب</button>
+      <button id="customerLogoutBtn" class="danger" style="padding:6px 12px;font-size:12.5px" hidden>خروج</button>
     </div>
   </div>
 
-  <!-- تب فروشگاه‌ها (ویژه خریدار و مهمان) -->
+  <!-- تب داشبورد و آمار -->
+  <section id="tab-analytics" class="tab">
+    <h2 id="dashboardTitle">داشبورد و آمار</h2>
+
+    <div class="card box" id="pendingCard" hidden>
+      <h4 style="margin-top:0;color:var(--orange)">🕓 فروشندگان در انتظار تأیید</h4>
+      <div id="pendingList"></div>
+    </div>
+
+    <div class="stats" id="dashboardStats">
+      <div class="card stat"><h3>تنوع اقلام</h3><p id="statCount">۰</p></div>
+      <div class="card stat"><h3>ارزش کل موجودی</h3><p id="statValue">۰ تومان</p></div>
+      <div class="card stat alert"><h3>هشدار موجودی اندک</h3><p id="statLow">۰ قلم</p></div>
+      <div class="card stat"><h3>فروش امروز</h3><p id="statTodaySales">۰ تومان</p></div>
+      <div class="card stat"><h3>فروش ماه جاری</h3><p id="statMonthSales">۰ تومان</p></div>
+      <div class="card stat"><h3>کل سفارش‌ها</h3><p id="statOrderCount">۰</p></div>
+    </div>
+
+    <div class="card box" id="storeMetricsCard">
+      <h4>وضعیت فروشگاه‌های تحت پوشش:</h4>
+      <div id="storeMetricsList" style="line-height:2"></div>
+    </div>
+
+    <div class="card box">
+      <h4>ارزش موجودی به تفکیک دسته‌بندی کالا:</h4>
+      <div id="catStats" style="line-height:2"></div>
+    </div>
+
+    <div class="card box">
+      <h4 id="lowStockHeader">کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4>
+      <ul id="lowList" style="padding-right:20px;line-height:1.8"></ul>
+    </div>
+  </section>
+
+  <!-- تب فروشگاه‌ها (برای خریدار و مدیریت) -->
   <section id="tab-shops" class="tab">
-    <h2>🏬 فروشگاه‌ها</h2>
+    <h2>🏪 فروشگاه‌های فعال سامانه</h2>
     <div id="shopGrid" class="shop-grid"></div>
   </section>
 
-  <!-- تب ۱: انبار / کاتالوگ -->
+  <!-- تب انبار و کاتالوگ محصولات -->
   <section id="tab-inventory" class="tab active">
     <div id="shopBar" class="user-profile-bar" hidden>
       <b id="shopBarName"></b>
-      <button id="backToShops" class="gray" style="padding:6px 12px;font-size:12.5px">← همه فروشگاه‌ها</button>
+      <button id="backToShops" class="gray" style="padding:6px 12px;font-size:12.5px">← بازگشت به همه فروشگاه‌ها</button>
     </div>
 
     <div class="card" id="formCard">
@@ -328,7 +459,7 @@
         <input type="text" id="fName" placeholder="نام محصول">
         <select id="fCategory"></select>
         <select id="fSubCategory"></select>
-        <select id="fShop" title="فروشگاه مبدا"></select>
+        <select id="fStore" title="فروشگاه مبدا"></select>
         <input type="number" id="fPrice" placeholder="قیمت (تومان)" min="0" step="any" data-step="100000">
         <input type="number" id="fStock" placeholder="موجودی" min="0" step="any" data-step="10">
         <div class="form-actions">
@@ -342,9 +473,9 @@
       <input type="text" id="search" placeholder="🔍 جستجو در نام کالاها...">
       <select id="filterCategory"></select>
       <select id="filterSubCategory" hidden></select>
-      <select id="filterShop" title="فیلتر بر اساس فروشگاه"></select>
+      <select id="filterStore" title="فیلتر بر اساس فروشگاه"></select>
       <button class="filter active" data-filter="all">همه کالاها</button>
-      <button class="filter" data-filter="low" id="filterLowBtn">⚠️ فقط موجودی کم (زیر ۵)</button>
+      <button class="filter" data-filter="low" id="filterLowBtn">⚠️️ فقط موجودی کم (زیر ۵)</button>
     </div>
 
     <div class="total" id="total"></div>
@@ -369,45 +500,58 @@
     </div>
   </section>
 
-  <!-- تب سفارش‌ها -->
+  <!-- تب سفارش‌ها و فروش -->
   <section id="tab-orders" class="tab">
-    <h2 id="ordersTitle">📋 سفارش‌ها</h2>
+    <h2 id="ordersTitle">🧾 سفارش‌ها و فروش</h2>
     <div class="toolbar" style="margin-top:10px">
-      <input type="text" id="orderSearch" placeholder="🔍 جستجو با کد پیگیری یا نام خریدار...">
+      <input type="text" id="orderSearch" placeholder="🔍 جستجو با کد پیگیری، نام یا شماره تماس خریدار...">
       <select id="orderStatusFilter"></select>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>کد پیگیری</th><th>فروشگاه</th><th>اقلام</th><th>مبلغ</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+        <thead><tr><th>کد پیگیری</th><th>فروشگاه</th><th>اقلام سفارش</th><th>مبلغ کل</th><th>وضعیت</th><th>عملیات</th></tr></thead>
         <tbody id="orderList"></tbody>
       </table>
     </div>
   </section>
 
-  <!-- تب ۲: آمار -->
-  <section id="tab-analytics" class="tab">
-    <h2>داشبورد تحلیل انبار</h2>
-    <div class="stats">
-      <div class="card stat"><h3>تنوع اقلام</h3><p id="statCount"></p></div>
-      <div class="card stat"><h3>ارزش کل موجودی</h3><p id="statValue"></p></div>
-      <div class="card stat alert"><h3>هشدار موجودی اندک</h3><p id="statLow"></p></div>
+  <!-- تب مدیریت کاربران (برای Admin) -->
+  <section id="tab-users" class="tab">
+    <h2>👥 مدیریت کاربران و سطوح دسترسی</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ردیف</th><th>نام و نام خانوادگی</th><th>نام کاربری</th><th>نقش</th><th>فروشگاه تخصیص‌یافته</th><th>شماره تماس</th><th>عملیات نقش</th></tr></thead>
+        <tbody id="userList"></tbody>
+      </table>
     </div>
-    <div class="card box"><h4>ارزش موجودی به تفکیک دسته:</h4><div id="catStats" style="line-height:2"></div></div>
-    <div class="card box"><h4>کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4><ul id="lowList" style="padding-right:20px;line-height:1.8"></ul></div>
   </section>
 
-  <!-- تب ۳: تاریخچه -->
+  <!-- تب تاریخچه فعالیت و لاگ‌ها -->
   <section id="tab-history" class="tab">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <h2 id="historyTabTitle">تاریخچه رویدادهای سیستم</h2>
+      <h2 id="historyTabTitle">🕒 تاریخچه رویدادهای سیستم</h2>
       <button id="clearLogs" class="gray">پاک‌سازی تاریخچه</button>
     </div>
 
-    <div class="toolbar" id="historyToolbar" style="margin-top:10px;margin-bottom:12px">
+    <div class="toolbar" id="historyToolbar" style="margin-top:10px;margin-bottom:8px">
       <button class="filter active" data-logfilter="all">همه رویدادها</button>
-      <button class="filter" data-logfilter="register">👤 ثبت‌نام کاربران</button>
-      <button class="filter" data-logfilter="sale">🛒 فروش و سفارشات</button>
-      <button class="filter" data-logfilter="manage">🛠️ ویرایش و تغییرات انبار</button>
+      <button class="filter" data-logfilter="register">👤 ثبت‌‌نام‌ها</button>
+      <button class="filter" data-logfilter="sale">🛒 فروش و سفارش‌ها</button>
+      <button class="filter" data-logfilter="manage">🛠️ تغییرات انبار</button>
+    </div>
+
+    <div class="toolbar" style="margin-top:0;margin-bottom:12px">
+      <input type="text" id="logSearch" placeholder="🔍 جستجو در رویدادها...">
+      <select id="logRange">
+        <option value="all">همه زمان‌ها</option>
+        <option value="today">امروز</option>
+        <option value="week">۷ روز اخیر</option>
+        <option value="custom">بازه دلخواه</option>
+      </select>
+      <input type="date" id="logFrom" hidden>
+      <input type="date" id="logTo" hidden>
+      <select id="logShopFilter" hidden></select>
+      <button id="archiveLogs" class="info" hidden>📦 آرشیو</button>
     </div>
 
     <div class="table-wrap">
@@ -418,82 +562,107 @@
     </div>
   </section>
 
-  <!-- تب ۴: پشتیبان -->
+  <!-- تب پشتیبان‌گیری و داده‌ها -->
   <section id="tab-backup" class="tab">
-    <h2>پشتیبان‌گیری و مدیریت داده‌ها</h2>
+    <h2>💾 پشتیبان‌گیری و مدیریت داده‌ها</h2>
     <div class="backup">
       <div class="card" style="border-right:4px solid var(--danger)">
-        <h3>📄 گزارش اداری و چاپی (PDF)</h3>
-        <p>مشاهده و ذخیره صورت‌جلسه موجودی، دسته‌بندی‌ها و ارزش مالی انبار به صورت PDF.</p>
+        <h3>📄 گزارش رسمی و چاپی (PDF)</h3>
+        <p>مشاهده و ذخیره صورت‌جلسه موجودی کالاها، دسته‌‌بندی‌ها و ارزش مالی انبار به صورت PDF.</p>
         <button id="pdfBtn" class="danger">ایجاد و دانلود فایل PDF</button>
       </div>
       <div class="card">
         <h3>📥 دریافت فایل پشتیبان (Export JSON)</h3>
-        <p>دانلود فایل داده‌ها برای نگهداری امن یا انتقال به مرورگر دیگر.</p>
+        <p>دانلود فایل کلیه داده‌ها شامل کالاها، فروشگاه‌ها، سفارش‌ها، تراکنش‌ها و تاریخچه.</p>
         <button id="exportBtn" class="info">دانلود فایل JSON</button>
       </div>
       <div class="card">
         <h3>📤 بازیابی اطلاعات از فایل (Import JSON)</h3>
-        <p>فایل پشتیبان را بارگذاری کنید تا داده‌های فعلی جایگزین شوند:</p>
+        <p>فایل پشتیبان را بارگذاری کنید تا داده‌های سیستم بازگردانی شوند:</p>
         <input type="file" id="importFile" accept=".json" style="margin-bottom:12px"><br>
         <button id="importBtn" class="ok">بازگردانی اطلاعات</button>
       </div>
       <div class="card" style="border-color:var(--danger)">
-        <h3 style="color:var(--danger)">⚠️ بازنشانی کامل انبار</h3>
-        <p>تمام محصولات و تاریخچه برای همیشه حذف می‌شوند.</p>
-        <button id="resetBtn" class="danger">حذف تمام اطلاعات انبار</button>
+        <h3 style="color:var(--danger)">⚠️ بازنشانی کامل سیستم</h3>
+        <p>تمام کالاها، سفارش‌ها، تراکنش‌های انبار و تاریخچه برای همیشه حذف می‌شوند.</p>
+        <button id="resetBtn" class="danger">حذف تمام اطلاعات سیستم</button>
       </div>
     </div>
   </section>
 </div>
 
-<!-- پنجره مدال ورود و ثبت‌نام حساب‌های کاربری -->
+<!-- پنجره احراز هویت با تب‌های دایره‌ای/کپسولی شیک -->
 <div id="authModal" class="modal-overlay" hidden>
   <div class="modal-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3 style="margin:0;border:none;padding:0">مدیریت حساب کاربری</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="margin:0;border:none;padding:0">حساب کاربری سامانه</h3>
       <button id="closeAuthModal" class="gray" style="padding:2px 8px;font-size:18px">&times;</button>
     </div>
 
-    <!-- ورود مدیر / فروشنده با PIN -->
-    <div style="font-size:13px;font-weight:bold;margin-bottom:8px">🔐 ورود مدیر / فروشنده:</div>
-    <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-      <select id="staffSelect" style="flex:1;min-width:150px"></select>
-      <input type="password" id="staffPin" placeholder="رمز عبور" style="flex:1;min-width:110px">
-      <button type="button" id="staffLoginBtn" class="info">ورود</button>
+    <!-- تب‌های کپسولی / دایره‌ای با نماد اختصاصی -->
+    <div class="auth-nav">
+      <button type="button" id="tabBtnLogin" class="active">
+        <span style="font-size:15px">🔑</span>
+        <span>ورود به حساب</span>
+      </button>
+      <button type="button" id="tabBtnSignup">
+        <span style="font-size:15px">✨</span>
+        <span>عضویت جدید</span>
+      </button>
     </div>
 
-    <!-- ورود خریدار با شماره تماس و شماره اشتراک -->
-    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:10px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:bold;margin-bottom:8px">🔑 ورود خریدار:</div>
-      <input type="text" id="loginPhone" placeholder="شماره تماس" inputmode="numeric" maxlength="11" style="margin-bottom:6px">
-      <div style="display:flex;gap:8px">
-        <input type="text" id="loginSub" placeholder="شماره اشتراک ۵ رقمی" maxlength="5" inputmode="numeric">
-        <button type="button" id="loginSubBtn" class="info">ورود</button>
+    <!-- ۱. فرم ورود استاندارد (Login) -->
+    <div id="loginSection">
+      <form id="loginForm" style="display:flex;flex-direction:column;gap:12px" novalidate>
+        <input type="text" id="loginUser" placeholder="نام کاربری، شماره همراه یا کد اشتراک" required>
+        
+        <div class="pass-wrapper">
+          <input type="password" id="loginPass" placeholder="رمز عبور" required>
+          <button type="button" class="toggle-pass-btn" data-target="loginPass" title="نمایش / مخفی کردن رمز">👁️</button>
+        </div>
+
+        <button type="submit" class="ok" style="padding:11px;font-size:14.5px;font-weight:bold;margin-top:4px">ورود به سامانه</button>
+      </form>
+
+      <!-- کادر هوشمند پر کردن خودکار حساب‌های تستی با یک کلیک -->
+      <div class="demo-hint-box">
+        <div style="font-weight:bold;margin-bottom:6px;color:var(--text)">⚡ ورود سریع با کلیک روی حساب‌های تستی:</div>
+        <div>
+          <button type="button" class="demo-chip" data-user="admin" data-pass="admin123">👑 مدیر کل</button>
+          <button type="button" class="demo-chip" data-user="seller1" data-pass="1234">🏪 فروشنده ۱</button>
+          <button type="button" class="demo-chip" data-user="seller2" data-pass="1234">🏪 فروشنده ۲</button>
+          <button type="button" class="demo-chip" data-user="sara" data-pass="1234">🛍️ خریدار (سارا)</button>
+        </div>
       </div>
     </div>
 
-    <!-- فرم ثبت‌نام حساب جدید -->
-    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:10px">
-      <div style="font-size:13px;font-weight:bold;margin-bottom:10px">✨ ثبت‌نام یا ساخت حساب جدید:</div>
-      <form id="signupForm" style="display:flex;flex-direction:column;gap:8px" novalidate>
+    <!-- ۲. فرم ثبت‌نام استاندارد (Sign Up) -->
+    <div id="signupSection" hidden>
+      <form id="signupForm" style="display:flex;flex-direction:column;gap:11px" novalidate>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <input type="text" id="regFirst" placeholder="نام">
-          <input type="text" id="regLast" placeholder="نام خانوادگی">
+          <input type="text" id="regFirst" placeholder="نام" required>
+          <input type="text" id="regLast" placeholder="نام خانوادگی" required>
         </div>
+        <input type="text" id="regUsername" placeholder="نام کاربری دلخواه (حداقل ۳ حرف)" required>
+        
+        <div class="pass-wrapper">
+          <input type="password" id="regPassword" placeholder="رمز عبور دلخواه (حداقل ۴ رقم)" required>
+          <button type="button" class="toggle-pass-btn" data-target="regPassword" title="نمایش / مخفی کردن رمز">👁️</button>
+        </div>
+        
         <select id="regRole">
-          <option value="customer">خریدار (مشاهده و خرید کالاها)</option>
+          <option value="customer">خریدار (فروشگاه آنلاین)</option>
           <option value="seller">فروشنده (مدیریت فروشگاه اختصاصی)</option>
         </select>
-        <input type="text" id="regShop" placeholder="نام فروشگاه شما (مثلاً: سوپرمارکت امید)" style="display:none">
-        <input type="password" id="regPin" placeholder="رمز عبور فروشنده (حداقل ۴ کاراکتر)" style="display:none">
         
-        <div id="customerSignupFields" style="display:flex;flex-direction:column;gap:8px">
-          <input type="text" id="regPhone" placeholder="شماره تماس همراه (مثلاً: ۰۹۱۲۳۴۵۶۷۸۹)">
-          <input type="text" id="regAddress" placeholder="شهر و آدرس دقیق محل سکونت">
+        <input type="text" id="regShop" placeholder="نام فروشگاه اختصاصی شما" style="display:none">
+        
+        <div id="customerSignupFields" style="display:flex;flex-direction:column;gap:11px">
+          <input type="text" id="regPhone" placeholder="شماره همراه (مثلاً: ۰۹۱۲۳۴۵۶۷۸۹)">
+          <input type="text" id="regAddress" placeholder="آدرس دقیق پستی محل تحویل">
         </div>
 
-        <button type="submit" class="ok" style="margin-top:4px">ثبت و ورود به حساب</button>
+        <button type="submit" class="ok" style="margin-top:4px;padding:11px;font-size:14.5px;font-weight:bold">ثبت‌نام و ایجاد حساب</button>
       </form>
     </div>
   </div>
@@ -510,12 +679,12 @@
     <div id="cartItemsList" style="max-height:240px;overflow-y:auto;margin-bottom:12px;padding-left:4px"></div>
 
     <div style="background:var(--head);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px">
-      <div style="font-weight:bold;margin-bottom:8px">📍 اطلاعات گیرنده و آدرس تحویل:</div>
+      <div style="font-weight:bold;margin-bottom:8px">📍 مشخصات و نشانی تحویل سفارش:</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
-        <input type="text" id="orderBuyerName" placeholder="نام و نام خانوادگی">
+        <input type="text" id="orderBuyerName" placeholder="نام تحویل‌گیرنده">
         <input type="text" id="orderBuyerPhone" placeholder="شماره تماس (الزامی)">
       </div>
-      <input type="text" id="orderBuyerAddress" placeholder="آدرس دقیق و کامل پستی برای ارسال">
+      <input type="text" id="orderBuyerAddress" placeholder="آدرس کامل و دقیق پستی">
     </div>
 
     <div id="cartSummary" style="border-top:1px solid var(--border);padding-top:10px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:14.5px">
@@ -530,17 +699,19 @@
   </div>
 </div>
 
-<!-- پنجره پیامک دریافتی خریدار -->
+<!-- پنجره شبیه‌ساز پیامک -->
 <div id="smsModal" class="modal-overlay" hidden>
   <div class="modal-box" style="max-width:380px;text-align:center">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📱 پیامک دریافتی</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📱 پیامک سیستم</div>
     <div id="smsText" style="background:var(--head);border:1px solid var(--border);border-radius:12px;padding:14px;line-height:2;font-size:14px;white-space:pre-line"></div>
-    <button id="smsOk" class="ok" style="margin-top:14px;width:100%">متوجه شدم، ادامه</button>
+    <button id="smsOk" class="ok" style="margin-top:14px;width:100%">متوجه شدم، ورود به فروشگاه</button>
   </div>
 </div>
 
 <script>
-/* ============ دسته‌بندی‌ها ============ */
+/* ==========================================================================
+   ۱. تنظیمات پایه، تعاریف دسته‌ها و مدل‌های داده
+   ========================================================================== */
 const UNCAT = 'بدون دسته';
 const CATEGORIES = {
   'مواد غذایی و خوراکی': ['لبنیات و تخم‌مرغ', 'خواربار و اساسی', 'فرآورده‌های پروتئینی', 'نوشیدنی‌ها', 'تنقلات و شیرینی‌جات',
@@ -552,7 +723,20 @@ const CATEGORIES = {
   [UNCAT]: ['متفرقه']
 };
 
-/* ============ ابزارها ============ */
+const DEFAULT_STORES = [
+  { id: 'store1', name: 'سوپرمارکت ۱' },
+  { id: 'store2', name: 'سوپرمارکت ۲' }
+];
+
+const DEFAULT_USERS = [
+  { id: 'u_admin', name: 'مدیر ارشد سیستم', username: 'admin', role: 'admin', storeId: null, phone: '0218888888', address: 'دفتر مرکزی' },
+  { id: 'u_s1', name: 'علی رضایی (فروشنده ۱)', username: 'seller1', role: 'seller', storeId: 'store1', phone: '09121111111', address: 'تهران، سوپرمارکت ۱' },
+  { id: 'u_s2', name: 'رضا حسینی (فروشنده ۲)', username: 'seller2', role: 'seller', storeId: 'store2', phone: '09122222222', address: 'تهران، سوپرمارکت ۲' },
+  { id: 'u_c1', name: 'سارا محمدی', username: 'sara', role: 'customer', storeId: null, phone: '09351234567', address: 'تهران، سعادت‌آباد، پلاک ۱۲', subscriptionNo: '12345' }
+];
+
+const GUEST = { id: 'guest', name: 'کاربر مهمان', role: 'guest', storeId: null };
+
 const LOW_STOCK = 5, DISCOUNT = 0.9;
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -561,34 +745,41 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 const isLow = p => p.stock < LOW_STOCK;
 const subsOf = cat => CATEGORIES[cat] || [];
+const options = (list, selected) => (list.includes(selected) ? list : [...list, selected]).map(v => `<option value="${esc(v)}"${v === selected ? ' selected' : ''}>${esc(v)}</option>`).join('');
+const faDigits = s => String(s || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+const faRaw = s => String(s || '').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-const options = (list, selected) =>
-  (list.includes(selected) ? list : [...list, selected]).map(v => `<option value="${esc(v)}"${v === selected ? ' selected' : ''}>${esc(v)}</option>`).join('');
+const nowISO = () => new Date().toISOString();
+const localDateKey = d => {
+  const x = d instanceof Date ? d : new Date(d);
+  if (Number.isNaN(x.getTime())) return '';
+  const y = x.getFullYear(), m = String(x.getMonth() + 1).padStart(2, '0'), day = String(x.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+const uid = prefix => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+const finiteNonNegative = (v, fallback = 0) => {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+};
+const normalizeStore = s => ({ id: String(s?.id || uid('store')), name: String(s?.name || 'فروشگاه بدون نام').trim() || 'فروشگاه بدون نام' });
+const normalizeUser = u => ({
+  ...u,
+  id: String(u?.id || uid('u')),
+  name: String(u?.name || 'کاربر').trim() || 'کاربر',
+  username: String(u?.username || u?.phone || u?.id).trim().toLowerCase(),
+  role: ['admin','seller','customer'].includes(u?.role) ? u.role : 'customer',
+  storeId: u?.storeId || null,
+  phone: String(u?.phone || ''),
+  address: String(u?.address || '')
+});
 
-/* ============ سیستم کاربران، رمز عبور و احراز هویت ============ */
-const DEFAULT_USERS = [
-  { id: 'u_admin', name: 'مدیر ارشد', role: 'admin', shop: 'دفتر مرکزی', phone: '۰۲۱۸۸۸۸۸۸۸', address: 'تهران، دفتر مرکزی' },
-  { id: 'u_s1', name: 'علی رضایی', role: 'seller', shop: 'سوپرمارکت امید', phone: '۰۹۱۲۱۱۱۱۱۱۱', address: 'تهران، خیابان آزادی' },
-  { id: 'u_s2', name: 'رضا حسینی', role: 'seller', shop: 'هایپرمارکت نگین', phone: '۰۹۱۲۲۲۲۲۲۲۲', address: 'تهران، میدان ونک' },
-  { id: 'u_c1', name: 'سارا محمدی', firstName: 'سارا', lastName: 'محمدی', role: 'customer', shop: '', phone: '09351234567', address: 'تهران، سعادت‌آباد، خیابان سرو شرقی، پلاک ۱۲', subscriptionNo: '12345' }
-];
+let stores = (Array.isArray(load('inventoryStores', DEFAULT_STORES)) ? load('inventoryStores', DEFAULT_STORES) : DEFAULT_STORES).map(normalizeStore);
+let users = (Array.isArray(load('inventoryUsers', DEFAULT_USERS)) ? load('inventoryUsers', DEFAULT_USERS) : DEFAULT_USERS).map(normalizeUser);
 
-const GUEST = { id: 'guest', name: 'مهمان', role: 'guest', shop: '' };
-
-let users = load('inventoryUsers', DEFAULT_USERS);
-const faDigits = s => String(s).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-const faRaw = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-function newSubscriptionNo() {
-  let n;
-  do { n = String(10000 + Math.floor(Math.random() * 90000)); } while (users.some(u => u.subscriptionNo === n));
-  return n;
-}
-
-// هش سبک برای مبهم‌سازی رمز در مرورگر
+/* توابع هش و همگام‌سازی تضمینی حساب‌ها */
 const hashPin = s => {
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-  const str = 'wh:' + faDigits(s);
+  const str = 'wh:' + faDigits(String(s || '').trim());
   for (let i = 0, ch; i < str.length; i++) {
     ch = str.charCodeAt(i);
     h1 = Math.imul(h1 ^ ch, 2654435761);
@@ -599,13 +790,46 @@ const hashPin = s => {
   return String(4294967296 * (2097151 & h2) + (h1 >>> 0));
 };
 
+function newSubscriptionNo() {
+  let n;
+  do { n = String(10000 + Math.floor(Math.random() * 90000)); } while (users.some(u => u.subscriptionNo === n));
+  return n;
+}
+
 function ensureCredentials() {
+  /* تنظیم قطعی رمزهای حساب‌های پیش‌فرض سامانه */
+  const admin = users.find(u => u.role === 'admin' || u.id === 'u_admin');
+  if (admin) {
+    admin.username = 'admin';
+    admin.pinHash = hashPin('admin123');
+    delete admin.status;
+  }
+  const s1 = users.find(u => u.id === 'u_s1' || u.username === 'seller1');
+  if (s1) {
+    s1.username = 'seller1';
+    s1.pinHash = hashPin('1234');
+    s1.storeId = 'store1';
+    delete s1.status;
+  }
+  const s2 = users.find(u => u.id === 'u_s2' || u.username === 'seller2');
+  if (s2) {
+    s2.username = 'seller2';
+    s2.pinHash = hashPin('1234');
+    s2.storeId = 'store2';
+    delete s2.status;
+  }
+  const c1 = users.find(u => u.id === 'u_c1' || u.username === 'sara');
+  if (c1) {
+    c1.username = 'sara';
+    c1.phone = '09351234567';
+    c1.pinHash = hashPin('1234');
+    c1.subscriptionNo = '12345';
+  }
+
   users.forEach(u => {
     if (u.role === 'customer' && !u.subscriptionNo) u.subscriptionNo = newSubscriptionNo();
-    if ((u.role === 'admin' || u.role === 'seller') && !u.pinHash) {
-      u.pinHash = hashPin('1234');
-      u.pinDefault = true;
-    }
+    if (!u.username) u.username = u.phone ? faDigits(u.phone) : u.id.replace('u_', '');
+    if (!u.pinHash) u.pinHash = hashPin(u.role === 'admin' ? 'admin123' : '1234');
   });
 }
 ensureCredentials();
@@ -613,60 +837,150 @@ ensureCredentials();
 const savedId = sessionStorage.getItem('sessionUser');
 let currentUser = users.find(u => u.id === savedId) || GUEST;
 
-const isGuest = () => currentUser.role === 'guest';
-const isMember = () => currentUser.role === 'customer';
-const isAdmin = () => currentUser.role === 'admin';
-const isSeller = () => currentUser.role === 'seller';
-const isCustomer = () => isMember() || isGuest();
-
-const canEdit = p => isAdmin() || (isSeller() && p.shop === currentUser.shop);
-
-function getAllShops() {
-  const s = new Set();
-  users.filter(u => u.role === 'seller' && u.shop).forEach(u => s.add(u.shop));
-  products.forEach(p => { if (p.shop) s.add(p.shop); });
-  if (!s.size) s.add('سوپرمارکت امید');
-  return Array.from(s);
-}
-
-const visible = () => isSeller() ? products.filter(p => p.shop === currentUser.shop) : products;
-
-const normalize = list => list.map((p, i) => ({
-  id: p.id ?? Date.now() + i,
-  name: String(p.name),
-  category: p.category || UNCAT,
-  shop: p.shop || 'سوپرمارکت امید',
-  subcategory: p.subcategory || subsOf(p.category || UNCAT)[0] || 'متفرقه',
-  price: Number(p.price) || 0,
-  stock: Number(p.stock) || 0
-}));
+const normalize = list => (Array.isArray(list) ? list : []).map((p, i) => {
+  let sId = p?.storeId || p?.shop;
+  if (sId === 'سوپرمارکت ۱' || sId === 's1') sId = 'store1';
+  if (sId === 'سوپرمارکت ۲' || sId === 's2') sId = 'store2';
+  if (!sId || !stores.some(st => st.id === sId)) sId = stores[0]?.id || 'store1';
+  const category = CATEGORIES[p?.category] ? p.category : UNCAT;
+  const subs = subsOf(category);
+  const subcategory = subs.includes(p?.subcategory) ? p.subcategory : (subs[0] || 'متفرقه');
+  const rawId = Number(p?.id);
+  return {
+    id: Number.isFinite(rawId) ? rawId : Date.now() + i,
+    name: String(p?.name || 'کالای بدون نام').trim(),
+    category,
+    subcategory,
+    price: finiteNonNegative(p?.price),
+    stock: finiteNonNegative(p?.stock),
+    storeId: sId
+  };
+});
 
 let products = normalize(load('inventoryData', []));
 let logs = load('inventoryLogs', []);
+let logArchive = load('inventoryLogArchive', []);
 let orders = load('inventoryOrders', []);
-
-/* سبد خرید مجزا برای هر حساب خریدار */
+let sales = load('inventorySales', []);
+let inventoryTransactions = load('inventoryTransactions', []);
 let carts = load('customerCarts', {});
-let cart = isMember() ? (carts[currentUser.id] || []) : [];
+let cart = (currentUser.role === 'customer') ? (carts[currentUser.id] || []) : [];
 
-let editId = null, deleteId = null, stockFilter = 'all', catFilter = 'all', subFilter = 'all', shopFilter = 'all';
+let editId = null, deleteId = null, stockFilter = 'all', catFilter = 'all', subFilter = 'all', storeFilter = 'all';
 let logFilter = 'all';
 const drafts = {};
 
 const find = id => products.find(p => p.id === id);
-const save = () => {
-  localStorage.setItem('inventoryData', JSON.stringify(products));
-  localStorage.setItem('inventoryLogs', JSON.stringify(logs));
-  localStorage.setItem('inventoryUsers', JSON.stringify(users));
-  sessionStorage.setItem('sessionUser', currentUser.id);
-  localStorage.setItem('inventoryOrders', JSON.stringify(orders));
-  if (currentUser.id !== 'guest') {
-    carts[currentUser.id] = cart;
-    localStorage.setItem('customerCarts', JSON.stringify(carts));
+const getStore = sId => stores.find(s => s.id === sId) || { id: sId, name: sId };
+const storeName = sId => getStore(sId).name;
+
+/* ==========================================================================
+   ۲. لایه دسترسی و سطوح مجوز (Central Permission Layer)
+   ========================================================================== */
+const permissions = {
+  admin: {
+    manageProducts: true,
+    manageInventory: true,
+    manageUsers: true,
+    manageStores: true,
+    viewReports: true,
+    viewLogs: true,
+    backup: true,
+    reset: true,
+    viewOrders: true,
+    manageOrders: true
+  },
+  seller: {
+    manageProducts: true,
+    manageInventory: true,
+    manageUsers: false,
+    manageStores: false,
+    viewReports: true,
+    viewLogs: true,
+    backup: false,
+    reset: false,
+    viewOrders: true,
+    manageOrders: true
+  },
+  customer: {
+    manageProducts: false,
+    manageInventory: false,
+    manageUsers: false,
+    manageStores: false,
+    viewReports: false,
+    viewLogs: false,
+    backup: false,
+    reset: false,
+    viewOrders: true,
+    manageOrders: false
+  },
+  guest: {
+    manageProducts: false,
+    manageInventory: false,
+    manageUsers: false,
+    manageStores: false,
+    viewReports: false,
+    viewLogs: false,
+    backup: false,
+    reset: false,
+    viewOrders: false,
+    manageOrders: false
   }
 };
 
-function log(type, message, shop = '', buyerInfo = null) {
+const isAdmin = () => currentUser.role === 'admin';
+const isSeller = () => currentUser.role === 'seller';
+const isMember = () => currentUser.role === 'customer';
+const isGuest = () => currentUser.role === 'guest';
+const isCustomer = () => isMember() || isGuest();
+
+function can(action) {
+  const rolePerms = permissions[currentUser.role];
+  return !!(rolePerms && rolePerms[action]);
+}
+
+function canAccessProduct(p) {
+  if (!p) return false;
+  if (isAdmin()) return true;
+  if (isSeller()) return p.storeId === currentUser.storeId;
+  return false;
+}
+
+function unauthorized(msg = 'شما دسترسی لازم برای انجام این عملیات را ندارید!') {
+  toast(msg, 'var(--danger)');
+  return false;
+}
+
+const visible = () => {
+  if (isSeller()) return products.filter(p => p.storeId === currentUser.storeId);
+  if (isCustomer()) return products.filter(p => storeFilter === 'all' || p.storeId === storeFilter);
+  return products;
+};
+
+const save = () => {
+  try {
+    if (currentUser.id !== 'guest') carts[currentUser.id] = cart;
+    const payload = {
+      inventoryData: products,
+      inventoryLogs: logs,
+      inventoryLogArchive: logArchive,
+      inventoryStores: stores,
+      inventoryUsers: users,
+      inventoryOrders: orders,
+      inventorySales: sales,
+      inventoryTransactions,
+      customerCarts: carts
+    };
+    Object.entries(payload).forEach(([key, value]) => localStorage.setItem(key, JSON.stringify(value)));
+    sessionStorage.setItem('sessionUser', currentUser.id);
+    return true;
+  } catch (err) {
+    toast('ذخیره‌سازی با خطا مواجه شد؛ حافظه محلی را بررسی کنید.', 'var(--danger)');
+    return false;
+  }
+};
+
+function log(type, message, storeId = '', buyerInfo = null) {
   logs.unshift({
     id: Date.now() + Math.random(),
     type,
@@ -674,10 +988,29 @@ function log(type, message, shop = '', buyerInfo = null) {
     time: new Date().toLocaleString('fa-IR'),
     by: currentUser.name,
     uid: currentUser.id,
-    shop,
+    role: currentUser.role,
+    storeId: storeId || currentUser.storeId || '',
     buyerInfo
   });
+  if (logs.length > 500) logArchive.push(...logs.splice(500));
   save();
+}
+
+function recordTransaction(productId, storeId, type, quantity, reason, delta = quantity) {
+  const qty = Math.abs(Number(quantity) || 0);
+  const tx = {
+    id: uid('tx'),
+    productId,
+    storeId,
+    type,
+    quantity: qty,
+    delta: Number(delta) || 0,
+    reason: String(reason || ''),
+    userId: currentUser.id,
+    createdAt: nowISO()
+  };
+  inventoryTransactions.unshift(tx);
+  return tx;
 }
 
 let toastTimer;
@@ -688,7 +1021,9 @@ function toast(text, color = 'var(--ok)') {
   toastTimer = setTimeout(() => el.hidden = true, 3000);
 }
 
-/* ============ چرخه و مدیریت سفارش‌ها ============ */
+/* ==========================================================================
+   ۳. سفارشات، فاکتورها و تسویه
+   ========================================================================== */
 const STATUS = {
   pending:   { t: 'ثبت‌شده',   c: 'var(--warn)' },
   confirmed: { t: 'تأییدشده',  c: 'var(--accent)' },
@@ -697,7 +1032,6 @@ const STATUS = {
   cancelled: { t: 'لغوشده',    c: 'var(--danger)' }
 };
 const NEXT = { pending: 'confirmed', confirmed: 'shipped', shipped: 'delivered' };
-const canManageOrder = o => isAdmin() || (isSeller() && o.shop === currentUser.shop);
 
 function newOrderCode() {
   let c;
@@ -709,18 +1043,28 @@ function setOrderStatus(code, status) {
   const o = orders.find(x => x.code === code);
   if (!o || o.status === 'delivered' || o.status === 'cancelled') return;
 
+  const canManageThis = isAdmin() || (isSeller() && o.storeId === currentUser.storeId);
+
   if (status === 'cancelled') {
-    const ok = isMember() ? (o.uid === currentUser.id && o.status === 'pending') : (canManageOrder(o) && o.status !== 'shipped');
-    if (!ok) return toast('امکان لغو این سفارش وجود ندارد', 'var(--danger)');
-    if (!confirm('سفارش لغو و موجودی کالاها به انبار برگردانده شود؟')) return;
-    o.items.forEach(it => { const p = find(it.id); if (p) p.stock += it.qty; });
-  } else if (isMember() || !canManageOrder(o) || NEXT[o.status] !== status) {
-    return;
+    const isOwnerCustomer = isMember() && o.uid === currentUser.id && o.status === 'pending';
+    if (!isOwnerCustomer && (!canManageThis || o.status === 'shipped')) {
+      return unauthorized('امکان لغو این سفارش وجود ندارد!');
+    }
+    if (!confirm('آیا از لغو این سفارش و بازگرداندن اقلام به انبار اطمینان دارید؟')) return;
+    o.items.forEach(it => {
+      const p = find(it.id);
+      if (p) {
+        p.stock += it.qty;
+        recordTransaction(p.id, p.storeId, 'return', it.qty, `لغو سفارش کد ${o.code}`, it.qty);
+      }
+    });
+  } else if (!canManageThis || NEXT[o.status] !== status) {
+    return unauthorized();
   }
 
   o.status = status;
   o.history.push({ status, time: new Date().toLocaleString('fa-IR'), by: currentUser.name });
-  log('sale', `سفارش ${faRaw(o.code)}: ${STATUS[status].t}`, o.shop, o.buyer);
+  log('sale', `تغییر وضعیت سفارش ${faRaw(o.code)} به ${STATUS[status].t}`, o.storeId, o.buyer);
   save(); render();
   toast(`وضعیت سفارش ${faRaw(o.code)}: ${STATUS[status].t}`);
 }
@@ -731,39 +1075,77 @@ function renderOrders() {
     sel.innerHTML = '<option value="all">📂 همه وضعیت‌ها</option>' + Object.entries(STATUS).map(([k, v]) => `<option value="${k}">${v.t}</option>`).join('');
   }
   const q = faDigits($('#orderSearch').value.trim()).toLowerCase(), st = sel.value;
-  const rows = orders.filter(o =>
-    (isAdmin() || (isSeller() && o.shop === currentUser.shop) || (isMember() && o.uid === currentUser.id)) &&
-    (st === 'all' || o.status === st) &&
-    (!q || o.code.includes(q) || (o.buyer && o.buyer.name.toLowerCase().includes(q))));
+  const rows = orders.filter(o => {
+    const scopeMatch = isAdmin() || (isSeller() && o.storeId === currentUser.storeId) || (isMember() && o.uid === currentUser.id);
+    const statusMatch = st === 'all' || o.status === st;
+    const textMatch = !q || o.code.includes(q) || (o.buyer && (o.buyer.name.toLowerCase().includes(q) || o.buyer.phone.includes(q)));
+    return scopeMatch && statusMatch && textMatch;
+  });
 
-  $('#ordersTitle').textContent = isMember() ? '📦 سفارش‌های من' : '📋 سفارش‌ها';
+  $('#ordersTitle').textContent = isMember() ? '📦 سفارش‌های من' : '🧾 سفارش‌ها و فروش';
 
   $('#orderList').innerHTML = rows.length ? rows.map(o => {
     const s = STATUS[o.status], last = o.history[o.history.length - 1];
     const buyer = isMember() ? '' : `<div class="order-meta" style="color:var(--accent)">👤 ${esc(o.buyer.name)} | 📞 ${esc(o.buyer.phone)}<br>🏠 ${esc(o.buyer.address)}</div>`;
     const btn = (to, cls, label) => `<button class="${cls}" data-ocode="${o.code}" data-oact="${to}">${label}</button>`;
     const acts = [];
-    if (!isMember() && canManageOrder(o) && NEXT[o.status]) acts.push(btn(NEXT[o.status], 'ok', STATUS[NEXT[o.status]].t));
+    acts.push(btn('invoice', 'info', '🧾 فاکتور'));
+    
+    const canManageThis = isAdmin() || (isSeller() && o.storeId === currentUser.storeId);
+    if (canManageThis && NEXT[o.status]) acts.push(btn(NEXT[o.status], 'ok', STATUS[NEXT[o.status]].t));
+    
     const open = o.status !== 'delivered' && o.status !== 'cancelled';
-    if (open && (isMember() ? (o.uid === currentUser.id && o.status === 'pending') : (canManageOrder(o) && o.status !== 'shipped'))) {
+    if (open && (isMember() ? (o.uid === currentUser.id && o.status === 'pending') : (canManageThis && o.status !== 'shipped'))) {
       acts.push(btn('cancelled', 'danger', 'لغو سفارش'));
     }
+
     return `<tr>
       <td><b>${faRaw(o.code)}</b><div class="order-meta">${esc(o.created)}</div></td>
-      <td><b style="color:var(--accent)">${esc(o.shop)}</b></td>
+      <td><b style="color:var(--accent)">${esc(storeName(o.storeId))}</b></td>
       <td style="text-align:right">${o.items.map(it => `${esc(it.name)} × ${fa(it.qty)}`).join('<br>')}${buyer}</td>
       <td>${fa(o.total)} تومان</td>
       <td><b style="color:${s.c}">${s.t}</b><div class="order-meta">${esc(last.time)}</div></td>
       <td><div class="btn-row">${acts.join('') || '—'}</div></td>
     </tr>`;
-  }).join('') : '<tr><td colspan="6" class="empty">سفارشی یافت نشد.</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="empty">هیچ سفارشی یافت نشد.</td></tr>';
 }
 
-/* ============ مدیریت سبد خرید و شمارنده در کاتالوگ ============ */
+function printInvoice(code) {
+  const o = orders.find(x => x.code === code);
+  if (!o) return;
+  const win = window.open('', '_blank');
+  if (!win) return alert('لطفاً اجازه باز شدن پنجره پاپ‌آپ را بدهید.');
+  const cell = 'border:1px solid #cbd5e1;padding:8px;text-align:center';
+  const rows = o.items.map((it, i) => `<tr><td style="${cell}">${fa(i + 1)}</td><td style="${cell};text-align:right">${esc(it.name)}</td><td style="${cell}">${fa(it.qty)}</td><td style="${cell}">${fa(it.price)} تومان</td><td style="${cell}">${fa(it.price * it.qty)} تومان</td></tr>`).join('');
+  const heads = ['ردیف', 'کالا', 'تعداد', 'قیمت واحد', 'جمع'].map(h => `<th style="${cell};background:#f1f5f9">${h}</th>`).join('');
+  win.document.title = 'فاکتور ' + faRaw(o.code);
+  win.document.documentElement.lang = 'fa';
+  win.document.documentElement.dir = 'rtl';
+  win.document.body.style.fontFamily = 'Tahoma,sans-serif';
+  win.document.body.style.padding = '25px';
+  win.document.body.style.color = '#0f172a';
+  win.document.body.innerHTML = `
+    <h2 style="text-align:center;border-bottom:2px solid #0284c7;padding-bottom:12px">فاکتور فروش — ${esc(storeName(o.storeId))}</h2>
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#475569;margin:15px 0">
+      <span>کد پیگیری: <b>${faRaw(o.code)}</b></span><span>تاریخ سفارش: ${esc(o.created)}</span><span>وضعیت: ${STATUS[o.status].t}</span>
+    </div>
+    <div style="font-size:13px;line-height:2;margin-bottom:14px">
+      👤 ${esc(o.buyer.name)} | 📞 ${esc(o.buyer.phone)}<br>🏠 ${esc(o.buyer.address)}
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>
+    <div style="margin-top:20px;border-top:2px dashed #94a3b8;padding-top:12px;font-weight:bold;text-align:left">مبلغ کل فاکتور: ${fa(o.total)} تومان</div>
+  `;
+  win.focus();
+  setTimeout(() => win.print(), 350);
+}
+
+/* ==========================================================================
+   ۴. سبد خرید و کاتالوگ فروشگاهی خریدار
+   ========================================================================== */
 const cartQty = id => (cart.find(x => x.id === id) || {}).qty || 0;
 
 function cartCell(p) {
-  if (p.stock <= 0) return '<button class="ok" disabled style="opacity:.45;cursor:not-allowed">🛒 افزودن</button>';
+  if (p.stock <= 0) return '<button class="ok" disabled style="opacity:.45;cursor:not-allowed">🔴 ناموجود</button>';
   if (isGuest()) return '<button class="info" data-act="need-login">🔑 ورود برای خرید</button>';
   const q = cartQty(p.id);
   return q
@@ -780,29 +1162,18 @@ function updateCartBadge() {
 function addToCart(productId) {
   if (!isMember()) { $('#authModal').hidden = false; return; }
   const product = find(productId);
-  if (!product || product.stock <= 0) {
-    return toast('متاسفانه این کالا در انبار ناموجود است!', 'var(--danger)');
-  }
+  if (!product || product.stock <= 0) return toast('این کالا ناموجود است!', 'var(--danger)');
 
   const existingItem = cart.find(item => item.id === productId);
   if (existingItem) {
-    if (existingItem.qty >= product.stock) {
-      return toast(`حداکثر موجودی این کالا در انبار (${fa(product.stock)} عدد) است!`, 'var(--danger)');
-    }
+    if (existingItem.qty >= product.stock) return toast(`حداکثر موجودی این کالا (${fa(product.stock)} عدد) است!`, 'var(--danger)');
     existingItem.qty += 1;
   } else {
-    cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      shop: product.shop,
-      qty: 1
-    });
+    cart.push({ id: product.id, name: product.name, price: product.price, storeId: product.storeId, qty: 1 });
   }
 
-  save();
-  updateCartBadge();
-  if (!existingItem) toast(`کالای "${product.name}" به سبد خرید اضافه شد 🛒`);
+  save(); updateCartBadge();
+  if (!existingItem) toast(`کالای "${product.name}" به سبد اضافه شد 🛒`);
   render();
 }
 
@@ -823,13 +1194,13 @@ function renderCartModal() {
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);gap:10px">
         <div style="flex:1">
           <div style="font-weight:bold;font-size:13px">${esc(item.name)}</div>
-          <div style="font-size:11.5px;color:var(--muted)">${esc(item.shop)} | هر عدد: ${fa(price)} ت</div>
+          <div style="font-size:11.5px;color:var(--muted)">${esc(storeName(item.storeId))} | فی: ${fa(price)} ت</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
           <button type="button" class="qty" onclick="changeCartItemQty(${item.id}, -1)">-</button>
           <span style="min-width:24px;text-align:center;font-weight:bold;font-size:13px">${fa(item.qty)}</span>
           <button type="button" class="qty" onclick="changeCartItemQty(${item.id}, 1)">+</button>
-          <button type="button" class="danger" style="padding:4px 8px;font-size:12px;margin-right:2px" onclick="removeCartItem(${item.id})" title="حذف کالا">🗑️</button>
+          <button type="button" class="danger" style="padding:4px 8px;font-size:12px;margin-right:2px" onclick="removeCartItem(${item.id})">🗑️</button>
         </div>
       </div>
     `;
@@ -844,27 +1215,16 @@ window.changeCartItemQty = function(id, delta) {
   if (!item || !product) return;
 
   const newQty = item.qty + delta;
-  if (newQty <= 0) {
-    removeCartItem(id);
-    return;
-  }
-  if (newQty > product.stock) {
-    return toast(`موجودی کالا در انبار (${fa(product.stock)} عدد) است!`, 'var(--danger)');
-  }
+  if (newQty <= 0) { removeCartItem(id); return; }
+  if (newQty > product.stock) return toast(`سقف موجودی کالا (${fa(product.stock)} عدد) است!`, 'var(--danger)');
 
   item.qty = newQty;
-  save();
-  updateCartBadge();
-  renderCartModal();
-  render();
+  save(); updateCartBadge(); renderCartModal(); render();
 };
 
 window.removeCartItem = function(id) {
   cart = cart.filter(x => x.id !== id);
-  save();
-  updateCartBadge();
-  renderCartModal();
-  render();
+  save(); updateCartBadge(); renderCartModal(); render();
 };
 
 $('#openCartBtn').onclick = () => {
@@ -877,16 +1237,10 @@ $('#openCartBtn').onclick = () => {
 $('#closeCartModal').onclick = () => { $('#cartModal').hidden = true; };
 
 $('#clearCartBtn').onclick = () => {
-  if (!cart.length) return;
-  if (!confirm('آیا از خالی کردن کل سبد خرید اطمینان دارید؟')) return;
-  cart = [];
-  save();
-  updateCartBadge();
-  renderCartModal();
-  render();
+  if (!cart.length || !confirm('کل سبد خرید خالی شود؟')) return;
+  cart = []; save(); updateCartBadge(); renderCartModal(); render();
 };
 
-// ثبت نهایی سفارش همراه با ساخت سفارش ۶ رقمی به ازای هر فروشگاه
 $('#checkoutBtn').onclick = () => {
   cart = cart.filter(i => find(i.id));
   if (!cart.length) return toast('سبد خرید شما خالی است!', 'var(--danger)');
@@ -896,7 +1250,7 @@ $('#checkoutBtn').onclick = () => {
   const buyerAddress = $('#orderBuyerAddress').value.trim();
 
   if (!buyerName || !buyerPhone || !buyerAddress) {
-    return alert('لطفاً مشخصات تحویل (نام، شماره تماس و آدرس پستی) را کامل وارد کنید تا سفارش ثبت شود.');
+    return alert('لطفاً مشخصات تحویل (نام، شماره تماس و آدرس پستی) را وارد کنید.');
   }
 
   currentUser.phone = buyerPhone;
@@ -904,55 +1258,62 @@ $('#checkoutBtn').onclick = () => {
 
   for (const item of cart) {
     const prod = find(item.id);
-    if (!prod || prod.stock < item.qty) {
-      return alert(`موجودی کالای "${item.name}" تغییر کرده و کافی نیست!`);
-    }
+    if (!prod || prod.stock < item.qty) return alert(`موجودی کالای "${item.name}" کافی نیست!`);
   }
 
-  const byShop = {};
+  const byStore = {};
   cart.forEach(item => {
     const prod = find(item.id);
     prod.stock -= item.qty;
-    (byShop[prod.shop] = byShop[prod.shop] || []).push({ id: prod.id, name: prod.name, price: prod.price, qty: item.qty });
+    recordTransaction(prod.id, prod.storeId, 'sale', item.qty, `فروش آنلاین به ${buyerName}`, -item.qty);
+    (byStore[prod.storeId] = byStore[prod.storeId] || []).push({ id: prod.id, name: prod.name, price: prod.price, qty: item.qty });
   });
 
   const buyerInfo = { name: buyerName, phone: buyerPhone, address: buyerAddress };
   const codes = [];
 
-  Object.entries(byShop).forEach(([shop, items]) => {
+  Object.entries(byStore).forEach(([sId, items]) => {
     const now = new Date().toLocaleString('fa-IR');
+    const total = items.reduce((s, it) => s + it.price * it.qty, 0);
     const order = {
       code: newOrderCode(),
       uid: currentUser.id,
       buyer: buyerInfo,
-      shop,
+      storeId: sId,
       items,
-      total: items.reduce((s, it) => s + it.price * it.qty, 0),
+      total,
       status: 'pending',
       created: now,
       history: [{ status: 'pending', time: now, by: currentUser.name }]
     };
     orders.unshift(order);
+    sales.unshift({
+      id: 'sale_' + order.code,
+      storeId: sId,
+      sellerId: null,
+      customerId: currentUser.id,
+      items,
+      total,
+      createdAt: new Date().toISOString()
+    });
     codes.push(faRaw(order.code));
-    log('sale', `سفارش جدید ${faRaw(order.code)}: ${items.map(it => `${it.name} × ${fa(it.qty)}`).join('، ')} (${fa(order.total)} تومان)`, shop, buyerInfo);
+    log('sale', `ثبت سفارش جدید ${faRaw(order.code)}: ${items.map(it => `${it.name} × ${fa(it.qty)}`).join('، ')} (${fa(total)} تومان)`, sId, buyerInfo);
   });
 
-  cart = [];
-  save();
-  updateCartBadge();
-  $('#cartModal').hidden = true;
-  render();
+  cart = []; save(); updateCartBadge(); $('#cartModal').hidden = true; render();
   $('.menu-item[data-tab="orders"]').click();
-  toast(`سفارش ثبت شد 🎉 کد پیگیری: ${codes.join('، ')}`);
+  toast(`سفارش با موفقیت ثبت شد 🎉 کد پیگیری: ${codes.join('، ')}`);
 };
 
-/* ============ پیش‌نویس ردیف‌ها ============ */
+/* ==========================================================================
+   ۵. سیستم پیش‌نویس جدول انبار (Drafts & Dirty Checking)
+   ========================================================================== */
 const same = (p, d) => d.stock.trim() !== '' && Number(d.stock) === p.stock && d.category === p.category && d.subcategory === p.subcategory;
 const draftOf = p => drafts[p.id] || { stock: String(p.stock), category: p.category, subcategory: p.subcategory };
 
 function syncRow(tr) {
   const id = Number(tr.dataset.id), p = find(id);
-  if (!p) return;
+  if (!p || !canAccessProduct(p)) return;
   const d = { stock: tr.querySelector('.stock input').value, category: tr.querySelector('.row-cat').value, subcategory: tr.querySelector('.row-subcat').value };
   if (same(p, d)) delete drafts[id]; else drafts[id] = d;
   const isDirty = id in drafts;
@@ -969,205 +1330,334 @@ function updateDirtyBar() {
 
 function commit(id) {
   const p = find(id), d = drafts[id];
-  if (!p || !d || !canEdit(p)) return 'none';
+  if (!p || !d || !canAccessProduct(p)) return 'none';
   const stock = Number(d.stock);
   if (d.stock.trim() === '' || !isFinite(stock) || stock < 0) return 'invalid';
+
   const changes = [];
-  if (stock !== p.stock) { changes.push(`موجودی از ${p.stock} به ${stock}`); p.stock = stock; }
+  if (stock !== p.stock) {
+    recordTransaction(p.id, p.storeId, 'adjustment', stock - p.stock, 'تغییر مستقیم موجودی');
+    changes.push(`موجودی از ${p.stock} به ${stock}`);
+    p.stock = stock;
+  }
   if (d.category !== p.category || d.subcategory !== p.subcategory) {
     changes.push(`دسته‌بندی به (${d.category} / ${d.subcategory})`);
     p.category = d.category; p.subcategory = d.subcategory;
   }
   delete drafts[id];
-  log('edit', `ویرایش کالای "${p.name}": ${changes.join(' و ')}.`);
+  log('edit', `ویرایش مشخصات "${p.name}": ${changes.join(' و ')}`, p.storeId);
   return 'ok';
 }
 
 function saveOne(id) {
+  if (!can('manageInventory')) return unauthorized();
   const r = commit(id);
-  if (r === 'invalid') return toast('خطا: موجودی باید یک عدد معتبر و نامنفی باشد', 'var(--danger)');
+  if (r === 'invalid') return toast('خطا: موجودی نامعتبر است', 'var(--danger)');
   save(); render();
   toast(`تغییرات "${find(id).name}" ثبت شد ✅`);
 }
 
 $('#saveAll').onclick = () => {
+  if (!can('manageInventory')) return unauthorized();
   let done = 0, bad = 0;
   Object.keys(drafts).forEach(id => { const r = commit(Number(id)); if (r === 'ok') done++; else if (r === 'invalid') bad++; });
   save(); render();
-  bad ? toast(`${fa(done)} ردیف ثبت شد؛ ${fa(bad)} ردیف مقدار نامعتبر دارد`, 'var(--danger)') : toast(`${fa(done)} ردیف ثبت شد ✅`);
+  bad ? toast(`${fa(done)} ردیف ثبت شد؛ ${fa(bad)} مقدار نامعتبر داشت`, 'var(--danger)') : toast(`${fa(done)} ردیف ثبت شد ✅`);
 };
+
 $('#undoAll').onclick = () => {
-  const n = Object.keys(drafts).length;
-  if (!confirm(`تغییرات ${fa(n)} ردیف لغو شود؟`)) return;
+  if (!confirm(`تغییرات ${fa(Object.keys(drafts).length)} ردیف لغو شود؟`)) return;
   Object.keys(drafts).forEach(id => delete drafts[id]);
   render();
 };
 
 addEventListener('beforeunload', e => { if (Object.keys(drafts).length) { e.preventDefault(); e.returnValue = ''; } });
 
-/* ============ رندر صفحه ============ */
+/* ==========================================================================
+   ۶. رندر صفحات و داشبوردها (Role-Based Rendering)
+   ========================================================================== */
 const mine = l => l.uid ? l.uid === currentUser.id : l.by === currentUser.name;
+
+function renderPending() {
+  const p = users.filter(u => u.role === 'seller' && u.status === 'pending');
+  $('#pendingCard').hidden = !isAdmin() || !p.length;
+  $('#pendingList').innerHTML = p.map(u => `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span><b>${esc(u.name)}</b> — ${esc(storeName(u.storeId))} <small style="color:var(--muted)">(@${esc(u.username)})</small></span>
+      <span class="btn-row">
+        <button class="ok" data-pact="approve" data-uid="${esc(u.id)}">تأیید</button>
+        <button class="danger" data-pact="reject" data-uid="${esc(u.id)}">رد</button>
+      </span>
+    </div>
+  `).join('');
+}
+
+function updateBadges() {
+  const pend = isAdmin() ? users.filter(u => u.role === 'seller' && u.status === 'pending').length : 0;
+  const fresh = (isAdmin() || isSeller()) ? orders.filter(o => o.status === 'pending' && (isAdmin() || o.storeId === currentUser.storeId)).length : 0;
+  const tag = (tab, n) => {
+    const el = $(`.menu-item[data-tab="${tab}"]`);
+    if (el) el.textContent = el.textContent.replace(/\s*\([۰-۹]+\)$/, '') + (n ? ` (${fa(n)})` : '');
+  };
+  tag('analytics', pend);
+  tag('orders', fresh);
+}
+
+function renderUsers() {
+  if (!isAdmin()) return;
+  $('#userList').innerHTML = users.map((u, i) => {
+    const isSelf = u.id === currentUser.id;
+    return `
+      <tr>
+        <td>${fa(i + 1)}</td>
+        <td><b>${esc(u.name)}</b></td>
+        <td><code>${esc(u.username || '—')}</code></td>
+        <td><span class="badge ${u.role === 'admin' ? 'edit' : u.role === 'seller' ? 'sale' : 'add'}">${u.role === 'admin' ? 'مدیر کل' : u.role === 'seller' ? 'فروشنده' : 'خریدار'}</span></td>
+        <td>${u.storeId ? esc(storeName(u.storeId)) : '—'}</td>
+        <td>${esc(u.phone || '—')}</td>
+        <td>
+          ${isSelf ? '<small style="color:var(--muted)">حساب جاری</small>' : `
+            <select class="user-role-select" data-uid="${u.id}" style="padding:3px 6px;font-size:12px;width:auto">
+              <option value="customer" ${u.role==='customer'?'selected':''}>خریدار</option>
+              <option value="seller" ${u.role==='seller'?'selected':''}>فروشنده</option>
+              <option value="admin" ${u.role==='admin'?'selected':''}>مدیر کل</option>
+            </select>
+          `}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function passLogFilters(l) {
+  const t = Math.floor(l.id), r = $('#logRange').value;
+  const day0 = new Date(); day0.setHours(0, 0, 0, 0);
+  if (r === 'today' && t < day0.getTime()) return false;
+  if (r === 'week' && t < Date.now() - 7 * 864e5) return false;
+  if (r === 'custom') {
+    const f = $('#logFrom').value, to = $('#logTo').value;
+    if (f && t < new Date(f + 'T00:00:00').getTime()) return false;
+    if (to && t > new Date(to + 'T23:59:59').getTime()) return false;
+  }
+  const sh = $('#logShopFilter').value;
+  if (isAdmin() && sh && sh !== 'all' && l.storeId !== sh) return false;
+  const q = $('#logSearch').value.trim().toLowerCase();
+  return !q || `${l.message} ${l.by || ''} ${l.buyerInfo ? l.buyerInfo.name : ''}`.toLowerCase().includes(q);
+}
 
 function render() {
   const vis = visible();
   renderOrders();
+  renderPending();
+  updateBadges();
+  renderUsers();
 
   const total = vis.reduce((s, p) => s + p.price * p.stock, 0);
   const lowItems = vis.filter(isLow);
-  $('#total').hidden = isCustomer();
-  $('#total').textContent = `ارزش کل انبار: ${fa(total)} تومان | با ۱۰٪ تخفیف: ${fa(total * DISCOUNT)} تومان`;
 
-  const q = $('#search').value.trim().toLowerCase();
-  const rows = vis.filter(p =>
-    p.name.toLowerCase().includes(q) &&
-    (stockFilter === 'all' || isLow(p)) &&
-    (catFilter === 'all' || p.category === catFilter) &&
-    (subFilter === 'all' || p.subcategory === subFilter) &&
-    (shopFilter === 'all' || p.shop === shopFilter));
-
-  $('#productHead').innerHTML = isCustomer()
-    ? '<tr><th>نام کالا</th><th>فروشگاه مبدا</th><th>دسته‌‌بندی</th><th>قیمت</th><th>وضعیت</th><th>خرید</th></tr>'
-    : '<tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr>';
-
-  const status = p => p.stock <= 0
-    ? '<b style="color:var(--danger)">ناموجود</b>'
-    : isLow(p) ? '<b style="color:var(--warn)">موجودی اندک</b>' : '<b style="color:var(--ok)">موجود</b>';
-
-  $('#productList').innerHTML = !rows.length
-    ? `<tr><td colspan="${isCustomer() ? 6 : 5}" class="empty">هیچ کالایی با این مشخصات یافت نشد.</td></tr>`
-    : isCustomer()
-    ? rows.map(p => `<tr>
-        <td class="name">${esc(p.name)}</td>
-        <td><b style="color:var(--accent)">${esc(p.shop)}</b></td>
-        <td>${esc(p.category)}</td>
-        <td>${fa(p.price)} تومان</td>
-        <td>${status(p)}</td>
-        <td>${cartCell(p)}</td>
-      </tr>`).join('')
-    : rows.map(p => {
-      const d = draftOf(p), dirty = p.id in drafts;
-      return `
-      <tr data-id="${p.id}"${dirty ? ' class="dirty"' : ''}>
-        <td class="name">${esc(p.name)}${isLow(p) ? '<span class="low">(موجودی کم)</span>' : ''}
-          <div style="font-size:11px;color:var(--muted);font-weight:normal">${esc(p.shop)}</div>
-        </td>
-        <td><div class="cat-box">
-          <select class="row-cat">${options(Object.keys(CATEGORIES), d.category)}</select>
-          <select class="row-subcat">${options(subsOf(d.category), d.subcategory)}</select>
-        </div></td>
-        <td>${fa(p.price)} تومان</td>
-        <td><div class="stock">
-          <button type="button" class="qty" data-act="dec">-</button>
-          <input type="number" value="${esc(d.stock)}" min="0" step="any">
-          <button type="button" class="qty" data-act="inc">+</button>
-        </div></td>
-        <td><div class="btn-row">
-          <button class="ok save" data-act="save"${dirty ? '' : ' hidden'}>ثبت</button>
-          <button class="gray undo" data-act="undo" title="بازگشت به مقدار ذخیره‌شده"${dirty ? '' : ' hidden'}>لغو</button>
-          <button class="info" data-act="edit">ویرایش</button>
-          <button class="danger" data-act="del">حذف</button>
-        </div></td>
-      </tr>`;
-    }).join('');
-  updateDirtyBar();
-
+  $('#dashboardTitle').textContent = isAdmin() ? '📊 داشبورد کلان مدیر سیستم' : isSeller() ? `📊 داشبورد ${storeName(currentUser.storeId)}` : '📊 آمار و گزارش‌ها';
   $('#statCount').textContent = fa(vis.length);
   $('#statValue').textContent = fa(total) + ' تومان';
   $('#statLow').textContent = fa(lowItems.length) + ' قلم';
 
+  const relevantSales = sales.filter(s => isAdmin() || s.storeId === currentUser.storeId);
+  const now = new Date();
+  const todayStr = localDateKey(now);
+  const monthStr = todayStr.slice(0, 7);
+
+  const todayTotal = relevantSales.filter(s => (s.createdAt || '').startsWith(todayStr)).reduce((sum, s) => sum + s.total, 0);
+  const monthTotal = relevantSales.filter(s => (s.createdAt || '').startsWith(monthStr)).reduce((sum, s) => sum + s.total, 0);
+  const relevantOrders = orders.filter(o => isAdmin() || o.storeId === currentUser.storeId);
+
+  $('#statTodaySales').textContent = fa(todayTotal) + ' تومان';
+  $('#statMonthSales').textContent = fa(monthTotal) + ' تومان';
+  $('#statOrderCount').textContent = fa(relevantOrders.length);
+
+  $('#storeMetricsCard').hidden = !isAdmin();
+  if (isAdmin()) {
+    $('#storeMetricsList').innerHTML = stores.map(st => {
+      const stProds = products.filter(p => p.storeId === st.id);
+      const stVal = stProds.reduce((sum, p) => sum + p.price * p.stock, 0);
+      const stSalesTotal = sales.filter(s => s.storeId === st.id).reduce((sum, s) => sum + s.total, 0);
+      return `<div>🏪 <b>${esc(st.name)}:</b> ${fa(stProds.length)} قلم کالا | ارزش انبار: <b>${fa(stVal)}</b> تومان | کل فروش: <b>${fa(stSalesTotal)}</b> تومان</div>`;
+    }).join('');
+  }
+
+  $('#lowStockHeader').textContent = isSeller() ? `کالاهای نیازمند شارژ در ${storeName(currentUser.storeId)}:` : 'کالاهای نیازمند شارژ (کمتر از ۵ عدد):';
+  $('#lowList').innerHTML = lowItems.length
+    ? lowItems.map(p => `<li>${esc(p.name)} (${esc(storeName(p.storeId))}) — موجودی: ${fa(p.stock)} عدد</li>`).join('')
+    : '<li>تمامی اقلام موجودی کافی دارند.</li>';
+
   const byCat = {};
   vis.forEach(p => byCat[p.category] = (byCat[p.category] || 0) + p.price * p.stock);
   $('#catStats').innerHTML = Object.keys(byCat).length
-    ? Object.entries(byCat).map(([c, v]) =>
-        `<div><strong>${esc(c)}:</strong> ${fa(v)} تومان <span style="color:var(--muted)">(${fa(total ? (v / total * 100).toFixed(1) : 0)}٪ کل انبار)</span></div>`).join('')
+    ? Object.entries(byCat).map(([c, v]) => `<div><strong>${esc(c)}:</strong> ${fa(v)} تومان <span style="color:var(--muted)">(${fa(total ? (v / total * 100).toFixed(1) : 0)}٪)</span></div>`).join('')
     : '<div style="color:var(--muted)">کالایی ثبت نشده است.</div>';
 
-  $('#lowList').innerHTML = lowItems.length
-    ? lowItems.map(p => `<li>${esc(p.name)} (${esc(p.shop)}) — موجودی: ${fa(p.stock)} عدد</li>`).join('')
-    : '<li>تمامی اقلام دارای موجودی کافی هستند.</li>';
+  $('#total').hidden = isCustomer();
+  $('#total').textContent = `ارزش کل انبار: ${fa(total)} تومان | با ۱۰٪ تخفیف: ${fa(total * DISCOUNT)} تومان`;
 
-  // تب فروشگاه‌ها و نوار فیلتر فروشگاه
-  $('#shopBar').hidden = !(isCustomer() && shopFilter !== 'all');
-  $('#shopBarName').textContent = '🏪 ' + shopFilter;
-  $('#shopGrid').innerHTML = getAllShops().map(s => {
-    const items = products.filter(p => p.shop === s), avail = items.filter(p => p.stock > 0).length;
-    return `<button class="shop-card" data-shop="${esc(s)}"><b>🏪 ${esc(s)}</b><span>${fa(items.length)} کالا | ${fa(avail)} موجود</span></button>`;
+  const q = $('#search').value.trim().toLowerCase();
+  const rows = vis.filter(p => {
+    const sMatch = p.name.toLowerCase().includes(q);
+    const kMatch = stockFilter === 'all' || isLow(p);
+    const cMatch = catFilter === 'all' || p.category === catFilter;
+    const subMatch = subFilter === 'all' || p.subcategory === subFilter;
+    const stMatch = storeFilter === 'all' || p.storeId === storeFilter;
+    return sMatch && kMatch && cMatch && subMatch && stMatch;
+  });
+
+  $('#productHead').innerHTML = isCustomer()
+    ? '<tr><th>نام کالا</th><th>فروشگاه</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>وضعیت موجودی</th><th>عملیات</th></tr>'
+    : '<tr><th>نام محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th><th>موجودی</th><th>عملیات</th></tr>';
+
+  $('#productList').innerHTML = !rows.length
+    ? `<tr><td colspan="${isCustomer() ? 6 : 5}" class="empty">هیچ کالایی یافت نشد.</td></tr>`
+    : isCustomer()
+    ? rows.map(p => {
+        let stockLabel = '<b style="color:var(--ok)">🟢 موجود</b>';
+        if (p.stock <= 0) stockLabel = '<b style="color:var(--danger)">🔴 ناموجود</b>';
+        else if (p.stock <= 5) stockLabel = '<b style="color:var(--warn)">🟡 موجودی محدود</b>';
+        return `<tr>
+          <td class="name">${esc(p.name)}</td>
+          <td><b style="color:var(--accent)">${esc(storeName(p.storeId))}</b></td>
+          <td>${esc(p.category)}</td>
+          <td>${fa(p.price)} تومان</td>
+          <td>${stockLabel}</td>
+          <td>${cartCell(p)}</td>
+        </tr>`;
+      }).join('')
+    : rows.map(p => {
+        const d = draftOf(p), dirty = p.id in drafts;
+        const storeBadge = isAdmin() ? `<div style="font-size:11px;color:var(--muted);font-weight:normal">فروشگاه: ${esc(storeName(p.storeId))}</div>` : '';
+        return `
+        <tr data-id="${p.id}"${dirty ? ' class="dirty"' : ''}>
+          <td class="name">${esc(p.name)}${isLow(p) ? '<span class="low">(موجودی کم)</span>' : ''}${storeBadge}</td>
+          <td><div class="cat-box">
+            <select class="row-cat">${options(Object.keys(CATEGORIES), d.category)}</select>
+            <select class="row-subcat">${options(subsOf(d.category), d.subcategory)}</select>
+          </div></td>
+          <td>${fa(p.price)} تومان</td>
+          <td><div class="stock">
+            <button type="button" class="qty" data-act="dec">-</button>
+            <input type="number" value="${esc(d.stock)}" min="0" step="any">
+            <button type="button" class="qty" data-act="inc">+</button>
+          </div></td>
+          <td><div class="btn-row">
+            <button class="ok save" data-act="save"${dirty ? '' : ' hidden'}>ثبت</button>
+            <button class="gray undo" data-act="undo"${dirty ? '' : ' hidden'}>لغو</button>
+            <button class="info" data-act="edit">ویرایش</button>
+            <button class="danger" data-act="del">حذف</button>
+          </div></td>
+        </tr>`;
+      }).join('');
+  updateDirtyBar();
+
+  $('#shopBar').hidden = !(isCustomer() && storeFilter !== 'all');
+  $('#shopBarName').textContent = '🏪 ' + storeName(storeFilter);
+  $('#shopGrid').innerHTML = stores.map(st => {
+    const stProds = products.filter(p => p.storeId === st.id);
+    const avail = stProds.filter(p => p.stock > 0).length;
+    return `<button class="shop-card" data-storeid="${esc(st.id)}"><b>🏪 ${esc(st.name)}</b><span>${fa(stProds.length)} قلم کالا | ${fa(avail)} موجود</span></button>`;
   }).join('');
 
   $('#historyToolbar').hidden = isCustomer();
-
-  let shown = isAdmin()
-    ? logs
-    : isSeller()
-    ? logs.filter(l => mine(l) || l.shop === currentUser.shop)
-    : logs.filter(l => l.type === 'sale' && mine(l));
+  let shownLogs = isAdmin() ? logs : isSeller() ? logs.filter(l => l.storeId === currentUser.storeId || mine(l)) : [];
 
   if (!isCustomer() && logFilter !== 'all') {
-    if (logFilter === 'register') {
-      shown = shown.filter(l => l.type === 'register');
-    } else if (logFilter === 'sale') {
-      shown = shown.filter(l => l.type === 'sale');
-    } else if (logFilter === 'manage') {
-      shown = shown.filter(l => ['add', 'edit', 'delete', 'system'].includes(l.type));
-    }
+    if (logFilter === 'register') shownLogs = shownLogs.filter(l => l.type === 'register');
+    else if (logFilter === 'sale') shownLogs = shownLogs.filter(l => l.type === 'sale');
+    else if (logFilter === 'manage') shownLogs = shownLogs.filter(l => ['add', 'edit', 'delete', 'system'].includes(l.type));
   }
 
-  const labels = { add: 'افزودن', edit: 'ویرایش', delete: 'حذف', system: 'سیستم', sale: 'فروش', register: 'ثبت‌نام' };
+  if (!isCustomer()) shownLogs = shownLogs.filter(passLogFilters);
 
-  $('#historyHead').innerHTML = '<tr><th>ردیف</th><th>نوع رویداد</th><th>شرح رویداد و مشخصات</th><th>زمان ثبت</th></tr>';
-  $('#logList').innerHTML = shown.length ? shown.map((l, i) => {
+  $('#archiveLogs').hidden = !isAdmin();
+  $('#archiveLogs').textContent = `📦 آرشیو (${fa(logArchive.length)})`;
+
+  const logLabels = { add: 'افزودن', edit: 'ویرایش', delete: 'حذف', system: 'سیستم', sale: 'فروش', register: 'ثبت‌نام' };
+  $('#historyHead').innerHTML = '<tr><th>ردیف</th><th>نوع رویداد</th><th>شرح رویداد و جزئیات</th><th>زمان ثبت</th></tr>';
+  $('#logList').innerHTML = shownLogs.length ? shownLogs.map((l, i) => {
     let buyerDetails = '';
     if (l.buyerInfo) {
       buyerDetails = `<div style="font-size:11.5px;color:var(--accent);margin-top:4px">
-        👤 <b>کاربر:</b> ${esc(l.buyerInfo.name)} | 📞 <b>تماس:</b> ${esc(l.buyerInfo.phone)}<br>
+        👤 <b>خریدار:</b> ${esc(l.buyerInfo.name)} | 📞 <b>تماس:</b> ${esc(l.buyerInfo.phone)}<br>
         🏠 <b>آدرس:</b> ${esc(l.buyerInfo.address)}
       </div>`;
     }
-    return `
-      <tr>
-        <td>${fa(i + 1)}</td>
-        <td><span class="badge ${labels[l.type] ? l.type : 'system'}">${labels[l.type] || 'سیستم'}</span></td>
-        <td style="text-align:right">${esc(l.message)}${buyerDetails}</td>
-        <td>${esc(l.time)}</td>
-      </tr>`;
-  }).join('')
-  : '<tr><td colspan="4" class="empty">هیچ رویدادی در این دسته‌بندی یافت نشد.</td></tr>';
+    const storeInfo = l.storeId ? `<span style="font-size:11px;color:var(--muted);margin-right:6px">(${esc(storeName(l.storeId))})</span>` : '';
+    return `<tr>
+      <td>${fa(i + 1)}</td>
+      <td><span class="badge ${logLabels[l.type] ? l.type : 'system'}">${logLabels[l.type] || 'سیستم'}</span></td>
+      <td style="text-align:right">${esc(l.message)} ${storeInfo}${buyerDetails}</td>
+      <td>${esc(l.time)}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="4" class="empty">هیچ لاگی در این دسته‌‌بندی یافت نشد.</td></tr>';
 }
 
-/* ============ مدیریت ورود و تغییر کاربر ============ */
+/* ==========================================================================
+   ۷. اعمال نقش‌ها و کنترل دسترسی‌ها
+   ========================================================================== */
 function applyUserAuth() {
-  shopFilter = 'all';
+  storeFilter = 'all';
   logFilter = 'all';
-  cart = isMember() ? (carts[currentUser.id] || []) : [];
-
+  cart = (currentUser.role === 'customer') ? (carts[currentUser.id] || []) : [];
   save();
+
   const subTxt = isMember() && currentUser.subscriptionNo ? ` (اشتراک: ${faRaw(currentUser.subscriptionNo)})` : '';
-  const shopLabel = currentUser.shop ? ` (${currentUser.shop})` : '';
-  $('#userGreeting').textContent = isGuest() ? '👤 کاربر مهمان' : `👤 سلام، ${currentUser.name}${shopLabel}${subTxt}`;
+  const storeLabel = currentUser.storeId ? ` [${storeName(currentUser.storeId)}]` : '';
+  $('#userGreeting').textContent = isGuest() ? '👤 کاربر مهمان' : `👤 ${currentUser.name}${storeLabel}${subTxt}`;
 
   const badge = $('#userRoleBadge');
   badge.className = 'role-badge ' + currentUser.role;
   badge.textContent = isAdmin() ? '👑 مدیر کل' : isSeller() ? '🏪 فروشنده' : isGuest() ? '👁️ مهمان' : '🛍️ خریدار';
 
-  const allowed = isAdmin() ? ['inventory', 'orders', 'analytics', 'history', 'backup']
-    : isSeller() ? ['inventory', 'orders', 'analytics', 'history']
-    : isMember() ? ['shops', 'inventory', 'orders']
-    : ['shops', 'inventory'];
+  const menuConfig = {
+    admin: [
+      { tab: 'analytics', title: '📊 داشبورد کلان' },
+      { tab: 'inventory', title: '📦 انبار کل' },
+      { tab: 'orders', title: '🧾 سفارش‌ها و فروش' },
+      { tab: 'shops', title: '🏪 فروشگاه‌ها' },
+      { tab: 'users', title: '👥 کاربران' },
+      { tab: 'history', title: '🕒 تاریخچه رویدادها' },
+      { tab: 'backup', title: '💾 پشتیبان‌گیری' }
+    ],
+    seller: [
+      { tab: 'analytics', title: `📊 داشبورد فروشگاه` },
+      { tab: 'inventory', title: `📦 موجودی فروشگاه` },
+      { tab: 'orders', title: '🧾 سفارش‌های فروشگاه' },
+      { tab: 'history', title: '🕒 رویدادهای فروشگاه' }
+    ],
+    customer: [
+      { tab: 'shops', title: '🏬 فروشگاه‌ها' },
+      { tab: 'inventory', title: '🛍️ کاتالوگ محصولات' },
+      { tab: 'orders', title: '📦 سفارش‌های من' }
+    ],
+    guest: [
+      { tab: 'shops', title: '🏬 فروشگاه‌ها' },
+      { tab: 'inventory', title: '🛍️ کاتالوگ محصولات' }
+    ]
+  };
 
-  $$('.menu-item').forEach(i => i.hidden = !allowed.includes(i.dataset.tab));
-  $('.menu-item[data-tab="inventory"]').textContent = isCustomer() ? '🛍️ همه محصولات' : '📦 مدیریت انبار';
-  $('.menu-item[data-tab="orders"]').textContent = isMember() ? '📦 سفارش‌های من' : '📋 سفارش‌ها';
-  $('.menu-item[data-tab="history"]').textContent = '🕒 تاریخچه رویدادها';
-  $('#historyTabTitle').textContent = 'تاریخچه رویدادهای سیستم';
+  const currentRoleMenus = menuConfig[currentUser.role] || menuConfig.guest;
 
-  $$('#historyToolbar .filter').forEach(b => b.classList.toggle('active', b.dataset.logfilter === 'all'));
+  $('#menuList').innerHTML = currentRoleMenus.map(m => `
+    <li class="menu-item" data-tab="${m.tab}">${m.title}</li>
+  `).join('');
 
-  $('#formCard').hidden = isCustomer();
-  $('#fShop').hidden = !isAdmin();
+  $$('.menu-item').forEach(item => {
+    item.onclick = () => {
+      $$('.menu-item').forEach(i => i.classList.toggle('active', i === item));
+      $$('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + item.dataset.tab));
+      $('#subtitle').textContent = `(${item.textContent.trim()})`;
+      toggleMenu(false);
+    };
+  });
+
+  $('#formCard').hidden = !can('manageProducts');
   $('#clearLogs').hidden = !isAdmin();
   $('#filterLowBtn').hidden = isCustomer();
   $('#openCartBtn').hidden = !isMember();
-
   $('#openAuthModal').hidden = !isGuest();
   $('#customerLogoutBtn').hidden = isGuest();
   $('#changePinBtn').hidden = !(isAdmin() || isSeller());
@@ -1175,60 +1665,54 @@ function applyUserAuth() {
   $('#calcFab').hidden = isCustomer();
   if (isCustomer()) $('#calc').hidden = true;
 
-  const shops = getAllShops();
-  $('#filterShop').hidden = isSeller() || isCustomer();
-  $('#filterShop').innerHTML = '<option value="all">🏪 همه فروشگاه‌ها</option>' +
-    shops.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  $('#fStore').hidden = isSeller();
+  $('#fStore').innerHTML = stores.map(st => `<option value="${st.id}">${esc(st.name)}</option>`).join('');
 
-  $('#fShop').innerHTML = shops.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  $('#filterStore').hidden = isSeller() || isCustomer();
+  $('#filterStore').innerHTML = '<option value="all">🏪 همه فروشگاه‌ها</option>' + stores.map(st => `<option value="${st.id}">${esc(st.name)}</option>`).join('');
 
-  if (isCustomer() && stockFilter === 'low') {
-    stockFilter = 'all';
-    $$('#tab-inventory .filter').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
-  }
+  $('#logShopFilter').hidden = !isAdmin();
+  $('#logShopFilter').innerHTML = '<option value="all">🏪 همه فروشگاه‌ها</option>' + stores.map(st => `<option value="${st.id}">${esc(st.name)}</option>`).join('');
 
-  $('#confirm').hidden = true; deleteId = null;
   resetForm();
-
-  if ($('.menu-item.active').hidden || isCustomer()) {
-    $(`.menu-item[data-tab="${isCustomer() ? 'shops' : 'inventory'}"]`).click();
-  }
-  $('#subtitle').textContent = `(${$('.menu-item.active').textContent.trim()})`;
-
   updateCartBadge();
-  renderQuickAccounts();
+
+  const defaultTab = isCustomer() ? 'shops' : 'analytics';
+  const targetMenuItem = $(`.menu-item[data-tab="${defaultTab}"]`) || $('.menu-item');
+  if (targetMenuItem) targetMenuItem.click();
+
   render();
 }
 
-function renderQuickAccounts() {
-  $('#staffSelect').innerHTML = users.filter(u => u.role === 'admin' || u.role === 'seller')
-    .map(u => `<option value="${esc(u.id)}">${esc(u.name)} — ${u.role === 'admin' ? 'مدیر کل' : esc(u.shop)}</option>`).join('');
-}
-
-let fails = 0, lockUntil = 0;
-const guard = () => {
-  if (Date.now() < lockUntil) {
-    toast(`تلاش ناموفق زیاد؛ ${fa(Math.ceil((lockUntil - Date.now()) / 1000))} ثانیه صبر کنید`, 'var(--danger)');
-    return false;
-  }
-  return true;
-};
-const failed = () => {
-  if (++fails >= 5) {
-    fails = 0;
-    lockUntil = Date.now() + 60000;
-  }
-};
-
+/* ==========================================================================
+   ۸. فرآیند ورود و عضویت یکپارچه و استاندارد
+   ========================================================================== */
 function loginAs(u) {
   if (Object.keys(drafts).length && !confirm('تغییرات ثبت‌نشده لغو خواهد شد. ادامه می‌دهید؟')) return;
   Object.keys(drafts).forEach(id => delete drafts[id]);
   currentUser = u;
-  ['#staffPin', '#loginPhone', '#loginSub'].forEach(s => $(s).value = '');
+  $('#loginUser').value = '';
+  $('#loginPass').value = '';
   $('#authModal').hidden = true;
   applyUserAuth();
-  toast(`خوش آمدید ${u.name} ✅`);
+  toast(`خوش آمدید ${u.name} عزیز ✅`);
+  loginAlerts();
   if (u.pinDefault) setTimeout(changePin, 300);
+}
+
+function loginAlerts() {
+  const msgs = [];
+  if (isSeller() || isAdmin()) {
+    const low = visible().filter(isLow).length;
+    const fresh = orders.filter(o => o.status === 'pending' && (isAdmin() || o.storeId === currentUser.storeId)).length;
+    if (low) msgs.push(`${fa(low)} کالا موجودی کم دارد`);
+    if (fresh) msgs.push(`${fa(fresh)} سفارش جدید`);
+  }
+  if (isAdmin()) {
+    const p = users.filter(u => u.role === 'seller' && u.status === 'pending').length;
+    if (p) msgs.push(`${fa(p)} فروشنده در انتظار تأیید`);
+  }
+  if (msgs.length) setTimeout(() => toast('🔔 ' + msgs.join(' | '), 'var(--orange)'), 2500);
 }
 
 function changePin() {
@@ -1242,35 +1726,92 @@ function changePin() {
   u.pinHash = hashPin(np);
   delete u.pinDefault;
   save();
-  toast('رمز با موفقیت تغییر کرد 🔑');
+  toast('رمز عبور با موفقیت تغییر کرد 🔑');
 }
 $('#changePinBtn').onclick = changePin;
 
-$('#staffLoginBtn').onclick = () => {
-  if (!guard()) return;
-  const u = users.find(x => x.id === $('#staffSelect').value);
-  if (!u || hashPin($('#staffPin').value) !== u.pinHash) {
-    failed();
-    return toast('رمز نادرست است!', 'var(--danger)');
-  }
-  fails = 0;
-  loginAs(u);
+/* دکمه‌های کپسولی سوئیچ تب ورود / عضویت */
+$('#tabBtnLogin').onclick = () => {
+  $('#tabBtnLogin').classList.add('active');
+  $('#tabBtnSignup').classList.remove('active');
+  $('#loginSection').hidden = false;
+  $('#signupSection').hidden = true;
+};
+$('#tabBtnSignup').onclick = () => {
+  $('#tabBtnSignup').classList.add('active');
+  $('#tabBtnLogin').classList.remove('active');
+  $('#signupSection').hidden = false;
+  $('#loginSection').hidden = true;
 };
 
-$('#loginSubBtn').onclick = () => {
-  if (!guard()) return;
-  const phone = faDigits($('#loginPhone').value.trim()), no = faDigits($('#loginSub').value.trim());
-  const u = users.find(x => x.role === 'customer' && faDigits(x.phone) === phone && x.subscriptionNo === no);
-  if (!u) {
-    failed();
-    return toast('شماره تماس یا شماره اشتراک نادرست است!', 'var(--danger)');
+/* کلیک روی حساب‌های آزمایشی جهت پر کردن خودکار */
+document.addEventListener('click', e => {
+  const chip = e.target.closest('.demo-chip');
+  if (!chip) return;
+  $('#loginUser').value = chip.dataset.user;
+  $('#loginPass').value = chip.dataset.pass;
+  toast(`حساب ${chip.textContent.trim()} انتخاب شد ✍️`, 'var(--accent)');
+});
+
+/* کلیک روی دکمه نمایش / مخفی‌سازی رمز عبور (پایدار و بدون چشمک زدن) */
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.toggle-pass-btn');
+  if (!btn) return;
+  const targetInput = $('#' + btn.dataset.target);
+  if (!targetInput) return;
+  if (targetInput.type === 'password') {
+    targetInput.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    targetInput.type = 'password';
+    btn.textContent = '👁️';
   }
+});
+
+let fails = 0, lockUntil = 0;
+const guard = () => {
+  if (Date.now() < lockUntil) {
+    toast(`تلاش ناموفق زیاد؛ ${fa(Math.ceil((lockUntil - Date.now()) / 1000))} ثانیه صبر کنید`, 'var(--danger)');
+    return false;
+  }
+  return true;
+};
+const failed = () => { if (++fails >= 5) { fails = 0; lockUntil = Date.now() + 60000; } };
+
+/* پردازش ورود استاندارد */
+$('#loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!guard()) return;
+
+  const rawUser = $('#loginUser').value.trim();
+  const inputUser = faDigits(rawUser).toLowerCase();
+  const inputPass = $('#loginPass').value;
+
+  if (!rawUser || !inputPass) {
+    return toast('لطفاً نام کاربری و رمز عبور را وارد نمایید.', 'var(--danger)');
+  }
+
+  const u = users.find(x =>
+    (x.username && faDigits(x.username).toLowerCase() === inputUser) ||
+    (x.phone && faDigits(x.phone) === inputUser) ||
+    (x.subscriptionNo && faDigits(x.subscriptionNo) === inputUser)
+  );
+
+  if (!u || hashPin(inputPass) !== u.pinHash) {
+    failed();
+    return toast('نام کاربری یا رمز عبور اشتباه است!', 'var(--danger)');
+  }
+
+  if (u.status === 'pending') {
+    return toast('حساب کاربری فروشگاه شما در انتظار تأیید مدیر کل است 🕓', 'var(--danger)');
+  }
+
   fails = 0;
   loginAs(u);
-};
+});
 
 $('#customerLogoutBtn').onclick = () => {
-  if (Object.keys(drafts).length && !confirm('تغییرات ثبت‌‌نشده لغو می‌شود. خارج می‌شوید؟')) return;
+  if (Object.keys(drafts).length && !confirm('تغییرات ثبت‌نشده لغو خواهد شد. خارج می‌شوید؟')) return;
   Object.keys(drafts).forEach(id => delete drafts[id]);
   currentUser = GUEST;
   save();
@@ -1278,72 +1819,81 @@ $('#customerLogoutBtn').onclick = () => {
   toast('از حساب کاربری خارج شدید');
 };
 
-$('#openAuthModal').onclick = () => { $('#authModal').hidden = false; };
+$('#openAuthModal').onclick = () => {
+  $('#tabBtnLogin').click();
+  $('#authModal').hidden = false;
+};
 $('#closeAuthModal').onclick = () => { $('#authModal').hidden = true; };
 
 $('#regRole').onchange = e => {
   const isCust = e.target.value === 'customer';
   $('#regShop').style.display = isCust ? 'none' : 'block';
-  $('#regPin').style.display = isCust ? 'none' : 'block';
   $('#customerSignupFields').style.display = isCust ? 'flex' : 'none';
 };
 
+/* فرم ثبت‌نام */
 $('#signupForm').addEventListener('submit', e => {
   e.preventDefault();
   const first = $('#regFirst').value.trim(), last = $('#regLast').value.trim();
-  const role = $('#regRole').value, shop = $('#regShop').value.trim();
+  const username = faDigits($('#regUsername').value.trim()).toLowerCase();
+  const password = $('#regPassword').value;
+  const role = $('#regRole').value, shopName = $('#regShop').value.trim();
   const phone = faDigits($('#regPhone').value.trim()), address = $('#regAddress').value.trim();
 
-  if (!first || !last) return alert('لطفاً نام و نام خانوادگی را وارد کنید.');
-  if (role === 'seller' && !shop) return alert('لطفاً نام فروشگاه خود را وارد کنید.');
-  if (role === 'seller' && getAllShops().includes(shop)) return alert('این نام فروشگاه قبلاً ثبت شده است.');
-  if (role === 'seller' && $('#regPin').value.length < 4) return alert('رمز عبور فروشنده باید حداقل ۴ کاراکتر باشد.');
+  if (!first || !last) return alert('نام و نام خانوادگی را وارد کنید.');
+  if (!username || username.length < 3) return alert('نام کاربری باید حداقل ۳ کاراکتر باشد.');
+  if (users.some(u => u.username && u.username.toLowerCase() === username)) {
+    return alert('این نام کاربری قبلاً انتخاب شده است.');
+  }
+  if (!password || password.length < 4) return alert('رمز عبور باید حداقل ۴ رقم باشد.');
+
+  let newStoreId = null;
+  if (role === 'seller') {
+    if (!shopName) return alert('نام فروشگاه را وارد کنید.');
+    if (stores.some(s => s.name === shopName)) return alert('این نام فروشگاه قبلاً ثبت شده است.');
+    newStoreId = uid('store');
+    stores.push({ id: newStoreId, name: shopName });
+  }
 
   if (role === 'customer') {
-    if (!/^09\d{9}$/.test(phone)) return alert('شماره تماس معتبر نیست (مثال: 09123456789).');
-    if (address.length < 10) return alert('لطفاً آدرس را کامل وارد کنید.');
+    if (!/^09\d{9}$/.test(phone)) return alert('شماره همراه نامعتبر است (مثال: 09123456789).');
+    if (address.length < 10) return alert('لطفاً آدرس پستی را کامل وارد کنید.');
     if (users.some(u => u.role === 'customer' && faDigits(u.phone) === phone)) {
-      return alert('با این شماره قبلاً ثبت‌نام شده است. لطفاً با شماره اشتراک وارد شوید.');
+      return alert('با این شماره قبلاً ثبت‌نام شده است.');
     }
   }
 
   const newUser = {
-    id: 'u_' + Date.now(),
+    id: uid('u'),
     name: `${first} ${last}`,
-    firstName: first,
-    lastName: last,
+    username,
     role,
-    shop: role === 'seller' ? shop : '',
+    storeId: newStoreId,
     phone: role === 'customer' ? phone : '',
-    address: role === 'customer' ? address : ''
+    address: role === 'customer' ? address : '',
+    pinHash: hashPin(password)
   };
+
   if (role === 'customer') newUser.subscriptionNo = newSubscriptionNo();
-  if (role === 'seller') newUser.pinHash = hashPin($('#regPin').value);
+  if (role === 'seller') newUser.status = 'pending';
 
   users.push(newUser);
-  currentUser = newUser;
-  $('#signupForm').reset();
-  $('#regRole').dispatchEvent(new Event('change'));
-  $('#authModal').hidden = true;
+  save();
 
   if (role === 'customer') {
-    log('register', `ثبت‌نام خریدار جدید: "${newUser.name}" (شماره اشتراک: ${newUser.subscriptionNo})`, '', {
-      name: newUser.name,
-      phone: newUser.phone,
-      address: newUser.address
-    });
-  } else {
-    log('register', `ثبت‌نام فروشنده جدید: "${newUser.name}" برای فروشگاه "${newUser.shop}"`, newUser.shop);
-  }
-
-  applyUserAuth();
-
-  if (role === 'customer') {
-    $('#smsText').textContent = `${first} عزیز، ثبت‌نام شما با موفقیت انجام شد.\nشماره اشتراک شما: ${faRaw(newUser.subscriptionNo)}\nبرای ورودهای بعدی از شماره تماس و این شماره اشتراک استفاده کنید.`;
+    currentUser = newUser;
+    log('register', `ثبت‌نام خریدار: "${newUser.name}" (@${username})`, '', { name: newUser.name, phone: newUser.phone, address: newUser.address });
+    applyUserAuth();
+    $('#smsText').textContent = `${first} عزیز، حساب شما فعال شد.\nنام کاربری: ${username}\nشماره اشتراک شما: ${faRaw(newUser.subscriptionNo)}\nرمز عبور: ${password}\nبرای خریدهای بعدی از این اطلاعات استفاده کنید.`;
     $('#smsModal').hidden = false;
   } else {
-    toast(`حساب کاربری جدید برای "${newUser.name}" ساخته شد و وارد شدید ✅`);
+    log('register', `درخواست عضویت فروشنده: "${newUser.name}" (@${username}) برای "${shopName}"`, newStoreId);
+    toast('اطلاعات فروشگاه ثبت شد؛ پس از تأیید مدیر کل فعال خواهد گردید 🕓');
+    applyUserAuth();
   }
+
+  $('#signupForm').reset();
+  $('#authModal').hidden = true;
 });
 
 $('#smsOk').onclick = () => {
@@ -1351,15 +1901,82 @@ $('#smsOk').onclick = () => {
   $('#openCartBtn').click();
 };
 
+/* تأیید فروشندگان توسط مدیر */
+$('#pendingList').addEventListener('click', e => {
+  const b = e.target.closest('[data-pact]');
+  if (!b || !can('manageUsers')) return unauthorized();
+  const u = users.find(x => x.id === b.dataset.uid);
+  if (!u) return;
+
+  if (b.dataset.pact === 'approve') {
+    delete u.status;
+    log('register', `فروشنده "${u.name}" (${storeName(u.storeId)}) توسط مدیر تأیید شد.`, u.storeId);
+    toast('فروشنده تأیید شد ✅');
+  } else {
+    users = users.filter(x => x.id !== u.id);
+    stores = stores.filter(s => s.id !== u.storeId);
+    log('register', `درخواست فروشنده "${u.name}" رد شد.`);
+    toast('درخواست رد شد', 'var(--danger)');
+  }
+  save(); render();
+});
+
+/* تغییر Role کاربر توسط Admin */
+$('#userList').addEventListener('change', e => {
+  if (!isAdmin()) return unauthorized();
+  const sel = e.target.closest('.user-role-select');
+  if (!sel) return;
+  const u = users.find(x => x.id === sel.dataset.uid);
+  if (!u) return;
+  const oldRole = u.role;
+  u.role = sel.value;
+  if (u.role === 'seller' && !u.storeId) u.storeId = 'store1';
+  log('edit', `تغییر نقش کاربر "${u.name}" از ${oldRole} به ${u.role}`);
+  save(); render();
+  toast(`نقش ${u.name} به روزرسانی شد ✅`);
+});
+
+/* ==========================================================================
+   ۹. رویدادهای جدول، فرم‌ها و انبارداری
+   ========================================================================== */
+function initCategories() {
+  const names = Object.keys(CATEGORIES);
+  $('#fCategory').innerHTML = names.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  $('#filterCategory').innerHTML = '<option value="all">📂 همه دسته‌بندی‌ها</option>' + names.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  fillFormSubs();
+}
+function fillFormSubs(selected) {
+  const subs = subsOf($('#fCategory').value);
+  $('#fSubCategory').innerHTML = options(subs, selected ?? subs[0]);
+}
+$('#fCategory').onchange = () => fillFormSubs();
+
+$('#search').oninput = render;
+$('#filterCategory').onchange = e => {
+  catFilter = e.target.value; subFilter = 'all';
+  const sel = $('#filterSubCategory');
+  sel.hidden = catFilter === 'all';
+  sel.innerHTML = '<option value="all">📁 همه زیردسته‌ها</option>' + subsOf(catFilter).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  render();
+};
+$('#filterSubCategory').onchange = e => { subFilter = e.target.value; render(); };
+$('#filterStore').onchange = e => { storeFilter = e.target.value; render(); };
+
+$$('#tab-inventory .filter').forEach(btn => btn.onclick = () => {
+  stockFilter = btn.dataset.filter;
+  $$('#tab-inventory .filter').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
+
 $('#shopGrid').addEventListener('click', e => {
-  const c = e.target.closest('[data-shop]');
+  const c = e.target.closest('[data-storeid]');
   if (!c) return;
-  shopFilter = c.dataset.shop;
+  storeFilter = c.dataset.storeid;
   $('.menu-item[data-tab="inventory"]').click();
   render();
 });
 $('#backToShops').onclick = () => {
-  shopFilter = 'all';
+  storeFilter = 'all';
   $('.menu-item[data-tab="shops"]').click();
   render();
 };
@@ -1369,39 +1986,36 @@ $$('#historyToolbar .filter').forEach(btn => btn.onclick = () => {
   $$('#historyToolbar .filter').forEach(b => b.classList.toggle('active', b === btn));
   render();
 });
+$('#logSearch').oninput = render;
+['#logRange', '#logFrom', '#logTo', '#logShopFilter'].forEach(s => $(s).onchange = render);
+$('#logRange').addEventListener('change', () => {
+  const c = $('#logRange').value === 'custom';
+  $('#logFrom').hidden = !c; $('#logTo').hidden = !c;
+});
+
+$('#archiveLogs').onclick = () => {
+  if (!can('backup')) return unauthorized();
+  if (!logArchive.length) return toast('آرشیو در حال حاضر خالی است.');
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([JSON.stringify(logArchive, null, 2)], { type: 'application/json' })),
+    download: `log-archive-${new Date().toISOString().slice(0, 10)}.json`
+  });
+  a.click(); URL.revokeObjectURL(a.href);
+  logArchive = []; save(); render();
+  toast('آرشیو دانلود شد و از حافظه سبک‌سازی گردید ✅');
+};
 
 $('#orderSearch').oninput = render;
 $('#orderStatusFilter').onchange = render;
 $('#orderList').addEventListener('click', e => {
   const b = e.target.closest('[data-oact]');
-  if (b) setOrderStatus(b.dataset.ocode, b.dataset.oact);
+  if (!b) return;
+  if (b.dataset.oact === 'invoice') printInvoice(b.dataset.ocode);
+  else setOrderStatus(b.dataset.ocode, b.dataset.oact);
 });
 
-/* ============ تم و منو ============ */
-function setTheme(dark) {
-  document.body.classList.toggle('dark', dark);
-  $('#themeToggle').textContent = dark ? '☀️' : '🌙';
-  localStorage.setItem('theme', dark ? 'dark' : 'light');
-}
-setTheme(localStorage.getItem('theme') === 'dark');
-$('#themeToggle').onclick = () => setTheme(!document.body.classList.contains('dark'));
-
-const toggleMenu = open => { $('#sideMenu').classList.toggle('open', open); $('#overlay').hidden = !open; };
-$('#menuToggle').onclick = () => toggleMenu(true);
-$('#closeMenu').onclick = $('#overlay').onclick = () => toggleMenu(false);
-
-$$('.menu-item').forEach(item => item.onclick = () => {
-  $$('.menu-item').forEach(i => i.classList.toggle('active', i === item));
-  $$('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + item.dataset.tab));
-  $('#subtitle').textContent = `(${item.textContent.trim()})`;
-  toggleMenu(false);
-});
-
-/* ============ رویدادهای جدول ============ */
 const list = $('#productList');
-
 list.addEventListener('input', e => { if (e.target.matches('.stock input')) syncRow(e.target.closest('tr')); });
-
 list.addEventListener('change', e => {
   const tr = e.target.closest('tr');
   if (!tr) return;
@@ -1422,25 +2036,19 @@ list.addEventListener('click', e => {
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
 
-  if (btn.dataset.act === 'need-login') {
-    $('#authModal').hidden = false;
-    return;
-  }
-  if (btn.dataset.act === 'add-to-cart' || btn.dataset.act === 'cart-inc') {
-    addToCart(Number(btn.dataset.id));
-    return;
-  }
-  if (btn.dataset.act === 'cart-dec') {
-    changeCartItemQty(Number(btn.dataset.id), -1);
-    return;
-  }
+  if (btn.dataset.act === 'need-login') { $('#authModal').hidden = false; return; }
+  if (btn.dataset.act === 'add-to-cart' || btn.dataset.act === 'cart-inc') { addToCart(Number(btn.dataset.id)); return; }
+  if (btn.dataset.act === 'cart-dec') { changeCartItemQty(Number(btn.dataset.id), -1); return; }
 
   const tr = btn.closest('tr'), id = Number(tr.dataset.id), p = find(id);
-  if (!p || !canEdit(p)) return;
+  if (!p) return;
+
+  if (!canAccessProduct(p)) return unauthorized();
 
   switch (btn.dataset.act) {
     case 'inc':
     case 'dec': {
+      if (!can('manageInventory')) return unauthorized();
       const input = tr.querySelector('.stock input');
       input.value = Math.max(0, (Number(input.value) || 0) + (btn.dataset.act === 'inc' ? 1 : -1));
       syncRow(tr);
@@ -1449,70 +2057,41 @@ list.addEventListener('click', e => {
     case 'save': saveOne(id); break;
     case 'undo': delete drafts[id]; render(); break;
     case 'edit':
+      if (!can('manageProducts')) return unauthorized();
       editId = id; delete drafts[id];
       $('#fName').value = p.name;
       $('#fCategory').value = p.category;
       fillFormSubs(p.subcategory);
-      $('#fShop').value = p.shop;
+      $('#fStore').value = p.storeId;
       $('#fPrice').value = p.price; $('#fStock').value = p.stock;
       $('#submitBtn').textContent = 'ثبت تغییرات'; $('#submitBtn').className = 'info';
       $('#cancelEdit').hidden = false;
       render();
       scrollTo({ top: 0, behavior: 'smooth' });
       break;
-    case 'del': deleteId = id; $('#confirm').hidden = false; break;
+    case 'del':
+      if (!can('manageProducts')) return unauthorized();
+      deleteId = id; $('#confirm').hidden = false; break;
   }
 });
 
 $('#yes').onclick = () => {
   const p = find(deleteId);
-  if (p && canEdit(p)) {
+  if (p && canAccessProduct(p)) {
     products = products.filter(x => x.id !== deleteId);
     delete drafts[deleteId];
-    log('delete', `کالای "${p.name}" از لیست انبار حذف گردید.`);
+    recordTransaction(p.id, p.storeId, 'waste', -p.stock, 'حذف کامل کالا از انبار');
+    log('delete', `کالای "${p.name}" از سیستم حذف شد`, p.storeId);
     if (editId === deleteId) resetForm();
     save(); render();
+    toast(`کالای "${p.name}" حذف شد`);
+  } else {
+    unauthorized();
   }
   $('#no').click();
 };
 $('#no').onclick = () => { deleteId = null; $('#confirm').hidden = true; };
 
-/* ============ جستجو و فیلترها ============ */
-function initCategories() {
-  const names = Object.keys(CATEGORIES);
-  $('#fCategory').innerHTML = names.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  $('#filterCategory').innerHTML = '<option value="all">📂 همه دسته‌بندی‌ها</option>' + names.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  fillFormSubs();
-}
-function fillFormSubs(selected) {
-  const subs = subsOf($('#fCategory').value);
-  $('#fSubCategory').innerHTML = options(subs, selected ?? subs[0]);
-}
-$('#fCategory').onchange = () => fillFormSubs();
-
-$('#search').oninput = render;
-
-$('#filterCategory').onchange = e => {
-  catFilter = e.target.value; subFilter = 'all';
-  const sel = $('#filterSubCategory');
-  sel.hidden = catFilter === 'all';
-  sel.innerHTML = '<option value="all">📁 همه زیردسته‌ها</option>' + subsOf(catFilter).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
-  render();
-};
-$('#filterSubCategory').onchange = e => { subFilter = e.target.value; render(); };
-
-$('#filterShop').onchange = e => {
-  shopFilter = e.target.value;
-  render();
-};
-
-$$('#tab-inventory .filter').forEach(btn => btn.onclick = () => {
-  stockFilter = btn.dataset.filter;
-  $$('#tab-inventory .filter').forEach(b => b.classList.toggle('active', b === btn));
-  render();
-});
-
-/* ============ فرم افزودن / ویرایش ============ */
 [$('#fPrice'), $('#fStock')].forEach(input => input.addEventListener('keydown', e => {
   if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
   e.preventDefault();
@@ -1530,54 +2109,61 @@ $('#cancelEdit').onclick = resetForm;
 
 $('#productForm').addEventListener('submit', e => {
   e.preventDefault();
-  if (isCustomer()) return;
-  const name = $('#fName').value.trim(), category = $('#fCategory').value, subcategory = $('#fSubCategory').value;
-  const shop = isSeller() ? currentUser.shop : $('#fShop').value;
-  const priceStr = $('#fPrice').value.trim(), stockStr = $('#fStock').value.trim();
-  const fail = t => toast(t, 'var(--danger)');
+  if (!can('manageProducts')) return unauthorized();
 
-  if (!name || priceStr === '' || stockStr === '') return fail('خطا: لطفاً تمام فیلدها را وارد کنید!');
+  const name = $('#fName').value.trim(), category = $('#fCategory').value, subcategory = $('#fSubCategory').value;
+  const storeId = isSeller() ? currentUser.storeId : $('#fStore').value;
+  const priceStr = $('#fPrice').value.trim(), stockStr = $('#fStock').value.trim();
+
+  if (!name || priceStr === '' || stockStr === '') return toast('خطا: همه فیلدها را وارد کنید!', 'var(--danger)');
   const price = Number(priceStr), stock = Number(stockStr);
-  if (price < 0 || stock < 0) return fail('خطا: قیمت و موجودی نمی‌توانند منفی باشند!');
-  if (products.some(p => p.id !== editId && p.shop === shop && p.name.toLowerCase() === name.toLowerCase())) {
-    $('#fName').select();
-    return fail('خطا: این فروشگاه قبلاً کالایی با همین نام ثبت کرده است!');
+  if (!Number.isFinite(price) || !Number.isFinite(stock) || price < 0 || stock < 0) return toast('قیمت و موجودی باید عدد معتبر و غیرمنفی باشند!', 'var(--danger)');
+
+  if (products.some(p => p.id !== editId && p.storeId === storeId && p.name.toLowerCase() === name.toLowerCase())) {
+    return toast('کالایی با این نام در این فروشگاه موجود است!', 'var(--danger)');
   }
 
   if (editId !== null) {
-    if (!canEdit(find(editId))) return fail('خطا: اجازه ویرایش این کالا را ندارید!');
-    Object.assign(find(editId), { name, category, subcategory, shop, price, stock });
-    log('edit', `مشخصات کالای "${name}" به‌روزرسانی شد.`);
+    const p = find(editId);
+    if (!canAccessProduct(p)) return unauthorized();
+    const oldStock = p.stock;
+    Object.assign(p, { name, category, subcategory, storeId, price, stock });
+    if (oldStock !== stock) recordTransaction(p.id, p.storeId, 'adjustment', stock - oldStock, 'ویرایش از طریق فرم کالا');
+    log('edit', `مشخصات کالای "${name}" ویرایش شد`, storeId);
     toast('تغییرات با موفقیت ذخیره شد ✏️');
   } else {
-    products.push({ id: Date.now(), name, category, subcategory, shop, price, stock });
-    log('add', `کالای "${name}" در فروشگاه (${shop}) ثبت شد.`);
-    toast('کالا با موفقیت به انبار افزوده شد ✅');
+    const newProd = { id: Date.now() + Math.floor(Math.random() * 1000), name, category, subcategory, storeId, price, stock };
+    products.push(newProd);
+    recordTransaction(newProd.id, storeId, 'in', stock, 'موجودی اولیه کالا');
+    log('add', `کالای جدید "${name}" با موجودی ${stock} ثبت شد`, storeId);
+    toast('کالا به انبار افزوده شد ✅');
   }
   save(); render(); resetForm();
 });
 
-/* ============ تاریخچه ============ */
+/* ==========================================================================
+   ۱۰. گزارش چاپی PDF و پشتیبان‌گیری
+   ========================================================================== */
 $('#clearLogs').onclick = () => {
-  if (!isAdmin()) return;
-  if (!confirm('آیا از پاک کردن کل تاریخچه اطمینان دارید؟')) return;
+  if (!isAdmin()) return unauthorized();
+  if (!confirm('کل تاریخچه پاک شود؟')) return;
   logs = []; save(); render();
 };
 
-/* ============ PDF ایمن (سازگار با Live Server) ============ */
 $('#pdfBtn').onclick = () => {
-  if (!isAdmin()) return;
+  if (!can('viewReports')) return unauthorized();
   if (!products.length) return alert('انبار در حال حاضر خالی است!');
   const win = window.open('', '_blank');
   if (!win) return alert('لطفاً اجازه باز شدن پنجره پاپ‌آپ را بدهید.');
 
-  const total = products.reduce((s, p) => s + p.price * p.stock, 0);
+  const vis = visible();
+  const total = vis.reduce((s, p) => s + p.price * p.stock, 0);
   const cell = 'border:1px solid #cbd5e1;padding:8px;text-align:center';
-  const rows = products.map((p, i) => `
+  const rows = vis.map((p, i) => `
     <tr style="${isLow(p) ? 'background:#fff1f2' : ''}">
       <td style="${cell}">${fa(i + 1)}</td>
       <td style="${cell};text-align:right;font-weight:bold">${esc(p.name)}</td>
-      <td style="${cell}">${esc(p.shop)}</td>
+      <td style="${cell}">${esc(storeName(p.storeId))}</td>
       <td style="${cell}">${esc(p.category)} - ${esc(p.subcategory)}</td>
       <td style="${cell}">${fa(p.price)} تومان</td>
       <td style="${cell}">${fa(p.stock)}</td>
@@ -1595,56 +2181,73 @@ $('#pdfBtn').onclick = () => {
   win.document.body.style.color = '#0f172a';
 
   win.document.body.innerHTML = `
-    <h2 style="text-align:center;border-bottom:2px solid #0284c7;padding-bottom:12px">گزارش جامع موجودی کل فروشگاه‌ها</h2>
+    <h2 style="text-align:center;border-bottom:2px solid #0284c7;padding-bottom:12px">گزارش جامع موجودی و ارزش مالی انبار</h2>
     <div style="display:flex;justify-content:space-between;font-size:13px;color:#475569;margin:15px 0">
       <span>تاریخ چاپ: ${new Date().toLocaleString('fa-IR')}</span>
-      <span>تعداد کل اقلام: ${fa(products.length)} کالا</span>
+      <span>گزارش‌گیرنده: ${esc(currentUser.name)}</span>
+      <span>تعداد کل اقلام: ${fa(vis.length)} کالا</span>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>
     <div style="margin-top:25px;border-top:2px dashed #94a3b8;padding-top:15px;display:flex;justify-content:space-between;font-weight:bold">
-      <div>ارزش کل بازار: ${fa(total)} تومان</div>
+      <div>ارزش کل موجودی: ${fa(total)} تومان</div>
       <div>ارزش با ۱۰٪ تخفیف: ${fa(total * DISCOUNT)} تومان</div>
     </div>
   `;
 
   win.focus();
   setTimeout(() => win.print(), 350);
-  log('system', 'گزارش PDF از وضعیت انبار استخراج گردید.');
+  log('system', 'گزارش PDF موجودی استخراج گردید');
   render();
 };
 
-/* ============ پشتیبان، بازیابی، ریست ============ */
 $('#exportBtn').onclick = () => {
-  if (!isAdmin()) return;
-  const data = JSON.stringify({ exportedAt: new Date().toISOString(), products, logs, users, customerCarts: carts, orders }, null, 2);
+  if (!can('backup')) return unauthorized();
+  const data = JSON.stringify({
+    exportedAt: new Date().toISOString(),
+    products, logs, logArchive, stores, users, customerCarts: carts, orders, sales, inventoryTransactions
+  }, null, 2);
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(new Blob([data], { type: 'application/json' })),
     download: `inventory-backup-${new Date().toISOString().slice(0, 10)}.json`
   });
   a.click();
-  URL.revokeObjectURL(a.href);
-  log('system', 'فایل پشتیبان JSON دریافت گردید.');
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  log('system', 'پشتیبان کامل سامانه دریافت شد');
   render();
 };
 
+function validateBackup(data) {
+  if (!data || typeof data !== 'object' || !Array.isArray(data.products)) return 'ساختار فایل پشتیبان معتبر نیست.';
+  if (data.products.length > 10000) return 'تعداد کالاها در فایل غیرمجاز است.';
+  return '';
+}
+
 $('#importBtn').onclick = () => {
-  if (!isAdmin()) return;
+  if (!can('backup')) return unauthorized();
   const file = $('#importFile').files[0];
-  if (!file) return alert('لطفاً یک فایل پشتیبان JSON انتخاب کنید.');
+  if (!file) return alert('یک فایل پشتیبان JSON انتخاب کنید.');
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
-      if (!Array.isArray(data.products)) return alert('قالب فایل پشتیبان معتبر نیست.');
+      const validationError = validateBackup(data);
+      if (validationError) return alert(validationError);
+
+      const oldUserId = currentUser.id;
+      if (Array.isArray(data.stores)) stores = data.stores.map(normalizeStore);
+      if (Array.isArray(data.users)) users = data.users.map(normalizeUser);
       products = normalize(data.products);
-      logs = Array.isArray(data.logs) ? data.logs : [];
-      if (Array.isArray(data.users)) users = data.users;
+      logs = Array.isArray(data.logs) ? data.logs.slice(0, 500) : [];
+      logArchive = Array.isArray(data.logArchive) ? data.logArchive : [];
       orders = Array.isArray(data.orders) ? data.orders : [];
+      sales = Array.isArray(data.sales) ? data.sales : [];
+      inventoryTransactions = Array.isArray(data.inventoryTransactions) ? data.inventoryTransactions : [];
       ensureCredentials();
-      if (data.customerCarts && typeof data.customerCarts === 'object') carts = data.customerCarts;
+      carts = data.customerCarts && typeof data.customerCarts === 'object' ? data.customerCarts : {};
       Object.keys(drafts).forEach(id => delete drafts[id]);
-      currentUser = users.find(u => u.id === currentUser.id) || GUEST;
-      log('system', 'داده‌ها با موفقیت از فایل پشتیبان بازگردانی شدند.');
+      currentUser = users.find(u => u.id === oldUserId && u.status !== 'pending') || GUEST;
+      save();
+      log('system', 'داده‌ها از فایل پشتیبان بازگردانی شدند');
       applyUserAuth();
       $('#importFile').value = '';
       alert('اطلاعات با موفقیت بازگردانی شد ✅');
@@ -1654,26 +2257,35 @@ $('#importBtn').onclick = () => {
 };
 
 $('#resetBtn').onclick = () => {
-  if (!isAdmin()) return;
-  if (!confirm('هشدار: تمام کالاها و تاریخچه به طور برگشت‌ناپذیر پاک خواهند شد. مطمئن هستید؟')) return;
-  products = []; logs = []; carts = {}; cart = []; orders = [];
+  if (!can('reset')) return unauthorized();
+  if (!confirm('هشدار: تمام کالاها، سفارش‌ها، فروش‌ها و تاریخچه برای همیشه پاک خواهند شد. آیا اطمینان دارید؟')) return;
+  products = []; logs = []; logArchive = []; carts = {}; cart = []; orders = []; sales = []; inventoryTransactions = [];
   Object.keys(drafts).forEach(id => delete drafts[id]);
-  localStorage.removeItem('inventoryData');
-  localStorage.removeItem('inventoryLogs');
-  localStorage.removeItem('customerCarts');
-  localStorage.removeItem('inventoryOrders');
+  ['inventoryData','inventoryLogs','inventoryLogArchive','customerCarts','inventoryOrders','inventorySales','inventoryTransactions'].forEach(k => localStorage.removeItem(k));
   render();
-  alert('سامانه به تنظیمات کارخانه بازگشت.');
+  alert('سامانه با موفقیت ریست گردید.');
 };
 
-/* ============ جابجایی عناصر شناور (ماوس و لمس) ============ */
-const clamp = (v, min, max) => Math.min(Math.max(v, min), Math.max(min, max));
+/* ==========================================================================
+   ۱۱. ماشین‌‌حساب شناور و منوی کناری (بدون کوچک‌ترین تغییر)
+   ========================================================================== */
+function setTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  $('#themeToggle').textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('theme', dark ? 'dark' : 'light');
+}
+setTheme(localStorage.getItem('theme') === 'dark');
+$('#themeToggle').onclick = () => setTheme(!document.body.classList.contains('dark'));
 
+const toggleMenu = open => { $('#sideMenu').classList.toggle('open', open); $('#overlay').hidden = !open; };
+$('#menuToggle').onclick = () => toggleMenu(true);
+$('#closeMenu').onclick = $('#overlay').onclick = () => toggleMenu(false);
+
+const clamp = (v, min, max) => Math.min(Math.max(v, min), Math.max(min, max));
 function place(el, x, y) {
   x = clamp(x, 0, window.innerWidth - el.offsetWidth);
   y = clamp(y, 0, window.innerHeight - el.offsetHeight);
-  el.style.left = x + 'px';
-  el.style.top = y + 'px';
+  el.style.left = x + 'px'; el.style.top = y + 'px';
 }
 const posOf = el => ({ x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0 });
 const savedPos = key => {
@@ -1683,16 +2295,13 @@ const savedPos = key => {
 
 function makeDraggable(el, handle, storageKey, onTap) {
   let active = false, moved = false, startX = 0, startY = 0, origin = { x: 0, y: 0 };
-
   handle.addEventListener('pointerdown', e => {
-    if (e.button) return;
-    if (e.target.closest('[data-nodrag]')) return;
+    if (e.button || e.target.closest('[data-nodrag]')) return;
     active = true; moved = false;
     startX = e.clientX; startY = e.clientY;
     origin = posOf(el);
     if (handle.setPointerCapture) handle.setPointerCapture(e.pointerId);
   });
-
   handle.addEventListener('pointermove', e => {
     if (!active) return;
     const dx = e.clientX - startX, dy = e.clientY - startY;
@@ -1701,7 +2310,6 @@ function makeDraggable(el, handle, storageKey, onTap) {
     el.classList.add('dragging');
     place(el, origin.x + dx, origin.y + dy);
   });
-
   const finish = isTap => {
     if (!active) return;
     active = false;
@@ -1713,7 +2321,6 @@ function makeDraggable(el, handle, storageKey, onTap) {
   handle.addEventListener('pointercancel', () => finish(false));
 }
 
-/* ============ ماشین حساب ============ */
 const fab = $('#calcFab'), calc = $('#calc');
 const calcState = { cur: '0', prev: null, op: null, fresh: false, expr: '' };
 const fmt = n => String(parseFloat(Number(n).toPrecision(12)));
@@ -1726,9 +2333,7 @@ function calcReset() {
   Object.assign(calcState, { cur: '0', prev: null, op: null, fresh: false, expr: '' });
 }
 function calcError() {
-  calcReset();
-  calcState.cur = 'خطا';
-  calcShow();
+  calcReset(); calcState.cur = 'خطا'; calcShow();
 }
 function calcOp(a, op, b) {
   a = Number(a); b = Number(b);
@@ -1742,7 +2347,6 @@ function calcOp(a, op, b) {
 function calcKey(k) {
   const s = calcState;
   if (s.cur === 'خطا') calcReset();
-
   if (/^\d$/.test(k)) {
     if (s.fresh) { s.cur = k; s.fresh = false; if (!s.op) s.expr = ''; }
     else if (s.cur === '0') s.cur = k;
@@ -1756,23 +2360,17 @@ function calcKey(k) {
       if (r === null) return calcError();
       s.cur = fmt(r);
     }
-    s.prev = s.cur; s.op = k; s.fresh = true;
-    s.expr = `${s.prev} ${k}`;
+    s.prev = s.cur; s.op = k; s.fresh = true; s.expr = `${s.prev} ${k}`;
   } else if (k === '=') {
     if (!s.op) return;
     const r = calcOp(s.prev, s.op, s.cur);
     if (r === null) return calcError();
     s.expr = `${s.prev} ${s.op} ${s.cur} =`;
     s.cur = fmt(r); s.prev = null; s.op = null; s.fresh = true;
-  } else if (k === 'C') {
-    calcReset();
-  } else if (k === '⌫') {
-    if (!s.fresh) s.cur = s.cur.length > 1 && !(s.cur.length === 2 && s.cur[0] === '-') ? s.cur.slice(0, -1) : '0';
-  } else if (k === '%') {
-    s.cur = fmt(Number(s.cur) / 100);
-  } else if (k === '±') {
-    if (s.cur !== '0') s.cur = s.cur[0] === '-' ? s.cur.slice(1) : '-' + s.cur;
-  }
+  } else if (k === 'C') calcReset();
+  else if (k === '⌫') { if (!s.fresh) s.cur = s.cur.length > 1 && !(s.cur.length === 2 && s.cur[0] === '-') ? s.cur.slice(0, -1) : '0'; }
+  else if (k === '%') s.cur = fmt(Number(s.cur) / 100);
+  else if (k === '±') { if (s.cur !== '0') s.cur = s.cur[0] === '-' ? s.cur.slice(1) : '-' + s.cur; }
   calcShow();
 }
 
@@ -1812,6 +2410,7 @@ addEventListener('resize', () => {
   if (!calc.hidden) { const c = posOf(calc); place(calc, c.x, c.y); }
 });
 
+/* راه‌اندازی اولیه سامانه */
 calcShow();
 initCategories();
 applyUserAuth();
