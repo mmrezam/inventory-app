@@ -48,10 +48,11 @@
 
   /* منوی کناری */
   .side-menu {
-    position: fixed; top: 0; right: -300px; width: min(280px, 85vw); height: 100%; padding: 20px; z-index: 2000;
-    background: var(--card); box-shadow: -4px 0 15px rgba(0,0,0,.15); transition: right .3s;
+    position: fixed; top: 0; right: 0; width: min(280px, 85vw); height: 100%; padding: 20px; z-index: 2000;
+    background: var(--card); box-shadow: -4px 0 15px rgba(0,0,0,.15);
+    transform: translateX(110%); transition: transform .3s cubic-bezier(.2,.8,.2,1), background-color .25s;
   }
-  .side-menu.open { right: 0; }
+  .side-menu.open { transform: none; }
   .overlay { position: fixed; inset: 0; background: rgba(15,23,42,.4); z-index: 1500; }
   .menu-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
   .menu-head h3 { margin: 0; }
@@ -75,7 +76,6 @@
   }
   .form-actions { display: flex; gap: 8px; }
 
-  /* پنهان‌سازی آیکون چشمک‌زن پیش‌فرض مرورگرها */
   input::-ms-reveal, input::-ms-clear { display: none; }
 
   .pass-wrapper {
@@ -242,65 +242,27 @@
   .shop-card span { font-size: 12.5px; color: var(--muted); }
   .order-meta { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
 
-  /* تب‌های دایره‌ای و کپسولی شیک برای ورود / عضویت */
+  /* تب‌های دایره‌ای و کپسولی ورود / عضویت */
   .auth-nav {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    background: var(--head);
-    padding: 6px;
-    border-radius: 35px;
-    border: 1px solid var(--border);
+    display: flex; gap: 8px; margin-bottom: 20px; background: var(--head); padding: 6px; border-radius: 35px; border: 1px solid var(--border);
   }
   .auth-nav button {
-    flex: 1;
-    padding: 9px 16px;
-    font-size: 13.5px;
-    font-weight: bold;
-    border-radius: 25px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.25s ease;
+    flex: 1; padding: 9px 16px; font-size: 13.5px; font-weight: bold; border-radius: 25px; border: none;
+    background: transparent; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s ease;
   }
   .auth-nav button.active {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+    background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
   }
 
   .demo-hint-box {
-    margin-top: 15px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 12px;
-    line-height: 1.9;
-    background: var(--head);
-    border: 1px dashed var(--border);
-    color: var(--muted);
+    margin-top: 15px; padding: 12px 14px; border-radius: 10px; font-size: 12px; line-height: 1.9;
+    background: var(--head); border: 1px dashed var(--border); color: var(--muted);
   }
   .demo-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--card);
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11.5px;
-    cursor: pointer;
-    margin: 3px 2px;
-    transition: border-color .2s;
+    display: inline-flex; align-items: center; gap: 4px; background: var(--card); color: var(--text);
+    border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; font-size: 11.5px; cursor: pointer; margin: 3px 2px; transition: border-color .2s;
   }
-  .demo-chip:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
+  .demo-chip:hover { border-color: var(--accent); color: var(--accent); }
 
   @media (max-width: 768px) {
     body { padding: 12px; }
@@ -324,11 +286,27 @@
     outline-offset: 2px;
   }
   button:disabled { opacity:.55; cursor:not-allowed; }
-  @media (max-width: 600px) {
-    .modal-box { max-height:92vh; overflow:auto; }
-    .shop-grid { grid-template-columns:1fr; }
-    .btn-row { flex-wrap:wrap; justify-content:center; }
-    .calc { max-width:calc(100vw - 24px); }
+
+  /* انیمیشن‌های سخت‌افزاری سبک و نرم */
+  .tab.active { animation: tabIn .22s ease both; }
+  @keyframes tabIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  .modal-overlay, .overlay { animation: fadeIn .18s ease both; }
+  .modal-box { animation: popIn .22s cubic-bezier(.2,.8,.2,1) both; }
+  .toast { animation: toastIn .22s ease both; }
+
+  .container button, .modal-box button, .menu-item, .shop-card {
+    transition: opacity .2s, background-color .2s, border-color .2s, color .2s, transform .12s;
+  }
+  .container button:active:not(:disabled), .modal-box button:active:not(:disabled) { transform: scale(.97); }
+  .card, .modal-box, .user-profile-bar, .table-wrap, input, select {
+    transition: background-color .25s, color .25s, border-color .25s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   }
 </style>
 </head>
@@ -377,15 +355,7 @@
 <div id="overlay" class="overlay" hidden></div>
 <nav id="sideMenu" class="side-menu">
   <div class="menu-head"><h3>منوی سامانه</h3><button id="closeMenu">&times;</button></div>
-  <ul id="menuList" style="padding:0;margin-top:20px">
-    <li class="menu-item" data-tab="analytics">📊 داشبورد و آمار</li>
-    <li class="menu-item active" data-tab="inventory">📦 مدیریت انبار</li>
-    <li class="menu-item" data-tab="orders">🧾 سفارش‌ها و فروش</li>
-    <li class="menu-item" data-tab="shops">🏪 فروشگاه‌ها</li>
-    <li class="menu-item" data-tab="users">👥 کاربران</li>
-    <li class="menu-item" data-tab="history">🕒 تاریخچه فعالیت</li>
-    <li class="menu-item" data-tab="backup">💾 پشتیبان‌گیری</li>
-  </ul>
+  <ul id="menuList" style="padding:0;margin-top:20px"></ul>
 </nav>
 
 <div class="container">
@@ -422,26 +392,52 @@
       <div class="card stat alert"><h3>هشدار موجودی اندک</h3><p id="statLow">۰ قلم</p></div>
       <div class="card stat"><h3>فروش امروز</h3><p id="statTodaySales">۰ تومان</p></div>
       <div class="card stat"><h3>فروش ماه جاری</h3><p id="statMonthSales">۰ تومان</p></div>
-      <div class="card stat"><h3>کل سفارش‌ها</h3><p id="statOrderCount">۰</p></div>
+      <div class="card stat"><h3>سفارش‌های تحویل‌شده</h3><p id="statOrderCount">۰</p></div>
+      <div class="card stat" data-admin-stat><h3>فروشندگان فعال</h3><p id="statSellerCount">۰</p></div>
+      <div class="card stat" data-admin-stat><h3>خریداران ثبت‌نام‌شده</h3><p id="statCustomerCount">۰</p></div>
+      <div class="card stat" data-admin-stat><h3>کل فروش قطعی</h3><p id="statTotalSales">۰ تومان</p></div>
     </div>
 
+    <!-- رتبه‌بندی فروشگاه‌ها بر اساس فروش قطعی -->
     <div class="card box" id="storeMetricsCard">
-      <h4>وضعیت فروشگاه‌های تحت پوشش:</h4>
-      <div id="storeMetricsList" style="line-height:2"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h4 style="margin:0">🏆 رتبه‌بندی فروشگاه‌ها بر اساس فروش قطعی</h4>
+        <select id="storeRankSort" style="width:auto;padding:4px 8px;font-size:12.5px">
+          <option value="desc">بیشترین به کمترین</option>
+          <option value="asc">کمترین به بیشترین</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table style="min-width:520px">
+          <thead><tr><th>رتبه</th><th>فروشگاه</th><th>سفارش تحویل‌شده</th><th>مجموع فروش</th></tr></thead>
+          <tbody id="storeRankList"></tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="card box">
+    <!-- جدول خریداران برتر VIP -->
+    <div class="card box" id="customerRankCard" hidden>
+      <h4 style="margin-top:0">⭐ مشتریان برتر (بر اساس مجموع خرید قطعی)</h4>
+      <div class="table-wrap">
+        <table style="min-width:520px">
+          <thead><tr><th>رتبه</th><th>خریدار</th><th>تعداد خرید</th><th>مجموع پرداختی</th></tr></thead>
+          <tbody id="customerRankList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card box" id="catCard">
       <h4>ارزش موجودی به تفکیک دسته‌بندی کالا:</h4>
       <div id="catStats" style="line-height:2"></div>
     </div>
 
-    <div class="card box">
+    <div class="card box" id="lowCard">
       <h4 id="lowStockHeader">کالاهای نیازمند شارژ (کمتر از ۵ عدد):</h4>
       <ul id="lowList" style="padding-right:20px;line-height:1.8"></ul>
     </div>
   </section>
 
-  <!-- تب فروشگاه‌ها (برای خریدار و مدیریت) -->
+  <!-- تب فروشگاه‌ها -->
   <section id="tab-shops" class="tab">
     <h2>🏪 فروشگاه‌های فعال سامانه</h2>
     <div id="shopGrid" class="shop-grid"></div>
@@ -515,7 +511,7 @@
     </div>
   </section>
 
-  <!-- تب مدیریت کاربران (برای Admin) -->
+  <!-- تب مدیریت کاربران -->
   <section id="tab-users" class="tab">
     <h2>👥 مدیریت کاربران و سطوح دسترسی</h2>
     <div class="table-wrap">
@@ -568,7 +564,7 @@
     <div class="backup">
       <div class="card" style="border-right:4px solid var(--danger)">
         <h3>📄 گزارش رسمی و چاپی (PDF)</h3>
-        <p>مشاهده و ذخیره صورت‌جلسه موجودی کالاها، دسته‌‌بندی‌ها و ارزش مالی انبار به صورت PDF.</p>
+        <p>مشاهده و ذخیره صورت‌جلسه موجودی کالاها، دسته‌‌‌بندی‌ها و ارزش مالی انبار به صورت PDF.</p>
         <button id="pdfBtn" class="danger">ایجاد و دانلود فایل PDF</button>
       </div>
       <div class="card">
@@ -591,7 +587,7 @@
   </section>
 </div>
 
-<!-- پنجره احراز هویت با تب‌های دایره‌ای/کپسولی شیک -->
+<!-- پنجره احراز هویت با تب‌های کپسولی شیک -->
 <div id="authModal" class="modal-overlay" hidden>
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -599,7 +595,6 @@
       <button id="closeAuthModal" class="gray" style="padding:2px 8px;font-size:18px">&times;</button>
     </div>
 
-    <!-- تب‌های کپسولی / دایره‌ای با نماد اختصاصی -->
     <div class="auth-nav">
       <button type="button" id="tabBtnLogin" class="active">
         <span style="font-size:15px">🔑</span>
@@ -611,7 +606,7 @@
       </button>
     </div>
 
-    <!-- ۱. فرم ورود استاندارد (Login) -->
+    <!-- فرم ورود -->
     <div id="loginSection">
       <form id="loginForm" style="display:flex;flex-direction:column;gap:12px" novalidate>
         <input type="text" id="loginUser" placeholder="نام کاربری، شماره همراه یا کد اشتراک" required>
@@ -624,9 +619,8 @@
         <button type="submit" class="ok" style="padding:11px;font-size:14.5px;font-weight:bold;margin-top:4px">ورود به سامانه</button>
       </form>
 
-      <!-- کادر هوشمند پر کردن خودکار حساب‌های تستی با یک کلیک -->
       <div class="demo-hint-box">
-        <div style="font-weight:bold;margin-bottom:6px;color:var(--text)">⚡ ورود سریع با کلیک روی حساب‌های تستی:</div>
+        <div style="font-weight:bold;margin-bottom:6px;color:var(--text)">⚡ ورود سریع با کلیک روی حساب‌های آزمایشی:</div>
         <div>
           <button type="button" class="demo-chip" data-user="admin" data-pass="admin123">👑 مدیر کل</button>
           <button type="button" class="demo-chip" data-user="seller1" data-pass="1234">🏪 فروشنده ۱</button>
@@ -636,7 +630,7 @@
       </div>
     </div>
 
-    <!-- ۲. فرم ثبت‌نام استاندارد (Sign Up) -->
+    <!-- فرم ثبت‌نام -->
     <div id="signupSection" hidden>
       <form id="signupForm" style="display:flex;flex-direction:column;gap:11px" novalidate>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -776,7 +770,7 @@ const normalizeUser = u => ({
 let stores = (Array.isArray(load('inventoryStores', DEFAULT_STORES)) ? load('inventoryStores', DEFAULT_STORES) : DEFAULT_STORES).map(normalizeStore);
 let users = (Array.isArray(load('inventoryUsers', DEFAULT_USERS)) ? load('inventoryUsers', DEFAULT_USERS) : DEFAULT_USERS).map(normalizeUser);
 
-/* توابع هش و همگام‌سازی تضمینی حساب‌ها */
+/* توابع هش و همگام‌سازی حساب‌ها */
 const hashPin = s => {
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
   const str = 'wh:' + faDigits(String(s || '').trim());
@@ -797,7 +791,6 @@ function newSubscriptionNo() {
 }
 
 function ensureCredentials() {
-  /* تنظیم قطعی رمزهای حساب‌های پیش‌فرض سامانه */
   const admin = users.find(u => u.role === 'admin' || u.id === 'u_admin');
   if (admin) {
     admin.username = 'admin';
@@ -1046,8 +1039,7 @@ function setOrderStatus(code, status) {
   const canManageThis = isAdmin() || (isSeller() && o.storeId === currentUser.storeId);
 
   if (status === 'cancelled') {
-    const isOwnerCustomer = isMember() && o.uid === currentUser.id && o.status === 'pending';
-    if (!isOwnerCustomer && (!canManageThis || o.status === 'shipped')) {
+    if (!canManageThis || o.status === 'shipped') {
       return unauthorized('امکان لغو این سفارش وجود ندارد!');
     }
     if (!confirm('آیا از لغو این سفارش و بازگرداندن اقلام به انبار اطمینان دارید؟')) return;
@@ -1063,6 +1055,19 @@ function setOrderStatus(code, status) {
   }
 
   o.status = status;
+  if (status === 'delivered') {
+    o.deliveredAt = nowISO();
+    sales.unshift({
+      id: 'sale_' + o.code,
+      storeId: o.storeId,
+      sellerId: currentUser.id,
+      customerId: o.uid,
+      items: o.items,
+      total: o.total,
+      createdAt: o.deliveredAt
+    });
+  }
+
   o.history.push({ status, time: new Date().toLocaleString('fa-IR'), by: currentUser.name });
   log('sale', `تغییر وضعیت سفارش ${faRaw(o.code)} به ${STATUS[status].t}`, o.storeId, o.buyer);
   save(); render();
@@ -1095,7 +1100,7 @@ function renderOrders() {
     if (canManageThis && NEXT[o.status]) acts.push(btn(NEXT[o.status], 'ok', STATUS[NEXT[o.status]].t));
     
     const open = o.status !== 'delivered' && o.status !== 'cancelled';
-    if (open && (isMember() ? (o.uid === currentUser.id && o.status === 'pending') : (canManageThis && o.status !== 'shipped'))) {
+    if (open && canManageThis && o.status !== 'shipped') {
       acts.push(btn('cancelled', 'danger', 'لغو سفارش'));
     }
 
@@ -1105,7 +1110,7 @@ function renderOrders() {
       <td style="text-align:right">${o.items.map(it => `${esc(it.name)} × ${fa(it.qty)}`).join('<br>')}${buyer}</td>
       <td>${fa(o.total)} تومان</td>
       <td><b style="color:${s.c}">${s.t}</b><div class="order-meta">${esc(last.time)}</div></td>
-      <td><div class="btn-row">${acts.join('') || '—'}</div></td>
+      <td><div class="btn-row">${acts.join('') || '—'}</div>${isMember() && open ? '<div class="order-meta">لغو فقط با هماهنگی فروشنده</div>' : ''}</td>
     </tr>`;
   }).join('') : '<tr><td colspan="6" class="empty">هیچ سفارشی یافت نشد.</td></tr>';
 }
@@ -1265,7 +1270,7 @@ $('#checkoutBtn').onclick = () => {
   cart.forEach(item => {
     const prod = find(item.id);
     prod.stock -= item.qty;
-    recordTransaction(prod.id, prod.storeId, 'sale', item.qty, `فروش آنلاین به ${buyerName}`, -item.qty);
+    recordTransaction(prod.id, prod.storeId, 'sale', item.qty, `ثبت سفارش آنلاین توسط ${buyerName}`, -item.qty);
     (byStore[prod.storeId] = byStore[prod.storeId] || []).push({ id: prod.id, name: prod.name, price: prod.price, qty: item.qty });
   });
 
@@ -1284,24 +1289,16 @@ $('#checkoutBtn').onclick = () => {
       total,
       status: 'pending',
       created: now,
+      createdAt: nowISO(),
       history: [{ status: 'pending', time: now, by: currentUser.name }]
     };
     orders.unshift(order);
-    sales.unshift({
-      id: 'sale_' + order.code,
-      storeId: sId,
-      sellerId: null,
-      customerId: currentUser.id,
-      items,
-      total,
-      createdAt: new Date().toISOString()
-    });
     codes.push(faRaw(order.code));
     log('sale', `ثبت سفارش جدید ${faRaw(order.code)}: ${items.map(it => `${it.name} × ${fa(it.qty)}`).join('، ')} (${fa(total)} تومان)`, sId, buyerInfo);
   });
 
   cart = []; save(); updateCartBadge(); $('#cartModal').hidden = true; render();
-  $('.menu-item[data-tab="orders"]').click();
+  showTab('orders');
   toast(`سفارش با موفقیت ثبت شد 🎉 کد پیگیری: ${codes.join('، ')}`);
 };
 
@@ -1341,7 +1338,7 @@ function commit(id) {
     p.stock = stock;
   }
   if (d.category !== p.category || d.subcategory !== p.subcategory) {
-    changes.push(`دسته‌بندی به (${d.category} / ${d.subcategory})`);
+    changes.push(`دسته‌‌بندی به (${d.category} / ${d.subcategory})`);
     p.category = d.category; p.subcategory = d.subcategory;
   }
   delete drafts[id];
@@ -1374,9 +1371,26 @@ $('#undoAll').onclick = () => {
 addEventListener('beforeunload', e => { if (Object.keys(drafts).length) { e.preventDefault(); e.returnValue = ''; } });
 
 /* ==========================================================================
-   ۶. رندر صفحات و داشبوردها (Role-Based Rendering)
+   ۶. رندر صفحات و رتبه‌بندی‌های کلان داشبورد
    ========================================================================== */
 const mine = l => l.uid ? l.uid === currentUser.id : l.by === currentUser.name;
+
+const debounce = (fn, ms = 120) => {
+  let t;
+  return (...a) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...a), ms);
+  };
+};
+
+let renderQueued = 0;
+function render() {
+  if (renderQueued) return;
+  renderQueued = requestAnimationFrame(() => {
+    renderQueued = 0;
+    renderNow();
+  });
+}
 
 function renderPending() {
   const p = users.filter(u => u.role === 'seller' && u.status === 'pending');
@@ -1445,7 +1459,7 @@ function passLogFilters(l) {
   return !q || `${l.message} ${l.by || ''} ${l.buyerInfo ? l.buyerInfo.name : ''}`.toLowerCase().includes(q);
 }
 
-function render() {
+function renderNow() {
   const vis = visible();
   renderOrders();
   renderPending();
@@ -1460,27 +1474,49 @@ function render() {
   $('#statValue').textContent = fa(total) + ' تومان';
   $('#statLow').textContent = fa(lowItems.length) + ' قلم';
 
-  const relevantSales = sales.filter(s => isAdmin() || s.storeId === currentUser.storeId);
-  const now = new Date();
-  const todayStr = localDateKey(now);
-  const monthStr = todayStr.slice(0, 7);
+  /* فروش قطعی = فقط سفارش‌های تحویل‌شده */
+  const sumTotal = arr => arr.reduce((s, o) => s + o.total, 0);
+  const deliveredAll = orders.filter(o => o.status === 'delivered');
+  const delivered = deliveredAll.filter(o => isAdmin() || o.storeId === currentUser.storeId);
+  const dayOf = o => localDateKey(o.deliveredAt || o.createdAt || '');
+  const todayStr = localDateKey(new Date()), monthStr = todayStr.slice(0, 7);
 
-  const todayTotal = relevantSales.filter(s => (s.createdAt || '').startsWith(todayStr)).reduce((sum, s) => sum + s.total, 0);
-  const monthTotal = relevantSales.filter(s => (s.createdAt || '').startsWith(monthStr)).reduce((sum, s) => sum + s.total, 0);
-  const relevantOrders = orders.filter(o => isAdmin() || o.storeId === currentUser.storeId);
+  $('#statTodaySales').textContent = fa(sumTotal(delivered.filter(o => dayOf(o) === todayStr))) + ' تومان';
+  $('#statMonthSales').textContent = fa(sumTotal(delivered.filter(o => dayOf(o).startsWith(monthStr)))) + ' تومان';
+  $('#statOrderCount').textContent = fa(delivered.length);
 
-  $('#statTodaySales').textContent = fa(todayTotal) + ' تومان';
-  $('#statMonthSales').textContent = fa(monthTotal) + ' تومان';
-  $('#statOrderCount').textContent = fa(relevantOrders.length);
-
+  /* مدیر: شاخص‌های پلتفرم به‌جای شاخص‌های خرد انبار */
+  ['#statCount', '#statValue', '#statLow'].forEach(s => $(s).closest('.stat').hidden = isAdmin());
+  $$('[data-admin-stat]').forEach(el => el.hidden = !isAdmin());
+  $('#catCard').hidden = isAdmin();
+  $('#lowCard').hidden = isAdmin();
   $('#storeMetricsCard').hidden = !isAdmin();
+  $('#customerRankCard').hidden = !isAdmin();
+
   if (isAdmin()) {
-    $('#storeMetricsList').innerHTML = stores.map(st => {
-      const stProds = products.filter(p => p.storeId === st.id);
-      const stVal = stProds.reduce((sum, p) => sum + p.price * p.stock, 0);
-      const stSalesTotal = sales.filter(s => s.storeId === st.id).reduce((sum, s) => sum + s.total, 0);
-      return `<div>🏪 <b>${esc(st.name)}:</b> ${fa(stProds.length)} قلم کالا | ارزش انبار: <b>${fa(stVal)}</b> تومان | کل فروش: <b>${fa(stSalesTotal)}</b> تومان</div>`;
-    }).join('');
+    $('#statSellerCount').textContent = fa(users.filter(u => u.role === 'seller' && u.status !== 'pending').length);
+    $('#statCustomerCount').textContent = fa(users.filter(u => u.role === 'customer').length);
+    $('#statTotalSales').textContent = fa(sumTotal(deliveredAll)) + ' تومان';
+
+    const dir = $('#storeRankSort').value === 'asc' ? 1 : -1;
+    const rank = stores.map(st => {
+      const os = deliveredAll.filter(o => o.storeId === st.id);
+      return { name: st.name, n: os.length, total: sumTotal(os) };
+    }).sort((a, b) => dir * (a.total - b.total));
+    
+    $('#storeRankList').innerHTML = rank.length
+      ? rank.map((r, i) => `<tr><td>${fa(i + 1)}</td><td class="name">${esc(r.name)}</td><td>${fa(r.n)}</td><td><b>${fa(r.total)}</b> تومان</td></tr>`).join('')
+      : '<tr><td colspan="4" class="empty">فروشگاهی ثبت نشده است.</td></tr>';
+
+    const byBuyer = {};
+    deliveredAll.forEach(o => {
+      const b = byBuyer[o.uid] = byBuyer[o.uid] || { name: (users.find(u => u.id === o.uid) || {}).name || (o.buyer ? o.buyer.name : 'کاربر'), n: 0, total: 0 };
+      b.n++; b.total += o.total;
+    });
+    const top = Object.values(byBuyer).sort((a, b) => b.total - a.total).slice(0, 20);
+    $('#customerRankList').innerHTML = top.length
+      ? top.map((b, i) => `<tr><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : fa(i + 1)}</td><td class="name">${esc(b.name)}</td><td>${fa(b.n)}</td><td><b>${fa(b.total)}</b> تومان</td></tr>`).join('')
+      : '<tr><td colspan="4" class="empty">هنوز خرید قطعی ثبت نشده است.</td></tr>';
   }
 
   $('#lowStockHeader').textContent = isSeller() ? `کالاهای نیازمند شارژ در ${storeName(currentUser.storeId)}:` : 'کالاهای نیازمند شارژ (کمتر از ۵ عدد):';
@@ -1596,8 +1632,26 @@ function render() {
 }
 
 /* ==========================================================================
-   ۷. اعمال نقش‌ها و کنترل دسترسی‌ها
+   ۷. مدیریت ناوبری، تب‌ها و دکمه Back مرورگر
    ========================================================================== */
+let booted = false;
+
+function showTab(tab, push = true) {
+  const item = $(`.menu-item[data-tab="${tab}"]`);
+  if (!item) return false;
+  $$('.menu-item').forEach(i => i.classList.toggle('active', i === item));
+  $$('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + tab));
+  $('#subtitle').textContent = `(${item.textContent.trim().replace(/\s*\([۰-۹]+\)$/, '')})`;
+  toggleMenu(false);
+  if (push && location.hash !== '#' + tab) history.pushState({ tab }, '', '#' + tab);
+  scrollTo({ top: 0 });
+  return true;
+}
+
+addEventListener('popstate', () => {
+  if (!showTab(location.hash.slice(1), false)) showTab(isCustomer() ? 'shops' : 'analytics', false);
+});
+
 function applyUserAuth() {
   storeFilter = 'all';
   logFilter = 'all';
@@ -1646,12 +1700,7 @@ function applyUserAuth() {
   `).join('');
 
   $$('.menu-item').forEach(item => {
-    item.onclick = () => {
-      $$('.menu-item').forEach(i => i.classList.toggle('active', i === item));
-      $$('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + item.dataset.tab));
-      $('#subtitle').textContent = `(${item.textContent.trim()})`;
-      toggleMenu(false);
-    };
+    item.onclick = () => showTab(item.dataset.tab);
   });
 
   $('#formCard').hidden = !can('manageProducts');
@@ -1677,18 +1726,20 @@ function applyUserAuth() {
   resetForm();
   updateCartBadge();
 
-  const defaultTab = isCustomer() ? 'shops' : 'analytics';
-  const targetMenuItem = $(`.menu-item[data-tab="${defaultTab}"]`) || $('.menu-item');
-  if (targetMenuItem) targetMenuItem.click();
+  const hashTab = location.hash.slice(1);
+  const startTab = (!booted && $(`.menu-item[data-tab="${hashTab}"]`)) ? hashTab : (isCustomer() ? 'shops' : 'analytics');
+  booted = true;
+  showTab(startTab, false);
+  history.replaceState({ tab: startTab }, '', '#' + startTab);
 
   render();
 }
 
 /* ==========================================================================
-   ۸. فرآیند ورود و عضویت یکپارچه و استاندارد
+   ۸. فرآیند ورود و عضویت یکپارچه
    ========================================================================== */
 function loginAs(u) {
-  if (Object.keys(drafts).length && !confirm('تغییرات ثبت‌نشده لغو خواهد شد. ادامه می‌دهید؟')) return;
+  if (Object.keys(drafts).length && !confirm('تغییرات ثبت‌‌نشده لغو خواهد شد. ادامه می‌دهید؟')) return;
   Object.keys(drafts).forEach(id => delete drafts[id]);
   currentUser = u;
   $('#loginUser').value = '';
@@ -1703,7 +1754,7 @@ function loginAs(u) {
 function loginAlerts() {
   const msgs = [];
   if (isSeller() || isAdmin()) {
-    const low = visible().filter(isLow).length;
+    const low = isSeller() ? visible().filter(isLow).length : 0;
     const fresh = orders.filter(o => o.status === 'pending' && (isAdmin() || o.storeId === currentUser.storeId)).length;
     if (low) msgs.push(`${fa(low)} کالا موجودی کم دارد`);
     if (fresh) msgs.push(`${fa(fresh)} سفارش جدید`);
@@ -1730,7 +1781,6 @@ function changePin() {
 }
 $('#changePinBtn').onclick = changePin;
 
-/* دکمه‌های کپسولی سوئیچ تب ورود / عضویت */
 $('#tabBtnLogin').onclick = () => {
   $('#tabBtnLogin').classList.add('active');
   $('#tabBtnSignup').classList.remove('active');
@@ -1744,7 +1794,6 @@ $('#tabBtnSignup').onclick = () => {
   $('#loginSection').hidden = true;
 };
 
-/* کلیک روی حساب‌های آزمایشی جهت پر کردن خودکار */
 document.addEventListener('click', e => {
   const chip = e.target.closest('.demo-chip');
   if (!chip) return;
@@ -1753,7 +1802,6 @@ document.addEventListener('click', e => {
   toast(`حساب ${chip.textContent.trim()} انتخاب شد ✍️`, 'var(--accent)');
 });
 
-/* کلیک روی دکمه نمایش / مخفی‌سازی رمز عبور (پایدار و بدون چشمک زدن) */
 document.addEventListener('click', e => {
   const btn = e.target.closest('.toggle-pass-btn');
   if (!btn) return;
@@ -1778,7 +1826,6 @@ const guard = () => {
 };
 const failed = () => { if (++fails >= 5) { fails = 0; lockUntil = Date.now() + 60000; } };
 
-/* پردازش ورود استاندارد */
 $('#loginForm').addEventListener('submit', e => {
   e.preventDefault();
   if (!guard()) return;
@@ -1831,7 +1878,6 @@ $('#regRole').onchange = e => {
   $('#customerSignupFields').style.display = isCust ? 'flex' : 'none';
 };
 
-/* فرم ثبت‌نام */
 $('#signupForm').addEventListener('submit', e => {
   e.preventDefault();
   const first = $('#regFirst').value.trim(), last = $('#regLast').value.trim();
@@ -1901,7 +1947,6 @@ $('#smsOk').onclick = () => {
   $('#openCartBtn').click();
 };
 
-/* تأیید فروشندگان توسط مدیر */
 $('#pendingList').addEventListener('click', e => {
   const b = e.target.closest('[data-pact]');
   if (!b || !can('manageUsers')) return unauthorized();
@@ -1921,7 +1966,6 @@ $('#pendingList').addEventListener('click', e => {
   save(); render();
 });
 
-/* تغییر Role کاربر توسط Admin */
 $('#userList').addEventListener('change', e => {
   if (!isAdmin()) return unauthorized();
   const sel = e.target.closest('.user-role-select');
@@ -1951,7 +1995,11 @@ function fillFormSubs(selected) {
 }
 $('#fCategory').onchange = () => fillFormSubs();
 
-$('#search').oninput = render;
+$('#search').oninput = debounce(render);
+$('#logSearch').oninput = debounce(render);
+$('#orderSearch').oninput = debounce(render);
+$('#storeRankSort').onchange = render;
+
 $('#filterCategory').onchange = e => {
   catFilter = e.target.value; subFilter = 'all';
   const sel = $('#filterSubCategory');
@@ -1972,12 +2020,12 @@ $('#shopGrid').addEventListener('click', e => {
   const c = e.target.closest('[data-storeid]');
   if (!c) return;
   storeFilter = c.dataset.storeid;
-  $('.menu-item[data-tab="inventory"]').click();
+  showTab('inventory');
   render();
 });
 $('#backToShops').onclick = () => {
   storeFilter = 'all';
-  $('.menu-item[data-tab="shops"]').click();
+  showTab('shops');
   render();
 };
 
@@ -1986,7 +2034,6 @@ $$('#historyToolbar .filter').forEach(btn => btn.onclick = () => {
   $$('#historyToolbar .filter').forEach(b => b.classList.toggle('active', b === btn));
   render();
 });
-$('#logSearch').oninput = render;
 ['#logRange', '#logFrom', '#logTo', '#logShopFilter'].forEach(s => $(s).onchange = render);
 $('#logRange').addEventListener('change', () => {
   const c = $('#logRange').value === 'custom';
@@ -2005,7 +2052,6 @@ $('#archiveLogs').onclick = () => {
   toast('آرشیو دانلود شد و از حافظه سبک‌سازی گردید ✅');
 };
 
-$('#orderSearch').oninput = render;
 $('#orderStatusFilter').onchange = render;
 $('#orderList').addEventListener('click', e => {
   const b = e.target.closest('[data-oact]');
@@ -2267,11 +2313,11 @@ $('#resetBtn').onclick = () => {
 };
 
 /* ==========================================================================
-   ۱۱. ماشین‌‌حساب شناور و منوی کناری (بدون کوچک‌ترین تغییر)
+   ۱۱. ماشین‌‌حساب شناور و منوی کناری
    ========================================================================== */
 function setTheme(dark) {
   document.body.classList.toggle('dark', dark);
-  $('#themeToggle').textContent = dark ? '☀️' : '🌙';
+  $('#themeToggle').textContent = dark ? '☀️️' : '🌙';
   localStorage.setItem('theme', dark ? 'dark' : 'light');
 }
 setTheme(localStorage.getItem('theme') === 'dark');
