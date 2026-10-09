@@ -239,6 +239,79 @@ function renderSellerPOS() {
 function renderNow() {
   renderDemoChips();
   renderSellerPOS(); //
+  /* =========================================
+   توابع عملیاتی صندوق فروشگاهی (POS)
+========================================= */
+
+// تابع ثبت فروش (کسر از انبار)
+window.posSell = function() {
+  const nameInput = $('#posSaleProduct').value.trim();
+  const qty = parseInt($('#posSaleQty').value);
+  
+  if (!nameInput || isNaN(qty) || qty <= 0) {
+    return toast('لطفاً نام کالا و تعداد صحیح را وارد کنید!', 'var(--danger)');
+  }
+
+  // پیدا کردن کالا در انبار همین فروشنده
+  const product = products.find(p => p.name === nameInput && p.storeId === currentUser.storeId);
+  
+  if (!product) {
+    return toast('کالایی با این نام در انبار شما یافت نشد!', 'var(--danger)');
+  }
+  
+  if (qty > product.stock) {
+    return toast(`موجودی کافی نیست! فقط ${fa(product.stock)} قلم موجود است.`, 'var(--danger)');
+  }
+
+  // کسر موجودی و ذخیره
+  product.stock -= qty;
+  
+  // ثبت گزارش (اختیاری)
+  const customer = $('#posSaleCustomer').value.trim() || 'مشتری حضوری';
+  log('sale', `فروش ${fa(qty)} عدد ${product.name} به ${customer} ثبت شد.`);
+
+  save();
+  render(); // یا renderNow() بسته به نام تابع رندر اصلی‌ات
+  toast(`فروش با موفقیت ثبت شد و از انبار کسر گردید 🛒`, 'var(--success)');
+  
+  // پاک کردن فرم
+  $('#posSaleProduct').value = '';
+  $('#posSaleQty').value = '1';
+  $('#posSaleCustomer').value = '';
+};
+
+// تابع ثبت خرید (اضافه به انبار)
+window.posBuy = function() {
+  const nameInput = $('#posBuyProduct').value.trim();
+  const qty = parseInt($('#posBuyQty').value);
+  
+  if (!nameInput || isNaN(qty) || qty <= 0) {
+    return toast('لطفاً نام کالا و تعداد صحیح را وارد کنید!', 'var(--danger)');
+  }
+
+  // پیدا کردن کالا در انبار همین فروشنده
+  const product = products.find(p => p.name === nameInput && p.storeId === currentUser.storeId);
+  
+  if (!product) {
+    return toast('کالایی با این نام در انبار شما یافت نشد!', 'var(--danger)');
+  }
+
+  // افزایش موجودی و ذخیره
+  product.stock += qty;
+  
+  // ثبت گزارش (اختیاری)
+  const supplier = $('#posBuySupplier').value.trim() || 'نامشخص';
+  log('buy', `خرید ${fa(qty)} عدد ${product.name} از تامین‌کننده: ${supplier}.`);
+
+  save();
+  render(); // یا renderNow()
+  toast(`موجودی انبار با موفقیت شارژ شد 📦`, 'var(--success)');
+  
+  // پاک کردن فرم
+  $('#posBuyProduct').value = '';
+  $('#posBuyQty').value = '10';
+  $('#posBuySupplier').value = '';
+};
   const vis = visible();
   renderOrders();
   renderPending();
