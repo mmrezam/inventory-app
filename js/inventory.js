@@ -8,10 +8,17 @@ const storeName = sId => getStore(sId).name;
 
 const isLow = p => p.stock < LOW_STOCK;
 
+/* استخراج خودکار فروشگاه‌هایی که فروشنده فعال دارند */
+const getActiveStores = () => stores.filter(st => users.some(u => u.role === 'seller' && u.storeId === st.id && u.status !== 'pending'));
+
+/* فقط کالاهای فروشگاه‌های دارای صاحب نمایش داده شوند */
 const visible = () => {
-  if (isSeller()) return products.filter(p => p.storeId === currentUser.storeId);
-  if (isCustomer()) return products.filter(p => storeFilter === 'all' || p.storeId === storeFilter);
-  return products;
+  const activeStoreIds = getActiveStores().map(s => s.id);
+  const activeProds = products.filter(p => activeStoreIds.includes(p.storeId));
+  
+  if (isSeller()) return activeProds.filter(p => p.storeId === currentUser.storeId);
+  if (isCustomer()) return activeProds.filter(p => storeFilter === 'all' || p.storeId === storeFilter);
+  return activeProds;
 };
 
 function recordTransaction(productId, storeId, type, quantity, reason, delta = quantity) {

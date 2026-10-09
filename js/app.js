@@ -191,7 +191,30 @@ function passLogFilters(l) {
   const q = $('#logSearch').value.trim().toLowerCase();
   return !q || `${l.message} ${l.by || ''} ${l.buyerInfo ? l.buyerInfo.name : ''}`.toLowerCase().includes(q);
 }
+/* رندر دکمه‌های ورود سریع بر اساس کاربران موجود در سیستم */
+function renderDemoChips() {
+  const container = $('#demoChipsContainer');
+  if (!container) return;
+
+  const demoAccounts = [
+    { u: 'admin', p: 'admin123', label: '👑 مدیر کل' },
+    { u: 'seller1', p: '1234', label: '🏪 فروشنده ۱' },
+    { u: 'seller2', p: '1234', label: '🏪 فروشنده ۲' },
+    { u: 'sara', p: '1234', label: '🛍️ خریدار (سارا)' }
+  ];
+
+  const availableChips = demoAccounts
+    .filter(demo => users.some(user => user.username === demo.u))
+    .map(demo => `<button type="button" class="demo-chip" data-user="${demo.u}" data-pass="${demo.p}">${demo.label}</button>`);
+
+  container.innerHTML = availableChips.join('');
+  
+  const box = $('#demoHintBox');
+  if (box) box.hidden = availableChips.length === 0;
+}
+
 function renderNow() {
+  renderDemoChips();
   const vis = visible();
   renderOrders();
   renderPending();
@@ -221,7 +244,7 @@ function renderNow() {
     $('#statCustomerCount').textContent = fa(users.filter(u => u.role === 'customer').length);
     $('#statTotalSales').textContent = fa(sumTotal(deliveredAll)) + ' تومان';
     const dir = $('#storeRankSort').value === 'asc' ? 1 : -1;
-    const rank = stores.map(st => {
+   const rank = getActiveStores().map(st => {
       const os = deliveredAll.filter(o => o.storeId === st.id);
       return { name: st.name, n: os.length, total: sumTotal(os) };
     }).sort((a, b) => dir * (a.total - b.total));
@@ -309,8 +332,8 @@ function renderNow() {
   updateDirtyBar();
   $('#shopBar').hidden = !(isCustomer() && storeFilter !== 'all');
   $('#shopBarName').textContent = '🏪 ' + storeName(storeFilter);
-  $('#shopGrid').innerHTML = stores.length
-    ? stores.map(st => {
+ $('#shopGrid').innerHTML = getActiveStores().length
+    ? getActiveStores().map(st => {
         const stProds = products.filter(p => p.storeId === st.id);
         const avail = stProds.filter(p => p.stock > 0).length;
         return `<button class="shop-card" data-storeid="${esc(st.id)}"><b>🏪 ${esc(st.name)}</b><span>${fa(stProds.length)} قلم کالا | ${fa(avail)} موجود</span></button>`;
@@ -364,7 +387,7 @@ addEventListener('popstate', () => {
   if (!showTab(location.hash.slice(1), false)) showTab(isCustomer() ? 'shops' : 'analytics', false);
 });
 const storeOptions = withAll => (withAll ? '<option value="all">🏪 همه فروشگاه‌ها</option>' : '')
-  + stores.map(st => `<option value="${esc(st.id)}">${esc(st.name)}</option>`).join('');
+  + getActiveStores().map(st => `<option value="${esc(st.id)}">${esc(st.name)}</option>`).join('');
 function applyUserAuth() {
   storeFilter = 'all';
   logFilter = 'all';
