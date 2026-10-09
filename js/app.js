@@ -212,9 +212,33 @@ function renderDemoChips() {
   const box = $('#demoHintBox');
   if (box) box.hidden = availableChips.length === 0;
 }
+/* رندر پنل صندوق فروشگاهی اختصاصی برای فروشنده */
+/* رندر پنل صندوق فروشگاهی اختصاصی برای فروشنده */
+function renderSellerPOS() {
+  const posContainer = $('#sellerPosContainer');
+  if (!posContainer) return;
 
+  // اگر کاربر فروشنده نیست، پنل کاملا مخفی شود
+  if (!isSeller()) {
+    posContainer.style.display = 'none';
+    return;
+  }
+
+  // نمایش پنل برای فروشنده
+  posContainer.style.display = 'grid';
+
+  // استخراج کالاهای همین فروشنده
+  const myProds = products.filter(p => p.storeId === currentUser.storeId);
+
+  // تزریق کالاها به دیتالیست (جستجوی هوشمند با قابلیت تایپ)
+  const datalist = $('#posProductsDatalist');
+  if (datalist) {
+    datalist.innerHTML = myProds.map(p => `<option value="${p.name}">موجودی: ${fa(p.stock)} قلم</option>`).join('');
+  }
+}
 function renderNow() {
   renderDemoChips();
+  renderSellerPOS(); //
   const vis = visible();
   renderOrders();
   renderPending();

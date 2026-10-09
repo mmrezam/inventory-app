@@ -67,6 +67,51 @@
   <!-- تب داشبورد و آمار -->
   <section id="tab-analytics" class="tab">
     <h2 id="dashboardTitle">داشبورد و آمار</h2>
+   <!-- === شروع پنل اختصاصی فروشنده (صندوق و تدارکات) === -->
+    <div id="sellerPosContainer" class="pos-container" style="display: none;">
+      
+      <!-- ستون راست: ثبت فروش (خروجی) -->
+      <div class="pos-card pos-outbound">
+        <h3>📤 ثبت فروش حضوری (خروجی کالا)</h3>
+       <div class="pos-form-group">
+          <label>انتخاب کالا</label>
+          <input type="text" id="posSaleProduct" list="posProductsDatalist" class="pos-input" placeholder="🔍 نام کالا را تایپ کنید...">
+        </div>
+        <div class="pos-form-group">
+          <label>تعداد فروش</label>
+          <input type="number" id="posSaleQty" class="pos-input" value="1" min="1">
+        </div>
+        <div class="pos-form-group">
+          <label>نام مشتری (اختیاری - خریدار حضوری)</label>
+          <input type="text" id="posSaleCustomer" class="pos-input" placeholder="مثال: مشتری متفرقه">
+        </div>
+        <button type="button" class="btn-purple" onclick="alert('به زودی وصل می‌شود!')">🛒 ثبت فروش و صدور فاکتور</button>
+      </div>
+
+      <!-- ستون چپ: ثبت خرید (ورودی) -->
+      <div class="pos-card pos-inbound">
+        <h3>📥 ثبت خرید و شارژ انبار (ورودی کالا)</h3>
+       <div class="pos-form-group">
+          <label>انتخاب کالا</label>
+          <input type="text" id="posBuyProduct" list="posProductsDatalist" class="pos-input" placeholder="🔍 نام کالا را تایپ کنید...">
+        </div>
+        <!-- لیست مشترک هوشمند برای جستجو -->
+        <datalist id="posProductsDatalist"></datalist>
+        <div class="pos-form-group">
+          <label>تعداد خرید (ورود به انبار)</label>
+          <input type="number" id="posBuyQty" class="pos-input" value="10" min="1">
+        </div>
+        <div class="pos-form-group">
+          <label>تامین‌کننده / شرکت پخش</label>
+          <input type="text" id="posBuySupplier" class="pos-input" placeholder="مثال: شرکت پخش البرز">
+        </div>
+        <button type="button" class="btn-green" onclick="alert('به زودی وصل می‌شود!')">📦 ثبت خرید و افزایش موجودی</button>
+      </div>
+      
+    </div>
+    <!-- === پایان پنل اختصاصی فروشنده === -->
+
+    <!-- این همون کد قبلی خودته که آوردمش پایین پنل جدید -->
     <div class="card box" id="pendingCard" hidden>
       <h4 class="inline-style-007">🕓 فروشندگان در انتظار تأیید</h4>
       <div id="pendingList"></div>
