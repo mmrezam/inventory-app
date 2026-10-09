@@ -244,6 +244,8 @@ function renderNow() {
 ========================================= */
 
 // تابع ثبت فروش (کسر از انبار)
+// تابع ثبت فروش (کسر از انبار و ثبت در درآمد)
+// تابع ثبت فروش (کسر از انبار و ثبت در درآمد)
 window.posSell = function() {
   const nameInput = $('#posSaleProduct').value.trim();
   const qty = parseInt($('#posSaleQty').value);
@@ -252,7 +254,6 @@ window.posSell = function() {
     return toast('لطفاً نام کالا و تعداد صحیح را وارد کنید!', 'var(--danger)');
   }
 
-  // پیدا کردن کالا در انبار همین فروشنده
   const product = products.find(p => p.name === nameInput && p.storeId === currentUser.storeId);
   
   if (!product) {
@@ -263,16 +264,36 @@ window.posSell = function() {
     return toast(`موجودی کافی نیست! فقط ${fa(product.stock)} قلم موجود است.`, 'var(--danger)');
   }
 
-  // کسر موجودی و ذخیره
+  // کسر موجودی از انبار
   product.stock -= qty;
   
-  // ثبت گزارش (اختیاری)
-  const customer = $('#posSaleCustomer').value.trim() || 'مشتری حضوری';
-  log('sale', `فروش ${fa(qty)} عدد ${product.name} به ${customer} ثبت شد.`);
+  const customerName = $('#posSaleCustomer').value.trim() || 'مشتری حضوری';
+
+  // ساخت یک فاکتور تایید شده برای ثبت در درآمد سیستم
+  if (typeof orders !== 'undefined') {
+    orders.push({
+      id: 'POS-' + Date.now(),
+      storeId: currentUser.storeId,
+      buyer: customerName,
+      status: 'delivered',
+      date: new Date().toISOString(),
+      type: 'in-person',
+      totalPrice: product.price * qty,
+      items: [{
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        qty: qty
+      }]
+    });
+  }
+
+  // ثبت در رویدادها
+  log('sale', `فروش حضوری ${fa(qty)} عدد ${product.name} به ${customerName} ثبت شد.`);
 
   save();
-  render(); // یا renderNow() بسته به نام تابع رندر اصلی‌ات
-  toast(`فروش با موفقیت ثبت شد و از انبار کسر گردید 🛒`, 'var(--success)');
+  render();
+  toast(`فروش ثبت شد و به درآمد امروز اضافه گردید 🛒`, 'var(--success)');
   
   // پاک کردن فرم
   $('#posSaleProduct').value = '';
@@ -289,22 +310,20 @@ window.posBuy = function() {
     return toast('لطفاً نام کالا و تعداد صحیح را وارد کنید!', 'var(--danger)');
   }
 
-  // پیدا کردن کالا در انبار همین فروشنده
   const product = products.find(p => p.name === nameInput && p.storeId === currentUser.storeId);
   
   if (!product) {
     return toast('کالایی با این نام در انبار شما یافت نشد!', 'var(--danger)');
   }
 
-  // افزایش موجودی و ذخیره
+  // افزایش موجودی
   product.stock += qty;
   
-  // ثبت گزارش (اختیاری)
   const supplier = $('#posBuySupplier').value.trim() || 'نامشخص';
   log('buy', `خرید ${fa(qty)} عدد ${product.name} از تامین‌کننده: ${supplier}.`);
 
   save();
-  render(); // یا renderNow()
+  render();
   toast(`موجودی انبار با موفقیت شارژ شد 📦`, 'var(--success)');
   
   // پاک کردن فرم
@@ -510,7 +529,7 @@ function applyUserAuth() {
     seller: [
       { tab: 'analytics', title: `📊 داشبورد فروشگاه` },
       { tab: 'inventory', title: `📦 موجودی فروشگاه` },
-      { tab: 'orders', title: '🧾 سفارش‌های فروشگاه' },
+      { tab: 'orders', title: '🧾 سفارش‌های اینترنتی' },
       { tab: 'history', title: '🕒 رویدادهای فروشگاه' }
     ],
     customer: [
